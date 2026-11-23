@@ -43,5 +43,5 @@ const manifest = {
   count: assets.length,
   assets
 };
-await writeFile(join(root, "assets.json"), `${JSON.stringify(manifest, null, 2)}\\n`);
+await writeFile(join(root, "assets.json"), JSON.stringify(manifest, null, 2) + "\n");
 console.log(`Wrote assets.json with ${assets.length} image(s).`);
