@@ -1,4 +1,4 @@
-name: Deploy sprite gallery to GitHub Pages
+name: Deploy portfolio design concepts to GitHub Pages
 
 on:
   push:
@@ -27,8 +27,6 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Build image manifest
-        run: node scripts/build-manifest.mjs
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

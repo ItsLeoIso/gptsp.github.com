@@ -1,30 +1,19 @@
-# BTA Sprite Pickup
+# Leandro Sinatra — Portfolio Design Studies
 
-This repository is the artwork handoff point for Belt to Ass (BTA).
+Four distinct, distraction-free interactive portfolio design prototypes built with Leandro Sinatra's real photography (`Arbeiten/*.webp`) and authentic Swiss High German (`de-CH`) copy.
 
-## Sprite folders
+Live preview via GitHub Pages: **https://itsleoiso.github.io/gptsp.github.com/**
 
-- `Sprites/Striker/` — Striker reference and animation artwork.
+## Concepts
 
-## Visual gallery and machine-readable manifest
+1. **[01 — Swiss Atelier](concept-01-swiss-atelier.html)** — Refined Swiss-editorial evolution with a photo-first split hero, natural-ratio asymmetric 12-column grid, hover-preview project index, Dark/Light toggle, and 100-week archive grid.
+2. **[02 — Katalog (Exhibition Monograph)](concept-02-monograph.html)** — Fine-art museum photobook aesthetic on warm cotton-rag paper (`#F4F1EA`) with curated single plates & diptychs, exhibition rooms, passe-partout framing for `Archiv · 100`, and a Paper/Dark lightbox wall toggle.
+3. **[03 — Dunkelkammer (Immersive Darkroom Cinema)](concept-03-darkroom.html)** — Deep obsidian (`#070708`) viewing room with a full-viewport photographic hero stage, hover focus-illumination, filmstrip/sequence screening room for series, and a zero-distraction lightbox with light-table inspection mode.
+4. **[04 — Kontaktbogen (Interactive Archival Contact Sheet)](concept-04-contact-sheet.html)** — Precision Swiss graphic studio / contact-sheet tool with an interactive split index hero, live view switching (`Kontaktbogen` / `Index` / `Grossansicht`), subtle category filters, master-detail project dossiers, and a 10×10 matrix for `Archiv · 100`.
 
-The root `index.html` is a lightweight, dependency-free gallery with click-to-zoom.
+## Guardrails Preserved Across All 4 Concepts
 
-Every GitHub Pages deployment runs `scripts/build-manifest.mjs` before publishing. It scans the repository for PNG, JPG, JPEG, WEBP, GIF and AVIF files and generates `assets.json`. The manifest includes each image's repository path, byte size, SHA-256 checksum, GitHub file URL, raw GitHub URL and jsDelivr CDN URL. This gives tools and scripts a stable index without needing to parse the gallery HTML.
-
-- Gallery: https://itsleoiso.github.io/gptsp.github.com/
-- Manifest: https://itsleoiso.github.io/gptsp.github.com/assets.json
-
-To publish it once:
-
-1. Open **Settings → Pages**.
-2. Under **Build and deployment**, choose **GitHub Actions** as the source.
-3. The workflow in `.github/workflows/pages.yml` deploys the gallery and freshly generated manifest on every push to `main` (or when run manually).
-
-## Handoff rules
-
-- Put generated source artwork under `Sprites/<Character>/`.
-- Keep each character's `<Character>.md` art specification beside the images.
-- Preserve original source images; do not overwrite a reference sheet with a processed export.
-- Use PNG for production sprites with true alpha transparency.
-- BTA runtime code stays in the separate BTA game repository.
+- **Zero cropping** on all portfolio photographs (exact natural `3:2`, `2:3`, and `4:5` ratios preserved).
+- **Minimal captions** (*just enough* index/title/location metadata, zero invented EXIF values).
+- **Swiss High German (`de-CH`)** spelling (`ss` instead of `ß`).
+- **Switchable views** for *Startseite*, *Projekte* (all 4 series), and *Archiv · 100* inside every prototype, plus an upgraded tactile lightbox (1×/2× zoom, filmstrip, keyboard & touch swipe).

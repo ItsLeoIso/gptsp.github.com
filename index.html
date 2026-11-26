@@ -1,84 +1,240 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="de-CH">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101018">
-  <title>BTA Sprite Pickup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <title>Leandro Sinatra — Portfolio Design-Studien</title>
   <style>
-    :root { color-scheme:dark; font-family:ui-sans-serif,system-ui,sans-serif; background:#101018; color:#f4f1ff; }
-    * { box-sizing:border-box; }
-    body { margin:0; }
-    header { position:sticky; top:0; z-index:2; padding:22px clamp(16px,4vw,48px); background:#101018ed; border-bottom:1px solid #343044; backdrop-filter:blur(12px); }
-    h1 { margin:0 0 5px; font-size:clamp(22px,4vw,32px); }
-    p { color:#aaa5bd; margin:0; }
-    header p { line-height:1.5; }
-    main { padding:24px clamp(16px,4vw,48px) 60px; max-width:1500px; margin:auto; }
-    #status { margin-bottom:18px; font-size:14px; }
-    #gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr)); gap:18px; }
-    figure { margin:0; padding:12px; border:1px solid #343044; border-radius:12px; background:#191824; min-width:0; }
-    figure img { display:block; width:100%; max-height:620px; object-fit:contain; cursor:zoom-in; border-radius:6px; background-color:#292735; background-image:linear-gradient(45deg,#373545 25%,transparent 25%),linear-gradient(-45deg,#373545 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#373545 75%),linear-gradient(-45deg,transparent 75%,#373545 75%); background-size:24px 24px; background-position:0 0,0 12px,12px -12px,-12px 0; }
-    figcaption { padding:10px 2px 0; overflow-wrap:anywhere; font-size:14px; color:#d7d2e5; }
-    .empty { padding:32px; border:1px dashed #514b65; border-radius:12px; color:#aaa5bd; }
-    dialog { width:min(96vw,1500px); max-width:none; max-height:94vh; padding:12px; border:1px solid #514b65; border-radius:12px; background:#191824; color:#f4f1ff; }
-    dialog::backdrop { background:#05040bdc; }
-    dialog img { display:block; max-width:100%; max-height:82vh; margin:auto; object-fit:contain; }
-    dialog button { display:block; margin:0 0 10px auto; padding:8px 14px; color:inherit; background:#343044; border:0; border-radius:8px; cursor:pointer; }
-    a { color:#b9a5ff; }
-    .tools { margin-top:8px; font-size:13px; }
+    :root {
+      --bg: #0B0B0C;
+      --surface: #131315;
+      --fg: #F1EFEA;
+      --body: #BEBBB4;
+      --muted: #7C7A75;
+      --accent: #C4A88B;
+      --line: rgba(241, 239, 234, 0.14);
+      --line-strong: rgba(241, 239, 234, 0.28);
+      --font-sans: 'Switzer', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-sans); line-height: 1.5; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 4px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wrap {
+      max-width: 1440px;
+      margin-inline: auto;
+      padding: clamp(24px, 4vw, 56px);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    header h1 {
+      font-size: clamp(26px, 3.2vw, 44px);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      color: var(--muted);
+      max-width: 48ch;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .grid {
+      margin-top: clamp(28px, 4vw, 48px);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(20px, 3vw, 36px);
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      transition: border-color 220ms var(--ease), transform 260ms var(--ease);
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .card-preview {
+      aspect-ratio: 3 / 2;
+      background: #080809;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    .card-preview.is-paper { background: #F4F1EA; padding: 18px; display: flex; align-items: center; justify-content: center; }
+    .card-preview.is-sheet { background: #F5F4F0; padding: 14px; display: flex; align-items: center; justify-content: center; }
+
+    .card-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 520ms var(--ease);
+    }
+
+    .card-preview.is-paper img,
+    .card-preview.is-sheet img {
+      object-fit: contain;
+    }
+
+    .card:hover .card-preview img {
+      transform: scale(1.02);
+    }
+
+    .card-body {
+      padding: clamp(18px, 2.2vw, 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      color: var(--muted);
+    }
+
+    .card-top .num { color: var(--accent); }
+
+    .card-title {
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: var(--body);
+      line-height: 1.55;
+    }
+
+    .card-cta {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      color: var(--fg);
+    }
+
+    .card:hover .card-cta { color: var(--accent); }
+
+    footer {
+      margin-top: clamp(36px, 5vw, 64px);
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>BTA · Sprite Pickup</h1>
-    <p>Visual handoff gallery · image files are indexed automatically on every deployment.</p>
-    <p class="tools"><a href="./assets.json">Machine-readable image manifest (JSON)</a> · <a href="https://github.com/ItsLeoIso/gptsp.github.com/tree/main/Sprites">Browse source folders</a></p>
-  </header>
-  <main>
-    <div id="status">Loading image manifest…</div>
-    <section id="gallery" aria-live="polite"></section>
-  </main>
-  <dialog id="viewer"><button id="close" type="button">Close ✕</button><img alt=""><p id="caption"></p></dialog>
-  <script>
-    const gallery = document.querySelector("#gallery"), status = document.querySelector("#status");
-    const viewer = document.querySelector("#viewer"), viewerImage = viewer.querySelector("img");
-    async function load() {
-      try {
-        const response = await fetch("./assets.json", { cache: "no-store" });
-        if (!response.ok) throw new Error(`Manifest returned ${response.status}`);
-        const manifest = await response.json();
-        const assets = Array.isArray(manifest.assets) ? manifest.assets : [];
-        status.textContent = `${manifest.count ?? assets.length} image file(s) · manifest generated ${manifest.generatedAt || "on deployment"}`;
-        if (!assets.length) {
-          gallery.innerHTML = '<div class="empty">No sprite images found yet. Add PNG, JPG, WEBP, GIF or AVIF files anywhere in the repository.</div>';
-          return;
-        }
-        for (const asset of assets) {
-          const figure = document.createElement("figure"), img = document.createElement("img"), caption = document.createElement("figcaption");
-          img.loading = "lazy";
-          img.src = asset.cdnUrl || asset.rawUrl;
-          img.alt = asset.path;
-          img.addEventListener("error", () => {
-            if (asset.rawUrl && img.src !== asset.rawUrl) img.src = asset.rawUrl;
-          }, { once:true });
-          caption.textContent = asset.path;
-          img.addEventListener("click", () => {
-            viewerImage.src = img.currentSrc || img.src;
-            viewerImage.alt = img.alt;
-            document.querySelector("#caption").textContent = asset.path;
-            viewer.showModal();
-          });
-          figure.append(img, caption);
-          gallery.append(figure);
-        }
-      } catch (error) {
-        status.textContent = "Couldn't load the image manifest.";
-        gallery.innerHTML = '<div class="empty">The manifest is generated by GitHub Actions during deployment. Try again after the latest Pages workflow finishes, or browse the <a href="https://github.com/ItsLeoIso/gptsp.github.com/tree/main/Sprites">Sprites folder on GitHub</a>.</div>';
-        console.error(error);
-      }
-    }
-    document.querySelector("#close").addEventListener("click", () => viewer.close());
-    load();
-  </script>
+  <div class="wrap">
+    <header>
+      <div>
+        <span class="mono" style="color:var(--accent);">Design-Studien · itsleoiso.ch</span>
+        <h1>Leandro Sinatra — 4 Richtungen</h1>
+        <p>Vier eigenständige, interaktive Prototypen mit allen 19 Fotografien, umschaltbaren Ansichten (Startseite, Projekte, Archiv · 100) und Zoom-Lightbox.</p>
+      </div>
+      <span class="mono" style="color:var(--muted);">01 — 04</span>
+    </header>
+
+    <main class="grid">
+      <a class="card" href="concept-01-swiss-atelier.html">
+        <div class="card-preview">
+          <img src="Arbeiten/mount-etna-sicily.webp" alt="Konzept 01 — Swiss Atelier">
+        </div>
+        <div class="card-body">
+          <div class="card-top mono"><span class="num">01</span><span>Dunkel / Hell · Switzer</span></div>
+          <h2 class="card-title">Swiss Atelier</h2>
+          <p class="card-desc">Weiterentwicklung der aktuellen Swiss-Editorial-DNA: fotozentrierter Split-Hero, asymmetrisches unbeschnittenes 12-Spalten-Raster, Hover-Vorschau für Projekte und 100er-Archivraster.</p>
+          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="concept-02-monograph.html">
+        <div class="card-preview is-paper">
+          <img src="Arbeiten/temple-of-concordia-sicily.webp" alt="Konzept 02 — Katalog">
+        </div>
+        <div class="card-body">
+          <div class="card-top mono"><span class="num">02</span><span>Warmes Papier / Nacht · Serif</span></div>
+          <h2 class="card-title">Katalog (Monograph)</h2>
+          <p class="card-desc">Ruhige Kunstbuch-Dramaturgie auf warmem Büttenpapier: einzelne Bildtafeln und Diptychen, Ausstellungsräume für Projekte, Passepartout für Archiv · 100 und Wand/Dunkel-Lightbox.</p>
+          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="concept-03-darkroom.html">
+        <div class="card-preview">
+          <img src="Arbeiten/vallorbe-caves.webp" alt="Konzept 03 — Dunkelkammer">
+        </div>
+        <div class="card-body">
+          <div class="card-top mono"><span class="num">03</span><span>Obsidian · Kino &amp; Filmstreifen</span></div>
+          <h2 class="card-title">Dunkelkammer</h2>
+          <p class="card-desc">Vollformatige Kino-Bühne auf tiefem Schwarz, Fokus-Beleuchtung beim Hover, umschaltbare Filmstreifen-Ansicht für Serien und ablenkungsfreier Vollbild-Modus mit Leuchttisch-Umschalter.</p>
+          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="concept-04-contact-sheet.html">
+        <div class="card-preview is-sheet">
+          <img src="Arbeiten/creux-du-van-landscape.webp" alt="Konzept 04 — Kontaktbogen">
+        </div>
+        <div class="card-body">
+          <div class="card-top mono"><span class="num">04</span><span>Studio-Weiss / Dunkel · Index</span></div>
+          <h2 class="card-title">Kontaktbogen &amp; Index</h2>
+          <p class="card-desc">Präzises Schweizer Archiv-Werkzeug: interaktiver Split-Index über dem Fold, Umschalter zwischen Kontaktbogen, Index-Tabelle und Grossansicht, Filter sowie ikonische 10×10-Matrix für Archiv · 100.</p>
+          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+        </div>
+      </a>
+    </main>
+
+    <footer class="mono">
+      <span>Leandro Sinatra · Portfolio Design Exploration</span>
+      <span>19 Werke · Kein Bildbeschnitt</span>
+    </footer>
+  </div>
 </body>
 </html>

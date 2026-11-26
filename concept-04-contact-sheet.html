@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Kontaktbogen (Konzept 04)</title>
+  <style>
+    :root {
+      --bg: #F5F4F0;
+      --surface: #ECEAE4;
+      --cell: #FAF9F6;
+      --fg: #121212;
+      --body: #3A3936;
+      --muted: #6E6D68;
+      --accent: #A84E32;
+      --rule: rgba(18, 18, 18, 0.14);
+      --rule-strong: rgba(18, 18, 18, 0.3);
+      --header-bg: rgba(245, 244, 240, 0.92);
+      --lb-bg: #0E0E0F;
+      --font-sans: 'Switzer', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --pad-x: clamp(16px, 3.2vw, 44px);
+      --header-h: 56px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0E0E0F;
+      --surface: #161618;
+      --cell: #131315;
+      --fg: #F0EFEA;
+      --body: #C5C3BC;
+      --muted: #7F7E79;
+      --accent: #D97252;
+      --rule: rgba(240, 239, 234, 0.14);
+      --rule-strong: rgba(240, 239, 234, 0.3);
+      --header-bg: rgba(14, 14, 15, 0.92);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.45;
+      overflow-x: hidden;
+      transition: background-color 220ms ease, color 220ms ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 1580px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+    }
+
+    /* ---------- HEADER ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      height: var(--header-h);
+      background: var(--header-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .header-inner {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .brand strong {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand span { color: var(--muted); }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-tab {
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover { color: var(--fg); }
+
+    .nav-tab.is-active {
+      color: var(--fg);
+      border-color: var(--rule-strong);
+      background: var(--cell);
+    }
+
+    .theme-btn {
+      padding: 5px 10px;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      transition: border-color 160ms ease, color 160ms ease;
+    }
+
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---------- VIEWS ---------- */
+    .view-panel { display: none; }
+    .view-panel.is-active {
+      display: block;
+      animation: snapIn 240ms var(--ease);
+    }
+
+    @keyframes snapIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- STARTSEITE: INTERACTIVE SPLIT INDEX HERO ---------- */
+    .desk-hero {
+      border-bottom: 1px solid var(--rule);
+      padding-block: clamp(20px, 3vw, 36px);
+    }
+
+    .desk-grid {
+      display: grid;
+      grid-template-columns: minmax(290px, 430px) minmax(0, 1fr);
+      gap: clamp(20px, 3.5vw, 48px);
+      align-items: stretch;
+    }
+
+    .desk-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--rule);
+      padding-right: clamp(16px, 2.5vw, 32px);
+    }
+
+    .desk-head {
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .desk-head h1 {
+      font-size: clamp(26px, 2.8vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    .desk-head p {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .desk-index {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .desk-row {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: baseline;
+      gap: 10px;
+      padding: 9px 6px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 13px;
+      transition: background-color 140ms ease, color 140ms ease;
+    }
+
+    .desk-row .code { color: var(--muted); }
+    .desk-row .loc { color: var(--muted); font-size: 10px; }
+
+    .desk-row:hover,
+    .desk-row.is-active {
+      background: var(--surface);
+    }
+
+    .desk-row.is-active .code {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .desk-row.is-active .title {
+      font-weight: 600;
+    }
+
+    .desk-stage {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .desk-lighttable {
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      padding: clamp(16px, 2.5vw, 32px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: clamp(360px, 56vh, 560px);
+      cursor: zoom-in;
+      position: relative;
+    }
+
+    .desk-lighttable img {
+      max-width: 100%;
+      max-height: 52vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .desk-stage-foot {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      color: var(--muted);
+    }
+
+    .desk-stage-foot strong { color: var(--fg); font-weight: 500; }
+
+    /* ---------- MULTI-MODE CURATORIAL GALLERY ---------- */
+    .archive-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-block: 20px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-btn {
+      padding: 5px 10px;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .filter-btn:hover { color: var(--fg); border-color: var(--rule-strong); }
+    .filter-btn.is-active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--cell);
+    }
+
+    .mode-group {
+      display: inline-flex;
+      border: 1px solid var(--rule);
+    }
+
+    .mode-btn {
+      padding: 6px 11px;
+      color: var(--muted);
+      transition: background-color 150ms ease, color 150ms ease;
+    }
+
+    .mode-btn.is-active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .gallery-zone {
+      padding-block: clamp(28px, 4vw, 48px) clamp(64px, 8vw, 112px);
+    }
+
+    /* Mode 1: Kontaktbogen (Uncropped inside crisp archival contact cells) */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--rule);
+      border-left: 1px solid var(--rule);
+    }
+
+    .contact-cell {
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background: var(--cell);
+      padding: clamp(14px, 2vw, 24px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      cursor: zoom-in;
+      transition: background-color 160ms ease;
+    }
+
+    .contact-cell:hover { background: var(--surface); }
+
+    .contact-cell-top {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .contact-cell-top .reg { color: var(--accent); }
+
+    .contact-img-box {
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .contact-img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transition: transform 320ms var(--ease);
+    }
+
+    .contact-cell:hover .contact-img-box img { transform: scale(1.02); }
+
+    .contact-cell-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12px;
+    }
+
+    .contact-cell-foot .loc { color: var(--muted); font-size: 10px; }
+
+    /* Mode 2: Index Table + Preview */
+    .index-mode-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 36px;
+      align-items: start;
+    }
+
+    .index-table {
+      border-top: 1px solid var(--rule);
+    }
+
+    .idx-row {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 60px 1.4fr 1fr 70px;
+      gap: 12px;
+      align-items: baseline;
+      padding: 15px 8px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 14px;
+      transition: background-color 140ms ease;
+    }
+
+    .idx-row:hover,
+    .idx-row.is-active { background: var(--surface); }
+    .idx-row .reg { color: var(--accent); }
+    .idx-row .muted { color: var(--muted); }
+
+    .index-preview-box {
+      position: sticky;
+      top: calc(var(--header-h) + 24px);
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      padding: 16px;
+    }
+
+    .index-preview-box img {
+      width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      margin-inline: auto;
+    }
+
+    /* Mode 3: Stream (Large editorial uncropped) */
+    .stream-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(28px, 4vw, 56px);
+      align-items: start;
+    }
+
+    .stream-card { min-width: 0; }
+    .stream-card.is-wide { grid-column: 1 / 3; max-width: 960px; margin-inline: auto; width: 100%; }
+
+    .stream-frame {
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      cursor: zoom-in;
+    }
+
+    .stream-frame img { width: 100%; height: auto; }
+
+    .stream-cap {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    /* ---------- HOME: ABOUT BAR ---------- */
+    .about-strip {
+      border-top: 1px solid var(--rule);
+      padding-block: clamp(40px, 6vw, 76px);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: clamp(24px, 4vw, 56px);
+      align-items: start;
+      max-width: 920px;
+    }
+
+    .about-img {
+      border: 1px solid var(--rule);
+      background: var(--cell);
+      padding: 6px;
+    }
+
+    .about-img img { width: 100%; aspect-ratio: 1 / 1; }
+
+    .about-copy h2 {
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .about-copy p { font-size: 14px; line-height: 1.65; color: var(--body); max-width: 56ch; }
+    .about-copy p + p { margin-top: 12px; }
+
+    /* ---------- PROJEKTE DOSSIER VIEW ---------- */
+    .dossier-view {
+      padding-block: clamp(24px, 4vw, 48px) clamp(64px, 8vw, 112px);
+    }
+
+    .dossier-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 24px;
+    }
+
+    .dossier-tab {
+      padding: 8px 14px;
+      border: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--muted);
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .dossier-tab:hover { color: var(--fg); border-color: var(--rule-strong); }
+    .dossier-tab.is-active {
+      color: var(--fg);
+      border-color: var(--accent);
+      background: var(--cell);
+      font-weight: 600;
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: clamp(20px, 3vw, 40px);
+      align-items: start;
+    }
+
+    .dossier-contact-rail {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .d-thumb {
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 150ms ease;
+    }
+
+    .d-thumb .img-wrap {
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .d-thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .d-thumb span { color: var(--muted); font-size: 10px; }
+    .d-thumb.is-active { border-color: var(--accent); }
+    .d-thumb.is-active span { color: var(--accent); }
+
+    .dossier-main {
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      padding: clamp(18px, 3vw, 36px);
+    }
+
+    .dossier-plate {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 440px;
+      cursor: zoom-in;
+    }
+
+    .dossier-plate img {
+      max-width: 100%;
+      max-height: 64vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .dossier-foot {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      color: var(--muted);
+    }
+
+    /* ---------- ARCHIV 100: ICONIC 10x10 MATRIX ---------- */
+    .matrix-view {
+      padding-block: clamp(28px, 4vw, 52px) clamp(64px, 8vw, 112px);
+    }
+
+    .matrix-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 28px;
+    }
+
+    .matrix-head h1 {
+      font-size: clamp(28px, 3.4vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .matrix-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: clamp(24px, 4vw, 48px);
+      align-items: start;
+    }
+
+    .featured-week {
+      background: var(--cell);
+      border: 1px solid var(--rule);
+      padding: clamp(16px, 2.5vw, 28px);
+    }
+
+    .featured-week-frame {
+      cursor: zoom-in;
+    }
+
+    .featured-week-frame img {
+      width: 100%;
+      aspect-ratio: 2200 / 1467;
+    }
+
+    .featured-week-meta {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .featured-week-meta strong { color: var(--accent); font-weight: 500; }
+
+    .ten-by-ten {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      border-top: 1px solid var(--rule);
+      border-left: 1px solid var(--rule);
+    }
+
+    .m-cell {
+      aspect-ratio: 1 / 1;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+      background: var(--cell);
+      opacity: 0.52;
+    }
+
+    .m-cell.is-live {
+      opacity: 1;
+      background: var(--accent);
+      color: #FFF;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .site-footer {
+      border-top: 1px solid var(--rule);
+      padding-block: clamp(32px, 4vw, 52px);
+    }
+
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-block h3 { color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+    .footer-link { font-size: 14px; transition: color 160ms ease; }
+    .footer-link:hover { color: var(--accent); }
+
+    .copy-wrap { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+    .copy-btn { padding: 5px 10px; border: 1px solid var(--rule-strong); transition: border-color 150ms ease, color 150ms ease; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-msg { color: var(--accent); opacity: 0; transition: opacity 160ms ease; }
+    .copy-msg.is-visible { opacity: 1; }
+
+    .footer-base {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    /* ---------- LOUPE LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: var(--lb-bg);
+      color: #F0EFEA;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: clamp(14px, 2vw, 22px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 200ms var(--ease), visibility 0s linear 200ms;
+    }
+
+    .lightbox.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 200ms var(--ease), visibility 0s linear 0s;
+    }
+
+    .lb-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .lb-meta { display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+    .lb-meta .reg { color: var(--accent); }
+    .lb-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    .lb-btn {
+      padding: 6px 10px;
+      border: 1px solid rgba(240, 239, 234, 0.28);
+      color: #F0EFEA;
+      transition: border-color 150ms ease, color 150ms ease;
+    }
+
+    .lb-btn:hover,
+    .lb-btn.is-active { border-color: var(--accent); color: var(--accent); }
+
+    .lb-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 0;
+      padding-block: 12px;
+    }
+
+    .lb-stage img {
+      max-width: 92vw;
+      max-height: calc(100vh - 170px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      cursor: zoom-in;
+      transition: transform 240ms var(--ease);
+    }
+
+    .lightbox.is-zoomed .lb-stage img {
+      cursor: zoom-out;
+      transform: scale(1.85);
+    }
+
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(240, 239, 234, 0.28);
+      color: #F0EFEA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lb-arrow:hover { border-color: var(--accent); color: var(--accent); }
+    .lb-prev { left: 4px; }
+    .lb-next { right: 4px; }
+
+    .lb-strip {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-top: 8px;
+    }
+
+    .lb-thumb {
+      flex: 0 0 auto;
+      height: 42px;
+      padding: 2px;
+      border: 1px solid transparent;
+      opacity: 0.42;
+      transition: opacity 150ms ease, border-color 150ms ease;
+    }
+
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb:hover,
+    .lb-thumb.is-active { opacity: 1; border-color: var(--accent); }
+
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 980px) {
+      .desk-grid { grid-template-columns: 1fr; }
+      .desk-left { border-right: 0; padding-right: 0; order: 2; }
+      .desk-stage { order: 1; }
+      .desk-lighttable { min-height: 280px; }
+      .contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .index-mode-wrap { grid-template-columns: 1fr; }
+      .index-preview-box { display: none; }
+      .dossier-grid { grid-template-columns: 1fr; }
+      .dossier-contact-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .matrix-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .site-header { height: auto; padding-block: 10px; }
+      .header-inner { display: grid; grid-template-columns: 1fr auto; row-gap: 10px; }
+      .brand { grid-column: 1; grid-row: 1; }
+      .theme-btn { grid-column: 2; grid-row: 1; justify-self: end; }
+      .nav-tabs { grid-column: 1 / 3; grid-row: 2; }
+      .brand span { display: none; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .stream-grid { grid-template-columns: 1fr; }
+      .stream-card.is-wide { grid-column: 1; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img { max-width: 160px; }
+      .dossier-contact-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dossier-plate { min-height: 260px; }
+      .idx-row { grid-template-columns: 44px 1fr auto; }
+      .idx-row .ratio { display: none; }
+      .lb-arrow { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="#start" class="brand" data-view-link="start">
+      <strong>Leandro Sinatra</strong>
+      <span class="mono">Archiv 25–26</span>
+    </a>
+    <nav class="nav-tabs" aria-label="Hauptnavigation">
+      <button type="button" class="nav-tab is-active" data-view-btn="start" aria-current="page">Kontaktbogen</button>
+      <button type="button" class="nav-tab" data-view-btn="projekte">Projekte</button>
+      <button type="button" class="nav-tab" data-view-btn="archiv">Archiv · 100</button>
+    </nav>
+    <button type="button" class="theme-btn mono" id="themeToggle">Dunkel</button>
+  </div>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="desk-hero">
+      <div class="wrap desk-grid">
+        <div class="desk-left">
+          <div class="desk-head">
+            <h1>Leandro Sinatra</h1>
+            <p class="mono">Lyss, Schweiz · Architektur · Landschaft · Wildlife</p>
+          </div>
+          <div class="desk-index" id="deskIndex"></div>
+        </div>
+
+        <div class="desk-stage">
+          <div class="desk-lighttable" id="deskStage" tabindex="0" role="button" aria-label="Aktive Fotografie im Vollbild öffnen">
+            <img id="deskImg" alt="">
+          </div>
+          <div class="desk-stage-foot mono">
+            <span><strong id="deskCode">00A</strong> · <span id="deskTitle">Etna</span></span>
+            <span id="deskMeta">Sizilien · 3:2</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="archive-toolbar">
+        <div class="filter-group mono" id="filterGroup" role="group" aria-label="Filter">
+          <button type="button" class="filter-btn is-active" data-filter="all">Alle (09)</button>
+          <button type="button" class="filter-btn" data-filter="sizilien">Sizilien</button>
+          <button type="button" class="filter-btn" data-filter="schweiz">Schweiz</button>
+          <button type="button" class="filter-btn" data-filter="wildlife">Wildlife</button>
+          <button type="button" class="filter-btn" data-filter="monochrom">Monochrom</button>
+        </div>
+        <div class="mode-group mono" id="modeGroup" role="group" aria-label="Ansichtsmodus">
+          <button type="button" class="mode-btn is-active" data-mode="contact">Kontaktbogen</button>
+          <button type="button" class="mode-btn" data-mode="index">Index</button>
+          <button type="button" class="mode-btn" data-mode="stream">Grossansicht</button>
+        </div>
+      </div>
+
+      <div class="gallery-zone" id="galleryZone"></div>
+    </section>
+
+    <section class="about-strip" id="ueber">
+      <div class="wrap about-grid">
+        <div class="about-img">
+          <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+        </div>
+        <div class="about-copy">
+          <h2>Leandro Sinatra</h2>
+          <p>Fotograf aus Lyss, Kanton Bern.</p>
+          <p>Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Ob antike Architektur, die Weite des Schweizer Juras oder flüchtige Begegnungen in der Natur: Meine Arbeit sucht nach Ruhe und klarer Form im Alltäglichen.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE DOSSIER ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="dossier-view wrap">
+      <div class="dossier-tabs" id="dossierTabs"></div>
+      <div class="dossier-grid">
+        <div class="dossier-contact-rail" id="dossierRail"></div>
+        <div class="dossier-main">
+          <div class="dossier-plate" id="dossierPlate" tabindex="0" role="button" aria-label="Im Vollbild öffnen">
+            <img id="dossierImg" alt="">
+          </div>
+          <div class="dossier-foot mono">
+            <span id="dossierCaption">01A · Etna · Sizilien</span>
+            <span id="dossierCounter">01 / 04</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100 MATRIX ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="matrix-view wrap">
+      <div class="matrix-head">
+        <h1>Archiv · 100</h1>
+        <span class="mono" style="color:var(--muted);">001 / 100 · Ein Foto pro Woche</span>
+      </div>
+      <div class="matrix-split">
+        <div class="featured-week">
+          <div class="featured-week-frame" id="weekPlate" tabindex="0" role="button" aria-label="Woche 001 öffnen">
+            <img id="weekImg" alt="Foto vom 13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          </div>
+          <div class="featured-week-meta mono">
+            <span><strong>001</strong> · 13.09.2026</span>
+            <span>Murtensee, Schweiz</span>
+          </div>
+        </div>
+        <div>
+          <div class="ten-by-ten" id="tenByTen"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="kontakt">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-block">
+        <h3 class="mono">Kontakt</h3>
+        <a class="footer-link" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a>
+        <div class="copy-wrap">
+          <button type="button" class="copy-btn mono" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+          <span class="copy-msg mono" aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="footer-block">
+        <h3 class="mono">Social</h3>
+        <a class="footer-link" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
+      <div class="footer-block">
+        <h3 class="mono">Konzept 04</h3>
+        <span class="mono" style="color:var(--muted);">Archival Contact Sheet</span>
+      </div>
+    </div>
+    <div class="footer-base mono">
+      <span>© 2026 Leandro Sinatra · Lyss, Schweiz</span>
+      <span>Alle Rechte vorbehalten</span>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografie im Vollbild" aria-hidden="true">
+  <div class="lb-top mono">
+    <div class="lb-meta">
+      <span class="reg" id="lbCounter">01 / 09</span>
+      <span id="lbCaption">Tempel der Eintracht · Sizilien</span>
+    </div>
+    <div class="lb-actions">
+      <button type="button" class="lb-btn" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const DESK_HERO_ITEMS = [
+    { code: "00A", file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien", ratio: "3:2", w: 2200, h: 1467 },
+    { code: "01A", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien", ratio: "3:2", w: 2200, h: 1467 },
+    { code: "02A", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien", ratio: "3:2", w: 2200, h: 1467 },
+    { code: "03A", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van", ratio: "2:3", w: 1467, h: 2200 },
+    { code: "04A", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge", ratio: "3:2", w: 2200, h: 1467 },
+    { code: "05A", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss", ratio: "2:3", w: 1467, h: 2200 },
+    { code: "06A", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge", ratio: "2:3", w: 1466, h: 2200 },
+    { code: "07A", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien", ratio: "2:3", w: 1467, h: 2200 },
+    { code: "08A", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van", ratio: "2:3", w: 1467, h: 2200 },
+    { code: "09A", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe", ratio: "3:2", w: 2200, h: 1467 }
+  ];
+
+  const WORKS = [
+    { code: "01A", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien", ratio: "3:2", tags: ["sizilien"], w: 2200, h: 1467 },
+    { code: "02A", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien", ratio: "3:2", tags: ["sizilien", "monochrom"], w: 2200, h: 1467 },
+    { code: "03A", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van", ratio: "2:3", tags: ["schweiz"], w: 1467, h: 2200 },
+    { code: "04A", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge", ratio: "3:2", tags: ["schweiz", "wildlife"], w: 2200, h: 1467 },
+    { code: "05A", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss", ratio: "2:3", tags: ["schweiz", "monochrom"], w: 1467, h: 2200 },
+    { code: "06A", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge", ratio: "2:3", tags: ["schweiz", "wildlife"], w: 1466, h: 2200 },
+    { code: "07A", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien", ratio: "2:3", tags: ["sizilien", "wildlife"], w: 1467, h: 2200 },
+    { code: "08A", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van", ratio: "2:3", tags: ["schweiz", "wildlife"], w: 1467, h: 2200 },
+    { code: "09A", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe", ratio: "3:2", tags: ["schweiz"], w: 2200, h: 1467 }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "projekt-01", num: "01", title: "Valle dei Templi",
+      photos: [
+        { code: "01A", file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien", w: 2200, h: 1467 },
+        { code: "01B", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento", w: 2200, h: 1467 },
+        { code: "01C", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento", w: 2200, h: 1467 },
+        { code: "01D", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien", w: 1467, h: 2200 }
+      ]
+    },
+    {
+      id: "projekt-02", num: "02", title: "Höhlen von Vallorbe",
+      photos: [
+        { code: "02A", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe", w: 2200, h: 1467 }
+      ]
+    },
+    {
+      id: "projekt-03", num: "03", title: "Creux du Van",
+      photos: [
+        { code: "03A", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van", w: 1467, h: 2200 },
+        { code: "03B", file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van", w: 2200, h: 1467 },
+        { code: "03C", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van", w: 1467, h: 2200 },
+        { code: "03D", file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van", w: 1467, h: 2200 },
+        { code: "03E", file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van", w: 1467, h: 2200 }
+      ]
+    },
+    {
+      id: "projekt-04", num: "04", title: "La Sauge",
+      photos: [
+        { code: "04A", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge", w: 2200, h: 1467 },
+        { code: "04B", file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge", w: 1760, h: 2200 },
+        { code: "04C", file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge", w: 1466, h: 2200 },
+        { code: "04D", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge", w: 2200, h: 1467 },
+        { code: "04E", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge", w: 2200, h: 1466 },
+        { code: "04F", file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge", w: 2200, h: 1467 },
+        { code: "04G", file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge", w: 2200, h: 1467 }
+      ]
+    }
+  ];
+
+  const WEEKLY = [
+    { code: "001", file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz", w: 2200, h: 1467 }
+  ];
+
+  /* Theme */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", next);
+    themeBtn.textContent = next === "light" ? "Dunkel" : "Hell";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Interactive Split Index Hero */
+  const deskIndex = document.getElementById("deskIndex");
+  const deskImg = document.getElementById("deskImg");
+  const deskCode = document.getElementById("deskCode");
+  const deskTitle = document.getElementById("deskTitle");
+  const deskMeta = document.getElementById("deskMeta");
+  const deskStage = document.getElementById("deskStage");
+  let activeDeskIdx = 0;
+
+  function setDesk(idx) {
+    activeDeskIdx = idx;
+    const it = DESK_HERO_ITEMS[idx];
+    deskImg.src = ASSETS[it.file];
+    deskImg.alt = `${it.title}, ${it.location}`;
+    deskCode.textContent = it.code;
+    deskTitle.textContent = it.title;
+    deskMeta.textContent = `${it.location} · ${it.ratio}`;
+    deskIndex.querySelectorAll(".desk-row").forEach((r, i) => r.classList.toggle("is-active", i === idx));
+  }
+
+  DESK_HERO_ITEMS.forEach((it, idx) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "desk-row";
+    b.innerHTML = `<span class="code mono">${it.code}</span><span class="title">${it.title}</span><span class="loc mono">${it.location}</span>`;
+    b.addEventListener("mouseenter", () => setDesk(idx));
+    b.addEventListener("focus", () => setDesk(idx));
+    b.addEventListener("click", () => { setDesk(idx); openLightbox(DESK_HERO_ITEMS, idx); });
+    deskIndex.appendChild(b);
+  });
+  setDesk(0);
+
+  deskStage.addEventListener("click", () => openLightbox(DESK_HERO_ITEMS, activeDeskIdx));
+  deskStage.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(DESK_HERO_ITEMS, activeDeskIdx); }
+  });
+
+  /* Multi-Mode Gallery */
+  const galleryZone = document.getElementById("galleryZone");
+  let currentFilter = "all";
+  let currentMode = "contact";
+
+  function getFiltered() {
+    if (currentFilter === "all") return WORKS;
+    return WORKS.filter((w) => w.tags.includes(currentFilter));
+  }
+
+  function renderGallery() {
+    const list = getFiltered();
+    galleryZone.innerHTML = "";
+
+    if (currentMode === "contact") {
+      const grid = document.createElement("div");
+      grid.className = "contact-grid";
+      list.forEach((w, idx) => {
+        const cell = document.createElement("article");
+        cell.className = "contact-cell";
+        cell.tabIndex = 0;
+        cell.setAttribute("role", "button");
+        cell.setAttribute("aria-label", `${w.title} öffnen`);
+        cell.innerHTML = `
+          <div class="contact-cell-top mono">
+            <span class="reg">${w.code}</span>
+            <span>${w.ratio}</span>
+          </div>
+          <div class="contact-img-box">
+            <img src="${ASSETS[w.file]}" alt="${w.title}, ${w.location}" loading="lazy">
+          </div>
+          <div class="contact-cell-foot">
+            <span>${w.title}</span>
+            <span class="loc mono">${w.location}</span>
+          </div>
+        `;
+        const open = () => openLightbox(list, idx);
+        cell.addEventListener("click", open);
+        cell.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+        grid.appendChild(cell);
+      });
+      galleryZone.appendChild(grid);
+    } else if (currentMode === "index") {
+      const wrap = document.createElement("div");
+      wrap.className = "index-mode-wrap";
+      const table = document.createElement("div");
+      table.className = "index-table";
+      const preview = document.createElement("div");
+      preview.className = "index-preview-box";
+      preview.innerHTML = `<img id="idxPreviewImg" src="${ASSETS[list[0].file]}" alt="">`;
+      const pImg = preview.querySelector("img");
+
+      list.forEach((w, idx) => {
+        const r = document.createElement("button");
+        r.type = "button";
+        r.className = "idx-row" + (idx === 0 ? " is-active" : "");
+        r.innerHTML = `
+          <span class="reg mono">${w.code}</span>
+          <span>${w.title}</span>
+          <span class="muted mono">${w.location}</span>
+          <span class="ratio muted mono" style="text-align:right;">${w.ratio}</span>
+        `;
+        const hover = () => {
+          table.querySelectorAll(".idx-row").forEach((x) => x.classList.remove("is-active"));
+          r.classList.add("is-active");
+          pImg.src = ASSETS[w.file];
+        };
+        r.addEventListener("mouseenter", hover);
+        r.addEventListener("focus", hover);
+        r.addEventListener("click", () => openLightbox(list, idx));
+        table.appendChild(r);
+      });
+      wrap.appendChild(table);
+      wrap.appendChild(preview);
+      galleryZone.appendChild(wrap);
+    } else {
+      const stream = document.createElement("div");
+      stream.className = "stream-grid";
+      list.forEach((w, idx) => {
+        const card = document.createElement("article");
+        card.className = "stream-card" + (w.w > w.h ? " is-wide" : "");
+        card.innerHTML = `
+          <div class="stream-frame" tabindex="0" role="button" aria-label="${w.title} öffnen">
+            <img src="${ASSETS[w.file]}" alt="${w.title}, ${w.location}" width="${w.w}" height="${w.h}" style="aspect-ratio:${w.w}/${w.h}" loading="lazy">
+          </div>
+          <div class="stream-cap">
+            <span><strong class="mono" style="color:var(--accent);margin-right:8px;">${w.code}</strong>${w.title}</span>
+            <span class="mono" style="color:var(--muted);">${w.location}</span>
+          </div>
+        `;
+        const fr = card.querySelector(".stream-frame");
+        const open = () => openLightbox(list, idx);
+        fr.addEventListener("click", open);
+        fr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+        stream.appendChild(card);
+      });
+      galleryZone.appendChild(stream);
+    }
+  }
+
+  document.querySelectorAll("[data-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-filter]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentFilter = btn.dataset.filter;
+      renderGallery();
+    });
+  });
+
+  document.querySelectorAll("[data-mode]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-mode]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentMode = btn.dataset.mode;
+      renderGallery();
+    });
+  });
+
+  renderGallery();
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Projekte Dossier */
+  const dossierTabs = document.getElementById("dossierTabs");
+  const dossierRail = document.getElementById("dossierRail");
+  const dossierImg = document.getElementById("dossierImg");
+  const dossierPlate = document.getElementById("dossierPlate");
+  const dossierCaption = document.getElementById("dossierCaption");
+  const dossierCounter = document.getElementById("dossierCounter");
+  let activeProj = PROJECTS[0];
+  let activeDossierIdx = 0;
+
+  function setDossierFrame(idx) {
+    activeDossierIdx = idx;
+    const ph = activeProj.photos[idx];
+    dossierImg.src = ASSETS[ph.file];
+    dossierImg.alt = `${ph.title}, ${ph.location}`;
+    dossierCaption.textContent = `${ph.code} · ${ph.title} · ${ph.location}`;
+    dossierCounter.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(activeProj.photos.length).padStart(2, "0")}`;
+    dossierRail.querySelectorAll(".d-thumb").forEach((t, i) => t.classList.toggle("is-active", i === idx));
+  }
+
+  function selectDossier(id) {
+    activeProj = PROJECTS.find((p) => p.id === id) || PROJECTS[0];
+    dossierTabs.querySelectorAll(".dossier-tab").forEach((t) => t.classList.toggle("is-active", t.dataset.did === activeProj.id));
+    dossierRail.innerHTML = "";
+    activeProj.photos.forEach((ph, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "d-thumb";
+      b.innerHTML = `<div class="img-wrap"><img src="${ASSETS[ph.file]}" alt=""></div><span class="mono">${ph.code}</span>`;
+      b.addEventListener("click", () => setDossierFrame(i));
+      dossierRail.appendChild(b);
+    });
+    setDossierFrame(0);
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "dossier-tab";
+    b.dataset.did = p.id;
+    b.textContent = `${p.num} ${p.title} (${String(p.photos.length).padStart(2, "0")})`;
+    b.addEventListener("click", () => selectDossier(p.id));
+    dossierTabs.appendChild(b);
+  });
+  selectDossier(PROJECTS[0].id);
+
+  dossierPlate.addEventListener("click", () => openLightbox(activeProj.photos, activeDossierIdx));
+  dossierPlate.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(activeProj.photos, activeDossierIdx); }
+  });
+
+  /* Archiv 100 — 10x10 Matrix */
+  document.getElementById("weekImg").src = ASSETS[WEEKLY[0].file];
+  const weekPlate = document.getElementById("weekPlate");
+  const openWeekly = () => openLightbox(WEEKLY, 0);
+  weekPlate.addEventListener("click", openWeekly);
+  weekPlate.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openWeekly(); } });
+
+  const tenByTen = document.getElementById("tenByTen");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "m-cell is-live";
+      b.textContent = code;
+      b.setAttribute("aria-label", "Woche 001 — 13.09.2026, Murtensee öffnen");
+      b.addEventListener("click", openWeekly);
+      tenByTen.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "m-cell";
+      d.textContent = code;
+      tenByTen.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    let t = null;
+    btn.addEventListener("click", async () => {
+      const m = btn.nextElementSibling;
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      m.textContent = "Kopiert";
+      m.classList.add("is-visible");
+      clearTimeout(t);
+      t = setTimeout(() => m.classList.remove("is-visible"), 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${it.code || String(lbIdx + 1).padStart(2, "0")} · ${String(lbIdx + 1).padStart(2, "0")}/${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.setAttribute("aria-label", it.title);
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+
+  let sx = null;
+  lb.addEventListener("touchstart", (e) => { sx = e.changedTouches[0].screenX; }, { passive: true });
+  lb.addEventListener("touchend", (e) => {
+    if (sx === null || lbList.length < 2) return;
+    const d = e.changedTouches[0].screenX - sx;
+    if (Math.abs(d) > 45) { lbIdx = (lbIdx + (d < 0 ? 1 : -1) + lbList.length) % lbList.length; renderLb(); }
+    sx = null;
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
