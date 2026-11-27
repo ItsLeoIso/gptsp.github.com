@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-fit="cover">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Zweischnitt (Counter-Scrolling Split Diptych · Konzept 15)</title>
+  <style>
+    :root {
+      --bg: #0D0D0C;
+      --matte-a: #121210;
+      --matte-b: #161513;
+      --fg: #F4F1EA;
+      --muted: #9A958B;
+      --seam: #E24E2B;
+      --line: rgba(244, 241, 234, 0.16);
+      --pill: rgba(15, 15, 14, 0.86);
+      --split: 50%;
+      --font-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      touch-action: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--seam); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- FULL-VIEWPORT OPPOSING SPLIT STAGE ---------- */
+    #diptychStage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    .reel-pane {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      transition: background-color 240ms ease;
+    }
+
+    #paneA {
+      width: var(--split);
+      background: var(--matte-a);
+    }
+
+    #paneB {
+      width: calc(100% - var(--split));
+      background: var(--matte-b);
+    }
+
+    .reel-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+    }
+
+    [data-fit="cover"] .reel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    [data-fit="contain"] .reel-slide {
+      padding: clamp(20px, 4.5vw, 60px) clamp(18px, 3.8vw, 52px) 76px;
+    }
+
+    [data-fit="contain"] .reel-slide img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Subtle Vignette for Legible Corner Stamps */
+    .pane-vignette {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 120px;
+      background: linear-gradient(to top, rgba(8, 8, 8, 0.78), rgba(8, 8, 8, 0));
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    /* Minimal Corner Caption + Single-Side Expand */
+    .pane-stamp {
+      position: absolute;
+      bottom: 18px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(13, 13, 12, 0.76);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      backdrop-filter: blur(8px);
+      max-width: calc(100% - 28px);
+    }
+
+    #stampA { left: 16px; }
+    #stampB { right: 16px; }
+
+    .stamp-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .stamp-idx {
+      color: var(--seam);
+      margin-right: 6px;
+    }
+
+    .expand-side-btn {
+      padding: 2px 6px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .expand-side-btn:hover { border-color: var(--seam); color: var(--fg); }
+
+    /* Whisper Brand Top-Left */
+    .top-whisper {
+      position: fixed;
+      top: 14px;
+      left: 16px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--pill);
+      border: 1px solid var(--line);
+      padding: 6px 11px;
+      backdrop-filter: blur(8px);
+    }
+
+    .top-whisper a:hover { color: var(--seam); }
+
+    /* ---------- DRAGGABLE VERMILION SEAM ---------- */
+    #seamBar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: var(--split);
+      width: 28px;
+      transform: translateX(-50%);
+      z-index: 25;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+
+    #seamBar::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: var(--seam);
+    }
+
+    .seam-knob {
+      position: relative;
+      width: 28px;
+      height: 54px;
+      border-radius: 999px;
+      background: #111110;
+      border: 1.5px solid var(--seam);
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      transition: transform 160ms ease, background-color 160ms ease;
+    }
+
+    #seamBar:hover .seam-knob,
+    #seamBar.is-dragging .seam-knob {
+      background: var(--seam);
+      color: #FFF;
+      transform: scale(1.06);
+    }
+
+    /* ---------- FLOATING DIPTYCH CONTROL PILL (BOTTOM CENTER) ---------- */
+    .control-pill {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--pill);
+      border: 1px solid var(--line);
+      padding: 5px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+    }
+
+    .ctrl-btn {
+      padding: 7px 11px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      white-space: nowrap;
+      transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+    }
+
+    .ctrl-btn:hover { color: var(--fg); border-color: var(--line); }
+    .ctrl-btn.is-active { color: var(--fg); border-color: var(--seam); background: rgba(226, 78, 43, 0.14); }
+
+    /* ---------- SLIDE-UP CURATORIAL INDEX & BIO DRAWER ---------- */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(6, 6, 6, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms var(--ease);
+    }
+
+    .drawer-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .index-drawer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 86vh;
+      z-index: 90;
+      background: #0F0F0E;
+      border-top: 2px solid var(--seam);
+      padding: clamp(20px, 3.2vw, 36px);
+      overflow-y: auto;
+      touch-action: pan-y;
+      user-select: text;
+      transform: translateY(102%);
+      transition: transform 340ms var(--ease);
+    }
+
+    .index-drawer.is-open { transform: translateY(0); }
+
+    .drawer-inner {
+      max-width: 1280px;
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: clamp(22px, 3.5vw, 48px);
+    }
+
+    .drawer-head {
+      max-width: 1280px;
+      margin: 0 auto 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preset-card {
+      text-align: left;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: #161614;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color 160ms ease;
+    }
+
+    .preset-card:hover { border-color: var(--seam); }
+
+    .thumb-strip {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .thumb-btn {
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      padding: 0;
+      position: relative;
+      background: #181816;
+    }
+
+    .thumb-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumb-btn:hover { border-color: var(--seam); }
+
+    .bio-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bio-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bio-row img {
+      width: 68px;
+      height: 68px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .contact-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .drawer-pill {
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      background: #171715;
+      overflow-wrap: anywhere;
+    }
+
+    .drawer-pill:hover { border-color: var(--seam); color: var(--seam); }
+
+    /* ---------- MOBILE TOP/BOTTOM SPLIT ADAPTATION ---------- */
+    @media (max-width: 760px) {
+      #diptychStage { flex-direction: column; }
+      #paneA { width: 100%; height: var(--split); }
+      #paneB { width: 100%; height: calc(100% - var(--split)); }
+
+      #seamBar {
+        top: var(--split);
+        bottom: auto;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 28px;
+        transform: translateY(-50%);
+        cursor: row-resize;
+      }
+
+      #seamBar::before {
+        top: 50%;
+        bottom: auto;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 2px;
+        transform: translateY(-50%);
+      }
+
+      .seam-knob {
+        width: 52px;
+        height: 24px;
+      }
+
+      #stampA { bottom: 10px; left: 10px; }
+      #stampB { bottom: 62px; right: 10px; }
+
+      .control-pill {
+        bottom: 10px;
+        max-width: calc(100vw - 16px);
+        padding: 4px;
+        gap: 2px;
+      }
+
+      .ctrl-btn { padding: 6px 8px; font-size: 9.5px; }
+      .drawer-inner { grid-template-columns: 1fr; }
+      .thumb-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WHISPER TOP-LEFT ANCHOR -->
+  <div class="top-whisper mono">
+    <a href="index.html" style="color:var(--muted);">← Index</a>
+    <span style="color:var(--line);">|</span>
+    <span>Leandro Sinatra · Zweischnitt</span>
+  </div>
+
+  <!-- DUAL COUNTER-SCROLLING FULL-BLEED REELS -->
+  <main id="diptychStage" aria-label="Gegenläufiges Diptychon">
+    <section class="reel-pane" id="paneA" aria-label="Linke Bildrolle">
+      <div id="slidesA"></div>
+      <div class="pane-vignette"></div>
+      <div class="pane-stamp" id="stampA">
+        <div class="stamp-text"><span class="stamp-idx mono" id="idxA">A·01</span><span id="titleA">Etna · Sizilien</span></div>
+        <button type="button" class="expand-side-btn mono" id="expandA" title="Linke Seite aufziehen">⤢</button>
+      </div>
+    </section>
+
+    <section class="reel-pane" id="paneB" aria-label="Rechte Bildrolle">
+      <div id="slidesB"></div>
+      <div class="pane-vignette"></div>
+      <div class="pane-stamp" id="stampB">
+        <div class="stamp-text"><span class="stamp-idx mono" id="idxB">B·01</span><span id="titleB">Graureiher · La Sauge</span></div>
+        <button type="button" class="expand-side-btn mono" id="expandB" title="Rechte Seite aufziehen">⤢</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- DRAGGABLE SEAM DIVIDER -->
+  <div id="seamBar" role="separator" tabindex="0" aria-label="Trennlinie verschieben (Doppelklick für 50/50)">
+    <div class="seam-knob mono" id="seamKnob">⇔</div>
+  </div>
+
+  <!-- COMPACT FLOATING CONTROL PILL -->
+  <nav class="control-pill mono" aria-label="Diptychon-Steuerung">
+    <button type="button" class="ctrl-btn is-active" id="coupleBtn" title="Gegenläufig gekoppelt oder einzeln frei">Gekoppelt ⇅</button>
+    <button type="button" class="ctrl-btn" id="fitBtn" title="Randlos oder unbeschnittenes Originalformat">Original</button>
+    <button type="button" class="ctrl-btn" id="pairNextBtn" title="Nächstes Paar">Weiter ↻</button>
+    <button type="button" class="ctrl-btn" id="shuffleBtn" title="Zufälliges Diptychon">Zufall</button>
+    <button type="button" class="ctrl-btn" id="openDrawerBtn">Register · Über</button>
+  </nav>
+
+  <!-- SLIDE-UP REGISTER, ARCHIV 100 & BIO SHEET -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="index-drawer" id="indexDrawer" role="dialog" aria-modal="true" aria-label="Serien-Register und Über Leandro Sinatra">
+    <div class="drawer-head">
+      <div>
+        <span class="mono" style="color:var(--seam);">81 Diptychon-Kombinationen · 18 Werke</span>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.03em;margin-top:2px;">Serien, Archiv · 100 &amp; Kontakt</h2>
+      </div>
+      <button type="button" class="drawer-pill mono" id="closeDrawerBtn">Schliessen ✕</button>
+    </div>
+
+    <div class="drawer-inner">
+      <div>
+        <span class="mono" style="color:var(--muted);">Kuratierte Gegenüberstellungen (Klick lädt Paar)</span>
+        <div class="preset-grid" id="presetGrid">
+          <button type="button" class="preset-card" data-a="1" data-b="1">
+            <span class="mono" style="color:var(--seam);">01 · Valle dei Templi</span>
+            <strong style="font-size:14px;">Tempel × Wächterin am Fels</strong>
+            <span style="font-size:12px;color:var(--muted);">Agrigento, Sizilien</span>
+          </button>
+          <button type="button" class="preset-card" data-a="2" data-b="7">
+            <span class="mono" style="color:var(--seam);">02 · Höhlen von Vallorbe</span>
+            <strong style="font-size:14px;">Licht im Fels × Frosch im Wasser</strong>
+            <span style="font-size:12px;color:var(--muted);">Waadt &amp; La Sauge</span>
+          </button>
+          <button type="button" class="preset-card" data-a="3" data-b="3">
+            <span class="mono" style="color:var(--seam);">03 · Creux du Van</span>
+            <strong style="font-size:14px;">Kante des Jura × Studie im Jura</strong>
+            <span style="font-size:12px;color:var(--muted);">Schweizer Jura</span>
+          </button>
+          <button type="button" class="preset-card" data-a="4" data-b="0">
+            <span class="mono" style="color:var(--seam);">04 · La Sauge</span>
+            <strong style="font-size:14px;">Weide × Graureiher</strong>
+            <span style="font-size:12px;color:var(--muted);">Drei-Seen-Land</span>
+          </button>
+          <button type="button" class="preset-card" data-a="5" data-b="5">
+            <span class="mono" style="color:var(--seam);">Archiv · 100 (Woche 001 / 100)</span>
+            <strong style="font-size:14px;">13.09.2026 Murtensee × Im Flug</strong>
+            <span style="font-size:12px;color:var(--muted);">Wochenprojekt · 1 von 100 live</span>
+          </button>
+          <button type="button" class="preset-card" data-a="0" data-b="3">
+            <span class="mono" style="color:var(--seam);">Monochrom-Dialog</span>
+            <strong style="font-size:14px;">Etna × Schwarzweiss-Studie</strong>
+            <span style="font-size:12px;color:var(--muted);">Licht &amp; Kontrast</span>
+          </button>
+        </div>
+
+        <div style="margin-top:20px;">
+          <span class="mono" style="color:var(--muted);">Rolle A (Links/Oben) &amp; Rolle B (Rechts/Unten) direkt wählen</span>
+          <div class="thumb-strip" id="thumbStripA"></div>
+          <div class="thumb-strip" id="thumbStripB" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="bio-box">
+        <div class="bio-row">
+          <img id="drawerPortrait" alt="Porträt von Leandro Sinatra">
+          <div>
+            <span class="mono" style="color:var(--seam);">Fotograf · Lyss, Kanton Bern</span>
+            <h3 style="font-size:22px;font-weight:600;letter-spacing:-0.03em;">Leandro Sinatra</h3>
+            <span class="mono" style="color:var(--muted);">Architektur · Landschaft · Wildlife</span>
+          </div>
+        </div>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.65;">Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Im Zweischnitt begegnen sich weite Landschaftsräume und flüchtige Naturbeobachtungen in gegenläufiger Bewegung.</p>
+        <div style="padding:12px;border:1px solid var(--line);background:#151513;">
+          <span class="mono" style="color:var(--seam);">Archiv · 100 — Status 001 / 100</span>
+          <p style="font-size:12.5px;color:var(--muted);margin-top:4px;">Jeden Samstag oder Sonntag erscheint ein neues Wochenbild. Aktuell live: <strong>001 · 13.09.2026 — Murtensee, Schweiz</strong>.</p>
+        </div>
+        <div class="contact-bar mono">
+          <a class="drawer-pill" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a>
+          <button type="button" class="drawer-pill" id="copyDrawerEmail">Kopieren</button>
+          <a class="drawer-pill" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    const REEL_A = [
+      { code: "A·01", file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien" },
+      { code: "A·02", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento" },
+      { code: "A·03", file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe" },
+      { code: "A·04", file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van" },
+      { code: "A·05", file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van" },
+      { code: "A·100", file: "murtensee-weekly-photo.webp", title: "13.09.2026 (001/100)", loc: "Murtensee" },
+      { code: "A·07", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van" },
+      { code: "A·08", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento" },
+      { code: "A·09", file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Schwarzweiss" }
+    ];
+
+    const REEL_B = [
+      { code: "B·01", file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge" },
+      { code: "B·02", file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien" },
+      { code: "B·03", file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge" },
+      { code: "B·04", file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Schwarzweiss" },
+      { code: "B·05", file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge" },
+      { code: "B·06", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge" },
+      { code: "B·07", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge" },
+      { code: "B·08", file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge" },
+      { code: "B·09", file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge" }
+    ];
+
+    const N = REEL_A.length;
+    const slidesWrapA = document.getElementById("slidesA");
+    const slidesWrapB = document.getElementById("slidesB");
+    const idxAEl = document.getElementById("idxA");
+    const titleAEl = document.getElementById("titleA");
+    const idxBEl = document.getElementById("idxB");
+    const titleBEl = document.getElementById("titleB");
+    const seamBar = document.getElementById("seamBar");
+    const seamKnob = document.getElementById("seamKnob");
+    const drawer = document.getElementById("indexDrawer");
+    const backdrop = document.getElementById("drawerBackdrop");
+
+    document.getElementById("drawerPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+    function createSlides(items, container) {
+      return items.map((item) => {
+        const div = document.createElement("div");
+        div.className = "reel-slide";
+        div.innerHTML = `<img src="${ASSETS[item.file]}" alt="${item.title} — ${item.loc}" decoding="async">`;
+        container.appendChild(div);
+        return div;
+      });
+    }
+
+    const domSlidesA = createSlides(REEL_A, slidesWrapA);
+    const domSlidesB = createSlides(REEL_B, slidesWrapB);
+
+    /* Populate Drawer Thumbnails */
+    const stripA = document.getElementById("thumbStripA");
+    const stripB = document.getElementById("thumbStripB");
+    REEL_A.forEach((item, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "thumb-btn";
+      b.title = `Links: ${item.title}`;
+      b.innerHTML = `<img src="${ASSETS[item.file]}" alt="${item.title}">`;
+      b.addEventListener("click", () => { state.targetA = i; closeDrawer(); });
+      stripA.appendChild(b);
+    });
+    REEL_B.forEach((item, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "thumb-btn";
+      b.title = `Rechts: ${item.title}`;
+      b.innerHTML = `<img src="${ASSETS[item.file]}" alt="${item.title}">`;
+      b.addEventListener("click", () => { state.targetB = i; closeDrawer(); });
+      stripB.appendChild(b);
+    });
+
+    /* Reel & Split State */
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const state = {
+      posA: 0,
+      posB: 0,
+      targetA: 0,
+      targetB: 0,
+      coupled: true,
+      split: 50,
+      targetSplit: 50,
+      drawerOpen: false
+    };
+
+    let snapTimer = null;
+    function scheduleDetent() {
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(() => {
+        state.targetA = Math.round(state.targetA);
+        state.targetB = Math.round(state.targetB);
+      }, 170);
+    }
+
+    function advanceReels(deltaUnits, side) {
+      if (state.coupled) {
+        state.targetA += deltaUnits;
+        state.targetB -= deltaUnits; /* Exact opposing counter-scroll! */
+      } else if (side === "A") {
+        state.targetA += deltaUnits;
+      } else {
+        state.targetB += deltaUnits;
+      }
+      scheduleDetent();
+    }
+
+    /* Wheel Counter-Scrolling */
+    window.addEventListener("wheel", (e) => {
+      if (state.drawerOpen) return;
+      e.preventDefault();
+      const isMobile = window.innerWidth <= 760;
+      const side = isMobile
+        ? (e.clientY < window.innerHeight * (state.split / 100) ? "A" : "B")
+        : (e.clientX < window.innerWidth * (state.split / 100) ? "A" : "B");
+      const step = Math.max(-0.85, Math.min(0.85, e.deltaY * 0.0028));
+      advanceReels(step, side);
+    }, { passive: false });
+
+    /* Touch Swipe on Panes */
+    let paneDrag = null;
+    document.getElementById("diptychStage").addEventListener("pointerdown", (e) => {
+      if (e.target.closest("button, a")) return;
+      const side = e.target.closest("#paneA") ? "A" : "B";
+      paneDrag = { id: e.pointerId, y: e.clientY, side };
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (!paneDrag || e.pointerId !== paneDrag.id) return;
+      const dy = paneDrag.y - e.clientY;
+      paneDrag.y = e.clientY;
+      advanceReels(dy / 260, paneDrag.side);
+    });
+    window.addEventListener("pointerup", (e) => {
+      if (paneDrag && e.pointerId === paneDrag.id) {
+        paneDrag = null;
+        state.targetA = Math.round(state.targetA);
+        state.targetB = Math.round(state.targetB);
+      }
+    });
+
+    /* Draggable Center Seam */
+    let draggingSeam = false;
+    function updateKnobIcon() {
+      seamKnob.textContent = window.innerWidth <= 760 ? "⇕" : "⇔";
+    }
+    updateKnobIcon();
+    window.addEventListener("resize", updateKnobIcon);
+
+    seamBar.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      draggingSeam = true;
+      seamBar.classList.add("is-dragging");
+      seamBar.setPointerCapture(e.pointerId);
+    });
+
+    seamBar.addEventListener("pointermove", (e) => {
+      if (!draggingSeam) return;
+      const isMobile = window.innerWidth <= 760;
+      const pct = isMobile
+        ? (e.clientY / window.innerHeight) * 100
+        : (e.clientX / window.innerWidth) * 100;
+      state.targetSplit = Math.max(8, Math.min(92, pct));
+    });
+
+    seamBar.addEventListener("pointerup", () => {
+      draggingSeam = false;
+      seamBar.classList.remove("is-dragging");
+    });
+
+    seamBar.addEventListener("dblclick", () => { state.targetSplit = 50; });
+
+    /* Expand single side buttons (Zero-Lightbox Inspection) */
+    document.getElementById("expandA").addEventListener("click", () => {
+      state.targetSplit = state.targetSplit > 75 ? 50 : 90;
+    });
+    document.getElementById("expandB").addEventListener("click", () => {
+      state.targetSplit = state.targetSplit < 25 ? 50 : 10;
+    });
+
+    /* Control Pill Actions */
+    const coupleBtn = document.getElementById("coupleBtn");
+    coupleBtn.addEventListener("click", () => {
+      state.coupled = !state.coupled;
+      coupleBtn.classList.toggle("is-active", state.coupled);
+      coupleBtn.textContent = state.coupled ? "Gekoppelt ⇅" : "Frei A | B";
+    });
+
+    const fitBtn = document.getElementById("fitBtn");
+    fitBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isCover = root.getAttribute("data-fit") === "cover";
+      root.setAttribute("data-fit", isCover ? "contain" : "cover");
+      fitBtn.classList.toggle("is-active", isCover);
+      fitBtn.textContent = isCover ? "Randlos" : "Original";
+    });
+
+    document.getElementById("pairNextBtn").addEventListener("click", () => {
+      state.targetA = Math.round(state.targetA) + 1;
+      state.targetB = Math.round(state.targetB) - 1;
+    });
+
+    document.getElementById("shuffleBtn").addEventListener("click", () => {
+      state.targetA = Math.round(state.targetA) + 1 + Math.floor(Math.random() * (N - 1));
+      state.targetB = Math.round(state.targetB) - (1 + Math.floor(Math.random() * (N - 1)));
+    });
+
+    /* Drawer Open / Close */
+    function openDrawer() {
+      state.drawerOpen = true;
+      drawer.classList.add("is-open");
+      backdrop.classList.add("is-open");
+    }
+    function closeDrawer() {
+      state.drawerOpen = false;
+      drawer.classList.remove("is-open");
+      backdrop.classList.remove("is-open");
+    }
+
+    document.getElementById("openDrawerBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeDrawerBtn").addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+
+    document.querySelectorAll(".preset-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        state.targetA = Number(card.dataset.a);
+        state.targetB = Number(card.dataset.b);
+        state.targetSplit = 50;
+        closeDrawer();
+      });
+    });
+
+    const copyBtn = document.getElementById("copyDrawerEmail");
+    copyBtn.addEventListener("click", () => {
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyBtn.textContent = "Kopieren"; }, 1800);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (state.drawerOpen) closeDrawer();
+        else state.targetSplit = 50;
+      } else if (!state.drawerOpen && (e.key === "ArrowDown" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        state.targetA = Math.round(state.targetA) + 1;
+        state.targetB = Math.round(state.targetB) - (state.coupled ? 1 : 0);
+      } else if (!state.drawerOpen && (e.key === "ArrowUp" || e.key === "ArrowLeft")) {
+        e.preventDefault();
+        state.targetA = Math.round(state.targetA) - 1;
+        state.targetB = Math.round(state.targetB) + (state.coupled ? 1 : 0);
+      }
+    });
+
+    /* 60fps Circular Reel & Seam Loop */
+    function mod(n, m) {
+      return ((n % m) + m) % m;
+    }
+
+    function positionCircularSlides(slides, pos) {
+      for (let i = 0; i < N; i++) {
+        let rel = mod(i - pos, N);
+        if (rel > N * 0.5) rel -= N;
+        const el = slides[i];
+        if (Math.abs(rel) > 1.55) {
+          el.style.visibility = "hidden";
+        } else {
+          el.style.visibility = "visible";
+          el.style.transform = `translate3d(0, ${(rel * 100).toFixed(2)}%, 0)`;
+        }
+      }
+    }
+
+    function animate() {
+      const ease = reducedMotion ? 1 : 0.13;
+      state.posA += (state.targetA - state.posA) * ease;
+      state.posB += (state.targetB - state.posB) * ease;
+      state.split += (state.targetSplit - state.split) * 0.18;
+
+      document.documentElement.style.setProperty("--split", `${state.split.toFixed(2)}%`);
+
+      positionCircularSlides(domSlidesA, state.posA);
+      positionCircularSlides(domSlidesB, state.posB);
+
+      const activeA = REEL_A[mod(Math.round(state.posA), N)];
+      const activeB = REEL_B[mod(Math.round(state.posB), N)];
+      idxAEl.textContent = activeA.code;
+      titleAEl.textContent = `${activeA.title} · ${activeA.loc}`;
+      idxBEl.textContent = activeB.code;
+      titleBEl.textContent = `${activeB.title} · ${activeB.loc}`;
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  })();
+  </script>
+</body>
+</html>

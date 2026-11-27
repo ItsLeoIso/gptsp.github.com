@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-bleed="false">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Blende (Full-Bleed Radial Light Continuum · Konzept 16)</title>
+  <style>
+    :root {
+      --room-bg: #DFDDD6;
+      --room-halo: rgba(255, 255, 255, 0.45);
+      --room-fg: #151514;
+      --room-muted: rgba(21, 21, 20, 0.62);
+      --room-line: rgba(21, 21, 20, 0.18);
+      --room-pill: rgba(242, 240, 234, 0.72);
+      --room-accent: #C8432B;
+      --font-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--room-bg);
+      color: var(--room-fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      touch-action: none;
+      transition: background-color 620ms var(--ease), color 420ms var(--ease);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--room-accent); outline-offset: 4px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- LIVING CHROMATIC HALO ---------- */
+    #ambientHalo {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 44%, var(--room-halo) 0%, transparent 66%);
+      transition: background 650ms var(--ease);
+    }
+
+    /* ---------- SINGLE EDGE-TO-EDGE LIVING CANVAS ---------- */
+    #canvasStage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .continuum-frame {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 68px clamp(20px, 6vw, 88px) 166px;
+      opacity: 0;
+      transform: scale(0.985);
+      pointer-events: none;
+      transition: opacity 540ms var(--ease), transform 640ms var(--ease), padding 380ms var(--ease);
+    }
+
+    .continuum-frame.is-active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .continuum-frame img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+      transition: box-shadow 400ms ease;
+    }
+
+    [data-bleed="true"] .continuum-frame {
+      padding: 0;
+    }
+
+    [data-bleed="true"] .continuum-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      box-shadow: none;
+    }
+
+    /* ---------- PERIPHERAL WHISPER LABELS (ZERO BOXES / ZERO NAVBAR) ---------- */
+    .chrome-layer {
+      transition: opacity 360ms var(--ease), transform 360ms var(--ease);
+    }
+
+    body.is-quiet .chrome-layer {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .whisper-tl {
+      position: fixed;
+      top: 20px;
+      left: 22px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: calc(100vw - 170px);
+    }
+
+    [data-bleed="true"] .whisper-tl,
+    [data-bleed="true"] .whisper-tr {
+      background: var(--room-pill);
+      padding: 8px 12px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+    }
+
+    .whisper-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--room-muted);
+    }
+
+    .whisper-brand a:hover { color: var(--room-fg); }
+
+    #workHeadline {
+      font-size: clamp(16px, 1.6vw, 21px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .whisper-tr {
+      position: fixed;
+      top: 20px;
+      right: 22px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .round-btn {
+      height: 34px;
+      padding: 0 13px;
+      border-radius: 999px;
+      border: 1px solid var(--room-line);
+      background: var(--room-pill);
+      backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 180ms ease, transform 180ms ease;
+    }
+
+    .round-btn:hover {
+      border-color: var(--room-fg);
+      transform: translateY(-1px);
+    }
+
+    /* ---------- TACTILE RADIAL APERTURE DIAL (BLENDE) ---------- */
+    .dial-dock {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: opacity 360ms var(--ease), transform 360ms var(--ease);
+    }
+
+    body.is-quiet .dial-dock {
+      opacity: 0.16;
+      transform: translateX(-50%) scale(0.86);
+    }
+
+    body.is-quiet .dial-dock:hover {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .dial-step-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--room-line);
+      background: var(--room-pill);
+      backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .dial-step-btn:hover { border-color: var(--room-fg); }
+
+    #apertureDial {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background: var(--room-pill);
+      border: 1px solid var(--room-line);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #apertureDial.is-turning { cursor: grabbing; }
+
+    #dialSvg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .dial-center {
+      position: absolute;
+      inset: 31px;
+      border-radius: 50%;
+      border: 1px solid var(--room-line);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    #dialDeg {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #dialCount {
+      font-size: 9.5px;
+      color: var(--room-muted);
+    }
+
+    /* ---------- SERENE FULL-SCREEN IRIS INFO OVERLAY ---------- */
+    .iris-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #0F1013;
+      color: #F2EFE8;
+      padding: clamp(24px, 5vw, 64px);
+      overflow-y: auto;
+      touch-action: pan-y;
+      user-select: text;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms var(--ease);
+    }
+
+    .iris-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .iris-inner {
+      max-width: 1040px;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .iris-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(242, 239, 232, 0.15);
+    }
+
+    .arc-series-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .arc-btn {
+      text-align: left;
+      padding: 14px;
+      border: 1px solid rgba(242, 239, 232, 0.15);
+      background: #17191E;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: border-color 180ms ease;
+    }
+
+    .arc-btn:hover { border-color: #E8A958; }
+
+    .iris-bio {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 22px;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(242, 239, 232, 0.15);
+    }
+
+    .iris-bio img {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(242, 239, 232, 0.2);
+    }
+
+    .iris-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .iris-pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(242, 239, 232, 0.2);
+      background: #17191E;
+      overflow-wrap: anywhere;
+    }
+
+    .iris-pill:hover { border-color: #E8A958; color: #E8A958; }
+
+    @media (max-width: 680px) {
+      .continuum-frame { padding: 72px 14px 148px; }
+      #apertureDial { width: 112px; height: 112px; }
+      .dial-center { inset: 25px; }
+      .whisper-tl { left: 14px; top: 14px; max-width: calc(100vw - 148px); }
+      .whisper-tr { right: 14px; top: 14px; gap: 6px; }
+      .round-btn { height: 30px; padding: 0 10px; font-size: 9.5px; }
+      .iris-bio { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="ambientHalo"></div>
+
+  <!-- FULL-VIEWPORT ADAPTIVE PHOTOGRAPHIC CONTINUUM -->
+  <main id="canvasStage" aria-label="Licht-Kontinuum (Klick auf das Bild blendet alle Elemente für Ruhemodus aus)">
+    <!-- 18 Continuum Frames injected via JS -->
+  </main>
+
+  <!-- PERIPHERAL WHISPER TOP-LEFT -->
+  <div class="whisper-tl chrome-layer" aria-live="polite">
+    <div class="whisper-brand mono">
+      <a href="index.html">← Index</a>
+      <span>·</span>
+      <span>Leandro Sinatra</span>
+      <span>·</span>
+      <span id="workSeries">01 Valle dei Templi</span>
+    </div>
+    <div id="workHeadline">Etna — Sizilien</div>
+  </div>
+
+  <!-- PERIPHERAL WHISPER TOP-RIGHT -->
+  <div class="whisper-tr chrome-layer mono">
+    <button type="button" class="round-btn" id="bleedToggle" title="Zwischen Originalformat und Randlos wechseln">Randlos</button>
+    <button type="button" class="round-btn" id="openIrisBtn" aria-label="Über Leandro Sinatra, Serien und Archiv 100">Info · 100</button>
+  </div>
+
+  <!-- TACTILE RADIAL APERTURE DIAL (BOTTOM CENTER) -->
+  <div class="dial-dock" aria-label="360-Grad Blenden-Rad">
+    <button type="button" class="dial-step-btn chrome-layer" id="prevArcBtn" aria-label="Vorheriges Lichtbild">‹</button>
+    <div id="apertureDial" role="slider" tabindex="0" aria-valuemin="1" aria-valuemax="18" aria-valuenow="1" aria-label="Licht-Kontinuum Drehrad">
+      <svg id="dialSvg" viewBox="-66 -66 132 132">
+        <circle cx="0" cy="0" r="54" fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="1"/>
+        <g id="dialTicks"></g>
+        <g id="dialRotor">
+          <circle cx="0" cy="-54" r="4.5" fill="var(--room-accent)"/>
+          <line x1="0" y1="-44" x2="0" y2="-36" stroke="var(--room-accent)" stroke-width="2" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="dial-center mono">
+        <span id="dialDeg">000°</span>
+        <span id="dialCount">01 / 18</span>
+      </div>
+    </div>
+    <button type="button" class="dial-step-btn chrome-layer" id="nextArcBtn" aria-label="Nächstes Lichtbild">›</button>
+  </div>
+
+  <!-- SERENE IRIS OVERLAY (SERIES, ARCHIV 100 & CONTACT) -->
+  <aside class="iris-overlay" id="irisOverlay" role="dialog" aria-modal="true" aria-label="Informationen, Serien und Archiv 100">
+    <div class="iris-inner">
+      <div class="iris-top">
+        <div>
+          <span class="mono" style="color:#E8A958;">360° Licht-Kontinuum · 18 Werke nach Farbtemperatur</span>
+          <h2 style="font-size:clamp(24px,3vw,36px);font-weight:600;letter-spacing:-0.03em;margin-top:4px;">Blende — Leandro Sinatra</h2>
+        </div>
+        <button type="button" class="iris-pill mono" id="closeIrisBtn">Schliessen ✕</button>
+      </div>
+
+      <div>
+        <span class="mono" style="color:#9A968C;display:block;margin-bottom:10px;">Direkt zu einem Lichtbogen springen</span>
+        <div class="arc-series-grid">
+          <button type="button" class="arc-btn" data-jump="0">
+            <span class="mono" style="color:#E8A958;">000° — 040° · Serie 01</span>
+            <strong>Valle dei Templi</strong>
+            <span style="font-size:12.5px;color:#9A968C;">Hochlicht am Ätna &amp; goldener Kalkstein in Sizilien</span>
+          </button>
+          <button type="button" class="arc-btn" data-jump="3">
+            <span class="mono" style="color:#C0DC92;">060° — 180° · Serie 04</span>
+            <strong>La Sauge</strong>
+            <span style="font-size:12.5px;color:#9A968C;">Schilfgold, Singvögel und Wassergrün am Neuenburgersee</span>
+          </button>
+          <button type="button" class="arc-btn" data-jump="10">
+            <span class="mono" style="color:#6BD195;">200° · Serie 02</span>
+            <strong>Höhlen von Vallorbe</strong>
+            <span style="font-size:12.5px;color:#9A968C;">Smaragdmoos und Langzeitbelichtung unter Tage</span>
+          </button>
+          <button type="button" class="arc-btn" data-jump="11">
+            <span class="mono" style="color:#7CC4E4;">220° — 260° · Serie 03</span>
+            <strong>Creux du Van</strong>
+            <span style="font-size:12.5px;color:#9A968C;">Jura-Weiden, Felskante und Schwarzweiss-Studien</span>
+          </button>
+          <button type="button" class="arc-btn" data-jump="14">
+            <span class="mono" style="color:#9BD2E6;">280° ◆ Wochenprojekt</span>
+            <strong>Archiv · 100 (001 / 100)</strong>
+            <span style="font-size:12.5px;color:#9A968C;">13.09.2026 — Murtensee, Schweiz (1 von 100 live)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="iris-bio">
+        <img id="irisPortrait" alt="Porträt von Leandro Sinatra">
+        <div>
+          <span class="mono" style="color:#E8A958;">Lyss, Kanton Bern</span>
+          <h3 style="font-size:24px;font-weight:600;letter-spacing:-0.03em;margin-top:2px;">Über Leandro Sinatra</h3>
+          <p style="font-size:14px;color:#B5B1A8;line-height:1.65;margin-top:8px;max-width:62ch;">Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Klicke direkt auf eine Fotografie, um den <strong>Ruhemodus</strong> (komplett ohne Bedienelemente) ein- oder auszuschalten.</p>
+          <div class="iris-links mono">
+            <a class="iris-pill" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a>
+            <button type="button" class="iris-pill" id="copyIrisMail">E-Mail kopieren</button>
+            <a class="iris-pill" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    /* Sequenced around a 360° tonal & chromatic light arc using real measured photo palettes */
+    const ARC = [
+      { file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien", series: "01 Valle dei Templi", bg: "#DFDDD6", halo: "rgba(255,255,255,0.55)", light: true, swatch: "#C8432B", accent: "#C8432B" },
+      { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento, Sizilien", series: "01 Valle dei Templi", bg: "#261E14", halo: "rgba(196,144,78,0.28)", light: false, swatch: "#D89B4E", accent: "#E6A85C" },
+      { file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien", series: "01 Valle dei Templi", bg: "#292218", halo: "rgba(188,150,96,0.25)", light: false, swatch: "#C99E67", accent: "#E0B074" },
+      { file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge", series: "04 La Sauge", bg: "#222017", halo: "rgba(166,154,96,0.24)", light: false, swatch: "#BDB06A", accent: "#D8C97E" },
+      { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge", series: "04 La Sauge", bg: "#21231B", halo: "rgba(154,162,114,0.22)", light: false, swatch: "#A9B27A", accent: "#C5CF92" },
+      { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van", series: "03 Creux du Van", bg: "#1D2016", halo: "rgba(142,156,88,0.24)", light: false, swatch: "#9FB262", accent: "#BED27C" },
+      { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge", series: "04 La Sauge", bg: "#22251D", halo: "rgba(156,170,118,0.22)", light: false, swatch: "#A8B87E", accent: "#C4D696" },
+      { file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge", series: "04 La Sauge", bg: "#262A22", halo: "rgba(176,192,146,0.24)", light: false, swatch: "#B5C896", accent: "#CEE0B0" },
+      { file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge", series: "04 La Sauge", bg: "#151912", halo: "rgba(104,132,82,0.25)", light: false, swatch: "#7BA463", accent: "#98C47E" },
+      { file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge", series: "04 La Sauge", bg: "#1A1E18", halo: "rgba(118,142,108,0.22)", light: false, swatch: "#88A87E", accent: "#A4C69A" },
+      { file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe, Waadt", series: "02 Höhlen von Vallorbe", bg: "#101411", halo: "rgba(74,138,94,0.26)", light: false, swatch: "#58B878", accent: "#72D492" },
+      { file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge", series: "04 La Sauge", bg: "#1C221D", halo: "rgba(126,158,122,0.22)", light: false, swatch: "#8CB688", accent: "#AAD2A6" },
+      { file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van", series: "03 Creux du Van", bg: "#16211D", halo: "rgba(92,148,124,0.24)", light: false, swatch: "#6AB494", accent: "#88D0B0" },
+      { file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van", series: "03 Creux du Van", bg: "#162225", halo: "rgba(102,158,168,0.25)", light: false, swatch: "#72BAC4", accent: "#90D6E0" },
+      { file: "murtensee-weekly-photo.webp", title: "13.09.2026 — Woche 001", loc: "Murtensee, Schweiz", series: "Archiv · 100 (001/100)", bg: "#1B2428", halo: "rgba(132,168,182,0.26)", light: false, swatch: "#94C4D4", accent: "#B2DFEE", weekly: true },
+      { file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Creux du Van", series: "03 Creux du Van · Schwarzweiss", bg: "#1A1E22", halo: "rgba(138,152,168,0.20)", light: false, swatch: "#9AA8B8", accent: "#BCCAE0" },
+      { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento, Sizilien", series: "01 Valle dei Templi · Monochrom", bg: "#171717", halo: "rgba(160,160,160,0.18)", light: false, swatch: "#B0B0B0", accent: "#DFDFDF" },
+      { file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Creux du Van", series: "03 Creux du Van · Schwarzweiss", bg: "#121212", halo: "rgba(140,140,140,0.18)", light: false, swatch: "#8E8E8E", accent: "#D4D4D4" }
+    ];
+
+    const N = ARC.length;
+    const DEG_STEP = 360 / N; /* 20° per plate */
+
+    const stage = document.getElementById("canvasStage");
+    const dial = document.getElementById("apertureDial");
+    const dialTicks = document.getElementById("dialTicks");
+    const dialRotor = document.getElementById("dialRotor");
+    const dialDeg = document.getElementById("dialDeg");
+    const dialCount = document.getElementById("dialCount");
+    const workSeries = document.getElementById("workSeries");
+    const workHeadline = document.getElementById("workHeadline");
+    const irisOverlay = document.getElementById("irisOverlay");
+
+    document.getElementById("irisPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+    /* Build Full-Viewport Continuum Frames & Colored 360° Dial Ticks */
+    const frameEls = ARC.map((item, i) => {
+      const fig = document.createElement("figure");
+      fig.className = "continuum-frame" + (i === 0 ? " is-active" : "");
+      fig.innerHTML = `<img src="${ASSETS[item.file]}" alt="${item.title} — ${item.loc}" decoding="async">`;
+      stage.appendChild(fig);
+
+      const angleRad = ((i * DEG_STEP - 90) * Math.PI) / 180;
+      const rInner = item.weekly ? 43 : 46;
+      const rOuter = 58;
+      const x1 = Math.cos(angleRad) * rInner;
+      const y1 = Math.sin(angleRad) * rInner;
+      const x2 = Math.cos(angleRad) * rOuter;
+      const y2 = Math.sin(angleRad) * rOuter;
+
+      const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      tick.setAttribute("x1", x1.toFixed(2));
+      tick.setAttribute("y1", y1.toFixed(2));
+      tick.setAttribute("x2", x2.toFixed(2));
+      tick.setAttribute("y2", y2.toFixed(2));
+      tick.setAttribute("stroke", item.swatch);
+      tick.setAttribute("stroke-width", item.weekly ? "3.5" : "2.4");
+      tick.setAttribute("stroke-linecap", "round");
+      tick.style.cursor = "pointer";
+      tick.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        setIndex(i);
+      });
+      dialTicks.appendChild(tick);
+
+      return fig;
+    });
+
+    let currentIdx = 0;
+    let irisOpen = false;
+
+    function applyRoomAtmosphere(item) {
+      const root = document.documentElement;
+      root.style.setProperty("--room-bg", item.bg);
+      root.style.setProperty("--room-halo", item.halo);
+      root.style.setProperty("--room-accent", item.accent);
+      if (item.light) {
+        root.style.setProperty("--room-fg", "#151514");
+        root.style.setProperty("--room-muted", "rgba(21, 21, 20, 0.62)");
+        root.style.setProperty("--room-line", "rgba(21, 21, 20, 0.18)");
+        root.style.setProperty("--room-pill", "rgba(244, 242, 236, 0.78)");
+      } else {
+        root.style.setProperty("--room-fg", "#F2EFE8");
+        root.style.setProperty("--room-muted", "rgba(242, 239, 232, 0.64)");
+        root.style.setProperty("--room-line", "rgba(242, 239, 232, 0.20)");
+        root.style.setProperty("--room-pill", "rgba(16, 18, 22, 0.72)");
+      }
+    }
+
+    function setIndex(next, customDeg) {
+      const idx = ((next % N) + N) % N;
+      currentIdx = idx;
+      frameEls.forEach((el, i) => el.classList.toggle("is-active", i === idx));
+
+      const item = ARC[idx];
+      applyRoomAtmosphere(item);
+
+      const deg = customDeg !== undefined ? ((Math.round(customDeg) % 360) + 360) % 360 : idx * DEG_STEP;
+      dialRotor.setAttribute("transform", `rotate(${deg})`);
+      dialDeg.textContent = `${String(idx * DEG_STEP).padStart(3, "0")}°`;
+      dialCount.textContent = `${String(idx + 1).padStart(2, "0")} / ${N}`;
+      dial.setAttribute("aria-valuenow", String(idx + 1));
+
+      workSeries.textContent = item.series;
+      workHeadline.textContent = `${item.title} — ${item.loc}`;
+    }
+
+    setIndex(0);
+
+    /* Tactile Rotary Drag on the Aperture Dial */
+    let turningDial = false;
+    function scrubDialFromEvent(e) {
+      const rect = dial.getBoundingClientRect();
+      const cx = rect.left + rect.width * 0.5;
+      const cy = rect.top + rect.height * 0.5;
+      /* 0° at top (12 o'clock), clockwise 0..360 */
+      let deg = (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI + 90;
+      if (deg < 0) deg += 360;
+      const nearest = Math.round(deg / DEG_STEP) % N;
+      setIndex(nearest, deg);
+    }
+
+    dial.addEventListener("pointerdown", (e) => {
+      turningDial = true;
+      dial.classList.add("is-turning");
+      dial.setPointerCapture(e.pointerId);
+      scrubDialFromEvent(e);
+    });
+    dial.addEventListener("pointermove", (e) => {
+      if (turningDial) scrubDialFromEvent(e);
+    });
+    dial.addEventListener("pointerup", () => {
+      turningDial = false;
+      dial.classList.remove("is-turning");
+      dialRotor.setAttribute("transform", `rotate(${currentIdx * DEG_STEP})`);
+    });
+
+    /* Wheel Scrubbing with Smooth Debounce */
+    let wheelAccum = 0;
+    window.addEventListener("wheel", (e) => {
+      if (irisOpen) return;
+      e.preventDefault();
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      wheelAccum += delta;
+      if (Math.abs(wheelAccum) >= 48) {
+        setIndex(currentIdx + (wheelAccum > 0 ? 1 : -1));
+        wheelAccum = 0;
+      }
+    }, { passive: false });
+
+    /* Stage Tap = Pure Contemplation Mode (Ruhemodus) + Horizontal Swipe */
+    let stageDown = null;
+    stage.addEventListener("pointerdown", (e) => {
+      stageDown = { x: e.clientX, y: e.clientY };
+    });
+    stage.addEventListener("pointerup", (e) => {
+      if (!stageDown) return;
+      const dx = e.clientX - stageDown.x;
+      const dy = e.clientY - stageDown.y;
+      stageDown = null;
+      if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy)) {
+        setIndex(currentIdx + (dx < 0 ? 1 : -1));
+      } else if (Math.hypot(dx, dy) < 8) {
+        document.body.classList.toggle("is-quiet");
+      }
+    });
+
+    /* Step Buttons, Bleed Toggle & Iris Overlay */
+    document.getElementById("prevArcBtn").addEventListener("click", () => setIndex(currentIdx - 1));
+    document.getElementById("nextArcBtn").addEventListener("click", () => setIndex(currentIdx + 1));
+
+    const bleedBtn = document.getElementById("bleedToggle");
+    bleedBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isBleed = root.getAttribute("data-bleed") === "true";
+      root.setAttribute("data-bleed", isBleed ? "false" : "true");
+      bleedBtn.textContent = isBleed ? "Randlos" : "Original";
+    });
+
+    function openIris() {
+      irisOpen = true;
+      irisOverlay.classList.add("is-open");
+    }
+    function closeIris() {
+      irisOpen = false;
+      irisOverlay.classList.remove("is-open");
+    }
+
+    document.getElementById("openIrisBtn").addEventListener("click", openIris);
+    document.getElementById("closeIrisBtn").addEventListener("click", closeIris);
+
+    document.querySelectorAll("[data-jump]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setIndex(Number(btn.dataset.jump));
+        closeIris();
+      });
+    });
+
+    const copyBtn = document.getElementById("copyIrisMail");
+    copyBtn.addEventListener("click", () => {
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyBtn.textContent = "E-Mail kopieren"; }, 1800);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (irisOpen) closeIris();
+        else document.body.classList.remove("is-quiet");
+      } else if (!irisOpen && (e.key === "ArrowRight" || e.key === "ArrowDown")) {
+        e.preventDefault();
+        setIndex(currentIdx + 1);
+      } else if (!irisOpen && (e.key === "ArrowLeft" || e.key === "ArrowUp")) {
+        e.preventDefault();
+        setIndex(currentIdx - 1);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

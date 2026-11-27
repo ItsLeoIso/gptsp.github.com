@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-surface="vellum">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Weltfeld (2D Spatial Canvas · Konzept 13)</title>
+  <style>
+    :root {
+      --bg: #F3F0E8;
+      --card: #FAF8F3;
+      --fg: #161615;
+      --muted: #6E6A61;
+      --faint: rgba(22, 22, 21, 0.11);
+      --cross: rgba(22, 22, 21, 0.22);
+      --accent: #D63826;
+      --hud-bg: rgba(250, 248, 243, 0.92);
+      --shadow: 0 18px 44px rgba(18, 17, 14, 0.10), 0 2px 6px rgba(18, 17, 14, 0.06);
+      --shadow-focus: 0 32px 80px rgba(18, 17, 14, 0.22);
+      --font-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    [data-surface="obsidian"] {
+      --bg: #0E0F12;
+      --card: #16181D;
+      --fg: #F0EDE6;
+      --muted: #8E8B82;
+      --faint: rgba(240, 237, 230, 0.11);
+      --cross: rgba(240, 237, 230, 0.20);
+      --accent: #FF4D38;
+      --hud-bg: rgba(20, 22, 27, 0.92);
+      --shadow: 0 22px 54px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-focus: 0 36px 90px rgba(0, 0, 0, 0.78);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transition: background-color 280ms ease, color 280ms ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- VIEWPORT & INFINITE WORLD ---------- */
+    #viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      cursor: grab;
+      background-image:
+        radial-gradient(circle at center, var(--cross) 1px, transparent 1.2px);
+      background-size: 48px 48px;
+    }
+
+    #viewport.is-dragging { cursor: grabbing; }
+
+    #world {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+    }
+
+    /* Subtle world axes passing through (0,0) */
+    .axis-h, .axis-v {
+      position: absolute;
+      pointer-events: none;
+      background: var(--faint);
+    }
+    .axis-h { left: -3200px; top: 0; width: 6400px; height: 1px; }
+    .axis-v { left: 0; top: -2400px; width: 1px; height: 4800px; }
+
+    /* Region Cluster Watermarks in World Space */
+    .cluster-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      text-align: left;
+      min-width: 320px;
+    }
+
+    .cluster-label .kicker {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cluster-label h2 {
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+    }
+
+    .cluster-label p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      max-width: 36ch;
+    }
+
+    /* ---------- ORIGIN STUDIO PLAQUE (0, 0) ---------- */
+    .origin-card {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 430px;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border: 1px solid var(--faint);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 5;
+    }
+
+    .origin-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .origin-portrait {
+      width: 68px;
+      height: 68px;
+      object-fit: cover;
+      border: 1px solid var(--faint);
+      flex-shrink: 0;
+    }
+
+    .origin-title h1 {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+
+    .origin-title span {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .origin-bio {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .compass-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      padding-top: 12px;
+      border-top: 1px solid var(--faint);
+    }
+
+    .compass-btn {
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid var(--faint);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+    }
+
+    .compass-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .compass-btn.span-2 { grid-column: span 2; }
+
+    .origin-contact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--faint);
+      font-size: 12px;
+    }
+
+    .origin-contact a {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      border-bottom: 1px solid var(--faint);
+      padding-bottom: 1px;
+    }
+
+    .origin-contact a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .mini-pill {
+      padding: 4px 8px;
+      border: 1px solid var(--faint);
+    }
+
+    .mini-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---------- PHOTOGRAPHIC PLATES IN WORLD SPACE ---------- */
+    .world-plate {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      padding: 10px 10px 32px 10px;
+      border: 1px solid var(--faint);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: box-shadow 240ms ease, border-color 200ms ease;
+    }
+
+    .world-plate:hover,
+    .world-plate.is-focused {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-focus);
+      z-index: 12;
+    }
+
+    .world-plate img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .plate-meta {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .plate-meta strong {
+      color: var(--fg);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .plate-meta .idx { color: var(--accent); margin-right: 6px; }
+
+    /* ---------- ARCHIV 100 MERIDIAN TIMELINE IN WORLD SPACE ---------- */
+    .meridian-track {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    .meridian-slot {
+      width: 44px;
+      height: 62px;
+      border: 1px dashed var(--faint);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 6px;
+      color: var(--muted);
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+
+    /* ---------- MINIMAL FLOATING HUD (ZERO NAVBAR / ZERO FOOTER) ---------- */
+    .hud-status {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 60;
+      background: var(--hud-bg);
+      border: 1px solid var(--faint);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: min(420px, calc(100vw - 210px));
+      backdrop-filter: blur(10px);
+    }
+
+    .hud-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-back {
+      color: var(--muted);
+      border-right: 1px solid var(--faint);
+      padding-right: 10px;
+    }
+
+    .hud-back:hover { color: var(--accent); }
+
+    .focus-bar {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--faint);
+      flex-wrap: wrap;
+    }
+
+    .focus-bar.is-visible { display: flex; }
+
+    .hud-btn {
+      padding: 5px 9px;
+      border: 1px solid var(--faint);
+      background: var(--card);
+      transition: border-color 150ms ease, color 150ms ease;
+    }
+
+    .hud-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .hud-btn.is-accent { border-color: var(--accent); color: var(--accent); }
+
+    /* Radar Minimap */
+    .hud-radar {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 60;
+      width: 196px;
+      background: var(--hud-bg);
+      border: 1px solid var(--faint);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .radar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--faint);
+      gap: 4px;
+    }
+
+    .radar-ctrl-btn {
+      padding: 3px 6px;
+      border: 1px solid var(--faint);
+      font-size: 10px;
+    }
+
+    .radar-ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    #radarSvg {
+      display: block;
+      width: 100%;
+      height: 126px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .hint-pill {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      background: var(--hud-bg);
+      border: 1px solid var(--faint);
+      padding: 6px 12px;
+      color: var(--muted);
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 400ms ease;
+    }
+
+    .hint-pill.is-hidden { opacity: 0; }
+
+    @media (max-width: 680px) {
+      .hud-radar { width: 152px; right: 10px; bottom: 10px; }
+      #radarSvg { height: 98px; }
+      .hud-status {
+        left: 10px;
+        bottom: 10px;
+        max-width: calc(100vw - 176px);
+        padding: 8px 10px;
+      }
+      .hint-pill {
+        top: 10px;
+        font-size: 9.5px;
+        padding: 5px 10px;
+        max-width: calc(100vw - 24px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hint-pill mono" id="hintPill">Weltfeld ziehen · Scrollen zum Zoomen · Foto anklicken = Fokus</div>
+
+  <!-- BOUNDLESS 2D PHOTOGRAPHIC UNIVERSE -->
+  <main id="viewport" aria-label="Zweidimensionales fotografisches Weltfeld von Leandro Sinatra">
+    <div id="world">
+      <div class="axis-h"></div>
+      <div class="axis-v"></div>
+
+      <!-- ORIGIN ANCHOR (0, 0) -->
+      <section class="origin-card" id="originCard" aria-label="Leandro Sinatra Studio-Ursprung">
+        <div class="origin-top">
+          <img class="origin-portrait" id="originPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+          <div class="origin-title">
+            <span class="mono" style="color:var(--accent);">0,0 · Ursprung</span>
+            <h1>Leandro Sinatra</h1>
+            <span class="mono">Fotografie · Lyss, Kanton Bern</span>
+          </div>
+        </div>
+        <p class="origin-bio">Die Kamera hält fest, was das Auge übersieht. Bewege dich frei durch die vier Werkserien und das Wochenarchiv im offenen Raum.</p>
+        <div class="compass-grid" aria-label="Richtungsweiser">
+          <button type="button" class="compass-btn mono" data-cluster="sicily"><span>↖ 01 Sizilien</span><span>04</span></button>
+          <button type="button" class="compass-btn mono" data-cluster="vallorbe"><span>↗ 02 Vallorbe</span><span>01</span></button>
+          <button type="button" class="compass-btn mono" data-cluster="jura"><span>↙ 03 Jura</span><span>05</span></button>
+          <button type="button" class="compass-btn mono" data-cluster="sauge"><span>↘ 04 La Sauge</span><span>07</span></button>
+          <button type="button" class="compass-btn span-2 mono" data-cluster="archiv"><span>↑ Archiv · 100 (Murtensee · 13.09.2026)</span><span>001/100</span></button>
+        </div>
+        <div class="origin-contact">
+          <a href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="mini-pill mono" id="copyEmailBtn">Kopieren</button>
+            <a class="mini-pill mono" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer" style="border-bottom:1px solid var(--faint);">IG ↗</a>
+          </div>
+        </div>
+      </section>
+      <!-- Cluster labels, 18 photographic plates & Archiv 100 meridian injected via JS -->
+    </div>
+  </main>
+
+  <!-- WHISPER STATUS & PLATE STEPPER (BOTTOM LEFT) -->
+  <aside class="hud-status" aria-live="polite">
+    <div class="hud-status-row mono">
+      <a href="index.html" class="hud-back" title="Zurück zur Übersicht">← Index</a>
+      <span id="coordReadout">X +0000 · Y +0000 · 52%</span>
+    </div>
+    <div id="focusCaption" style="font-size:12.5px;color:var(--fg);display:none;"></div>
+    <div class="focus-bar mono" id="focusBar">
+      <button type="button" class="hud-btn" id="prevPlateBtn" aria-label="Vorheriges Werk">←</button>
+      <button type="button" class="hud-btn" id="nextPlateBtn" aria-label="Nächstes Werk">→</button>
+      <button type="button" class="hud-btn is-accent" id="exitFocusBtn">Übersicht (Esc)</button>
+    </div>
+  </aside>
+
+  <!-- LIVE RADAR MINIMAP (BOTTOM RIGHT) -->
+  <aside class="hud-radar" aria-label="Weltfeld-Radar">
+    <div class="radar-controls mono">
+      <button type="button" class="radar-ctrl-btn" id="zoomOutBtn" aria-label="Herauszoomen">−</button>
+      <button type="button" class="radar-ctrl-btn" id="resetViewBtn">Übersicht</button>
+      <button type="button" class="radar-ctrl-btn" id="zoomInBtn" aria-label="Hineinzoomen">+</button>
+      <button type="button" class="radar-ctrl-btn" id="surfaceBtn" title="Oberfläche wechseln">Nacht</button>
+    </div>
+    <svg id="radarSvg" viewBox="-2500 -1850 5000 3700" aria-label="Minimap Navigation">
+      <line x1="-2500" y1="0" x2="2500" y2="0" stroke="currentColor" stroke-opacity="0.12" stroke-width="14"/>
+      <line x1="0" y1="-1850" x2="0" y2="1850" stroke="currentColor" stroke-opacity="0.12" stroke-width="14"/>
+      <g id="radarPlates"></g>
+      <rect id="radarOrigin" x="-110" y="-85" width="220" height="170" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-width="20"/>
+      <rect id="radarViewport" x="-600" y="-400" width="1200" height="800" fill="rgba(214,56,38,0.10)" stroke="#D63826" stroke-width="28"/>
+    </svg>
+  </aside>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    const CLUSTERS = {
+      origin:   { x: 0,     y: 0,     z: 0.56, labelX: 0,     labelY: 0 },
+      archiv:   { x: -120,  y: -1020, z: 0.72, labelX: -680,  labelY: -1020, kicker: "N · Wochenprojekt", title: "Archiv · 100", desc: "Ein Foto pro Woche — 001 / 100 live am Murtensee." },
+      sicily:   { x: -1160, y: -420,  z: 0.58, labelX: -1180, labelY: -860,  kicker: "NW · Serie 01", title: "Valle dei Templi", desc: "Antike Architektur, Vulkanlicht und Kalkstein in Agrigento, Sizilien." },
+      vallorbe: { x: 1020,  y: -360,  z: 0.68, labelX: 1020,  labelY: -720,  kicker: "NO · Serie 02", title: "Höhlen von Vallorbe", desc: "Unterirdischer Fluss, Smaragdmoos und feuchter Fels im Kanton Waadt." },
+      jura:     { x: -1140, y: 760,   z: 0.54, labelX: -1180, labelY: 300,   kicker: "SW · Serie 03", title: "Creux du Van", desc: "Felsarena, Weiden und Schwarzweiss-Studien im Schweizer Jura." },
+      sauge:    { x: 1140,  y: 740,   z: 0.50, labelX: 1060,  labelY: 220,   kicker: "SO · Serie 04", title: "La Sauge", desc: "Flüchtige Begegnungen im Naturschutzgebiet am Neuenburgersee." }
+    };
+
+    /* Exact uncropped aspect ratios in world units */
+    const PLATES = [
+      /* Archiv 100 North Meridian */
+      { id: "100", cluster: "archiv", file: "murtensee-weekly-photo.webp", title: "13.09.2026 — Woche 001", loc: "Murtensee", x: -120, y: -1020, w: 510, h: 340 },
+
+      /* 01 Valle dei Templi (NW) */
+      { id: "01", cluster: "sicily", file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien", x: -780, y: -530, w: 510, h: 340 },
+      { id: "02", cluster: "sicily", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento", x: -1420, y: -560, w: 510, h: 340 },
+      { id: "03", cluster: "sicily", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento", x: -1440, y: -130, w: 465, h: 310 },
+      { id: "04", cluster: "sicily", file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien", x: -850, y: -40, w: 300, h: 450 },
+
+      /* 02 Vallorbe (NE) */
+      { id: "05", cluster: "vallorbe", file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe", x: 1020, y: -340, w: 600, h: 400 },
+
+      /* 03 Creux du Van (SW) */
+      { id: "06", cluster: "jura", file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van", x: -720, y: 620, w: 320, h: 480 },
+      { id: "07", cluster: "jura", file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van", x: -1260, y: 560, w: 480, h: 320 },
+      { id: "08", cluster: "jura", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van", x: -1720, y: 680, w: 300, h: 450 },
+      { id: "09", cluster: "jura", file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Schwarzweiss", x: -1320, y: 1060, w: 300, h: 450 },
+      { id: "10", cluster: "jura", file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Schwarzweiss", x: -860, y: 1140, w: 300, h: 450 },
+
+      /* 04 La Sauge (SE) */
+      { id: "11", cluster: "sauge", file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge", x: 760, y: 500, w: 495, h: 330 },
+      { id: "12", cluster: "sauge", file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge", x: 1260, y: 470, w: 294, h: 440 },
+      { id: "13", cluster: "sauge", file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge", x: 1690, y: 490, w: 336, h: 420 },
+      { id: "14", cluster: "sauge", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge", x: 770, y: 930, w: 465, h: 310 },
+      { id: "15", cluster: "sauge", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge", x: 1320, y: 940, w: 465, h: 310 },
+      { id: "16", cluster: "sauge", file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge", x: 1840, y: 940, w: 435, h: 290 },
+      { id: "17", cluster: "sauge", file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge", x: 1320, y: 1330, w: 450, h: 300 }
+    ];
+
+    const viewport = document.getElementById("viewport");
+    const world = document.getElementById("world");
+    const radarSvg = document.getElementById("radarSvg");
+    const radarPlates = document.getElementById("radarPlates");
+    const radarViewport = document.getElementById("radarViewport");
+    const coordReadout = document.getElementById("coordReadout");
+    const focusCaption = document.getElementById("focusCaption");
+    const focusBar = document.getElementById("focusBar");
+    const hintPill = document.getElementById("hintPill");
+
+    document.getElementById("originPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+    /* Render Cluster Labels */
+    Object.values(CLUSTERS).forEach((c) => {
+      if (!c.title) return;
+      const el = document.createElement("div");
+      el.className = "cluster-label";
+      el.style.left = `${c.labelX}px`;
+      el.style.top = `${c.labelY}px`;
+      el.innerHTML = `
+        <span class="kicker mono">${c.kicker}</span>
+        <h2>${c.title}</h2>
+        <p>${c.desc}</p>
+      `;
+      world.appendChild(el);
+    });
+
+    /* Render 99 future weekly ticks extending eastward from Archiv 100 plate */
+    const meridian = document.createElement("div");
+    meridian.className = "meridian-track";
+    meridian.style.left = "185px";
+    meridian.style.top = "-1051px";
+    for (let w = 2; w <= 26; w++) {
+      const slot = document.createElement("div");
+      slot.className = "meridian-slot mono";
+      slot.textContent = String(w).padStart(3, "0");
+      meridian.appendChild(slot);
+    }
+    const moreLabel = document.createElement("span");
+    moreLabel.className = "mono";
+    moreLabel.style.color = "var(--muted)";
+    moreLabel.style.whiteSpace = "nowrap";
+    moreLabel.textContent = "··· → 100 Wochen";
+    meridian.appendChild(moreLabel);
+    world.appendChild(meridian);
+
+    /* Render All 18 World Plates + Radar Rectangles */
+    const plateEls = [];
+    PLATES.forEach((p, idx) => {
+      const fig = document.createElement("figure");
+      fig.className = "world-plate";
+      fig.tabIndex = 0;
+      fig.setAttribute("role", "button");
+      fig.setAttribute("aria-label", `${p.title}, ${p.loc} fokussieren`);
+      fig.style.left = `${p.x}px`;
+      fig.style.top = `${p.y}px`;
+      fig.style.width = `${p.w}px`;
+      fig.style.height = `${p.h + 32}px`;
+      fig.dataset.plateIdx = String(idx);
+      fig.innerHTML = `
+        <img src="${ASSETS[p.file]}" alt="${p.title} — ${p.loc}">
+        <figcaption class="plate-meta">
+          <strong><span class="idx mono">${p.id}</span> ${p.title}</strong>
+          <span class="mono">${p.loc}</span>
+        </figcaption>
+      `;
+      fig.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          focusPlate(idx);
+        }
+      });
+      world.appendChild(fig);
+      plateEls.push(fig);
+
+      const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      r.setAttribute("x", String(p.x - p.w / 2));
+      r.setAttribute("y", String(p.y - p.h / 2));
+      r.setAttribute("width", String(p.w));
+      r.setAttribute("height", String(p.h));
+      r.setAttribute("fill", p.id === "100" ? "#D63826" : "currentColor");
+      r.setAttribute("fill-opacity", p.id === "100" ? "0.75" : "0.32");
+      radarPlates.appendChild(r);
+    });
+
+    /* Camera State */
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobileInit = window.innerWidth < 760;
+    const overviewZ = () => (window.innerWidth < 760 ? 0.36 : 0.50);
+
+    const state = {
+      x: isMobileInit ? -40 : -60,
+      y: isMobileInit ? -40 : -30,
+      z: overviewZ(),
+      tx: isMobileInit ? -40 : -60,
+      ty: isMobileInit ? -40 : -30,
+      tz: overviewZ(),
+      focusedIdx: -1
+    };
+
+    const MIN_Z = 0.22;
+    const MAX_Z = 2.4;
+    const BOUND_X = 2450;
+    const BOUND_Y = 1750;
+
+    function clampTargets() {
+      state.tz = Math.max(MIN_Z, Math.min(MAX_Z, state.tz));
+      state.tx = Math.max(-BOUND_X, Math.min(BOUND_X, state.tx));
+      state.ty = Math.max(-BOUND_Y, Math.min(BOUND_Y, state.ty));
+    }
+
+    function hideHint() {
+      hintPill.classList.add("is-hidden");
+    }
+
+    function setFocusedUI(idx) {
+      state.focusedIdx = idx;
+      plateEls.forEach((el, i) => el.classList.toggle("is-focused", i === idx));
+      if (idx >= 0) {
+        const p = PLATES[idx];
+        focusCaption.style.display = "block";
+        focusCaption.textContent = `${p.id} · ${p.title} — ${p.loc}`;
+        focusBar.classList.add("is-visible");
+      } else {
+        focusCaption.style.display = "none";
+        focusBar.classList.remove("is-visible");
+      }
+    }
+
+    function focusPlate(idx) {
+      hideHint();
+      const safeIdx = ((idx % PLATES.length) + PLATES.length) % PLATES.length;
+      const p = PLATES[safeIdx];
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const padW = vw < 680 ? vw * 0.88 : vw * 0.76;
+      const padH = vw < 680 ? vh * 0.68 : vh * 0.78;
+      const fitZ = Math.min(padW / (p.w + 24), padH / (p.h + 52));
+      state.tx = p.x;
+      state.ty = p.y + (vw < 680 ? 24 : 0);
+      state.tz = Math.max(0.45, Math.min(2.1, fitZ));
+      clampTargets();
+      setFocusedUI(safeIdx);
+    }
+
+    function resetOverview() {
+      state.tx = 0;
+      state.ty = -30;
+      state.tz = overviewZ();
+      clampTargets();
+      setFocusedUI(-1);
+    }
+
+    function flyToCluster(key) {
+      hideHint();
+      const c = CLUSTERS[key];
+      if (!c) return;
+      state.tx = c.x;
+      state.ty = c.y;
+      state.tz = window.innerWidth < 760 ? c.z * 0.68 : c.z;
+      clampTargets();
+      setFocusedUI(-1);
+    }
+
+    document.querySelectorAll("[data-cluster]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        flyToCluster(btn.dataset.cluster);
+      });
+    });
+
+    /* Pointer Drag + Pinch-to-Zoom + Clean Click Detection */
+    const activePointers = new Map();
+    let dragStartScreen = null;
+    let totalMoved = 0;
+    let lastPinchDist = null;
+    let vx = 0;
+    let vy = 0;
+
+    viewport.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("a, button")) return;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      viewport.setPointerCapture(e.pointerId);
+      if (activePointers.size === 1) {
+        dragStartScreen = { x: e.clientX, y: e.clientY };
+        totalMoved = 0;
+        vx = 0;
+        vy = 0;
+      } else if (activePointers.size === 2) {
+        const pts = [...activePointers.values()];
+        lastPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      }
+    });
+
+    viewport.addEventListener("pointermove", (e) => {
+      if (!activePointers.has(e.pointerId)) return;
+      const prev = activePointers.get(e.pointerId);
+      const curr = { x: e.clientX, y: e.clientY };
+      activePointers.set(e.pointerId, curr);
+
+      if (activePointers.size === 1) {
+        const dx = curr.x - prev.x;
+        const dy = curr.y - prev.y;
+        totalMoved += Math.hypot(dx, dy);
+        if (totalMoved > 6) {
+          hideHint();
+          viewport.classList.add("is-dragging");
+          if (state.focusedIdx !== -1) setFocusedUI(-1);
+          state.tx -= dx / state.z;
+          state.ty -= dy / state.z;
+          vx = -dx / state.z;
+          vy = -dy / state.z;
+          clampTargets();
+        }
+      } else if (activePointers.size === 2) {
+        hideHint();
+        const pts = [...activePointers.values()];
+        const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        const midX = (pts[0].x + pts[1].x) * 0.5;
+        const midY = (pts[0].y + pts[1].y) * 0.5;
+        if (lastPinchDist && lastPinchDist > 10) {
+          const factor = dist / lastPinchDist;
+          zoomAroundScreenPoint(midX, midY, state.tz * factor);
+        }
+        lastPinchDist = dist;
+      }
+    });
+
+    function onPointerEnd(e) {
+      if (!activePointers.has(e.pointerId)) return;
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) lastPinchDist = null;
+      if (activePointers.size === 0) {
+        viewport.classList.remove("is-dragging");
+        if (totalMoved <= 6 && dragStartScreen) {
+          /* Clean tap/click without dragging */
+          const hitEl = document.elementFromPoint(e.clientX, e.clientY);
+          const plate = hitEl && hitEl.closest(".world-plate");
+          if (plate) {
+            const idx = Number(plate.dataset.plateIdx);
+            if (state.focusedIdx === idx) {
+              resetOverview();
+            } else {
+              focusPlate(idx);
+            }
+          } else if (hitEl && !hitEl.closest(".origin-card") && state.focusedIdx !== -1) {
+            resetOverview();
+          }
+        } else {
+          /* Gentle inertia throw */
+          state.tx += vx * 5;
+          state.ty += vy * 5;
+          clampTargets();
+        }
+        dragStartScreen = null;
+      }
+    }
+
+    viewport.addEventListener("pointerup", onPointerEnd);
+    viewport.addEventListener("pointercancel", onPointerEnd);
+
+    function zoomAroundScreenPoint(sx, sy, desiredZ) {
+      const nextZ = Math.max(MIN_Z, Math.min(MAX_Z, desiredZ));
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const wx = state.tx + (sx - vw * 0.5) / state.tz;
+      const wy = state.ty + (sy - vh * 0.5) / state.tz;
+      state.tx = wx - (sx - vw * 0.5) / nextZ;
+      state.ty = wy - (sy - vh * 0.5) / nextZ;
+      state.tz = nextZ;
+      if (state.focusedIdx !== -1) setFocusedUI(-1);
+      clampTargets();
+    }
+
+    viewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      hideHint();
+      const zoomFactor = Math.exp(-e.deltaY * 0.0014);
+      zoomAroundScreenPoint(e.clientX, e.clientY, state.tz * zoomFactor);
+    }, { passive: false });
+
+    /* Radar Minimap Click & Drag Navigation */
+    let radarDown = false;
+    function jumpFromRadar(e) {
+      hideHint();
+      const rect = radarSvg.getBoundingClientRect();
+      const rx = (e.clientX - rect.left) / rect.width;
+      const ry = (e.clientY - rect.top) / rect.height;
+      state.tx = -2500 + rx * 5000;
+      state.ty = -1850 + ry * 3700;
+      if (state.focusedIdx !== -1) setFocusedUI(-1);
+      clampTargets();
+    }
+    radarSvg.addEventListener("pointerdown", (e) => {
+      radarDown = true;
+      radarSvg.setPointerCapture(e.pointerId);
+      jumpFromRadar(e);
+    });
+    radarSvg.addEventListener("pointermove", (e) => { if (radarDown) jumpFromRadar(e); });
+    radarSvg.addEventListener("pointerup", () => { radarDown = false; });
+
+    /* HUD Controls & Keyboard */
+    document.getElementById("zoomInBtn").addEventListener("click", () => zoomAroundScreenPoint(window.innerWidth * 0.5, window.innerHeight * 0.5, state.tz * 1.32));
+    document.getElementById("zoomOutBtn").addEventListener("click", () => zoomAroundScreenPoint(window.innerWidth * 0.5, window.innerHeight * 0.5, state.tz / 1.32));
+    document.getElementById("resetViewBtn").addEventListener("click", resetOverview);
+    document.getElementById("exitFocusBtn").addEventListener("click", resetOverview);
+    document.getElementById("prevPlateBtn").addEventListener("click", () => focusPlate(state.focusedIdx <= 0 ? PLATES.length - 1 : state.focusedIdx - 1));
+    document.getElementById("nextPlateBtn").addEventListener("click", () => focusPlate(state.focusedIdx + 1));
+
+    const surfaceBtn = document.getElementById("surfaceBtn");
+    surfaceBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isVellum = root.getAttribute("data-surface") === "vellum";
+      root.setAttribute("data-surface", isVellum ? "obsidian" : "vellum");
+      surfaceBtn.textContent = isVellum ? "Papier" : "Nacht";
+    });
+
+    const copyBtn = document.getElementById("copyEmailBtn");
+    copyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyBtn.textContent = "Kopieren"; }, 1800);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        resetOverview();
+      } else if (e.key === "ArrowRight") {
+        focusPlate(state.focusedIdx + 1);
+      } else if (e.key === "ArrowLeft") {
+        focusPlate(state.focusedIdx <= 0 ? PLATES.length - 1 : state.focusedIdx - 1);
+      } else if (e.key === "+" || e.key === "=") {
+        zoomAroundScreenPoint(window.innerWidth * 0.5, window.innerHeight * 0.5, state.tz * 1.25);
+      } else if (e.key === "-") {
+        zoomAroundScreenPoint(window.innerWidth * 0.5, window.innerHeight * 0.5, state.tz / 1.25);
+      }
+    });
+
+    /* 60fps Spatial Camera Loop */
+    function fmtSign(n) {
+      const r = Math.round(n);
+      return (r >= 0 ? "+" : "-") + String(Math.abs(r)).padStart(4, "0");
+    }
+
+    function tick() {
+      const ease = reducedMotion ? 1 : 0.14;
+      state.x += (state.tx - state.x) * ease;
+      state.y += (state.ty - state.y) * ease;
+      state.z += (state.tz - state.z) * ease;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const screenX = vw * 0.5 - state.x * state.z;
+      const screenY = vh * 0.5 - state.y * state.z;
+      world.style.transform = `translate(${screenX.toFixed(2)}px, ${screenY.toFixed(2)}px) scale(${state.z.toFixed(4)})`;
+
+      /* Update Radar Viewport Box */
+      const visW = vw / state.z;
+      const visH = vh / state.z;
+      radarViewport.setAttribute("x", (state.x - visW * 0.5).toFixed(1));
+      radarViewport.setAttribute("y", (state.y - visH * 0.5).toFixed(1));
+      radarViewport.setAttribute("width", visW.toFixed(1));
+      radarViewport.setAttribute("height", visH.toFixed(1));
+
+      coordReadout.textContent = `X ${fmtSign(state.x)} · Y ${fmtSign(state.y)} · ${Math.round(state.z * 100)}%`;
+
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>

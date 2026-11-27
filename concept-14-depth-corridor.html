@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Tiefenraum (3D Z-Axis Depth Flight · Konzept 14)</title>
+  <style>
+    :root {
+      --bg: #06070A;
+      --fg: #F2EFE8;
+      --muted: #8C8980;
+      --line: rgba(242, 239, 232, 0.14);
+      --accent: #E8A958;
+      --glow: rgba(186, 128, 60, 0.22);
+      --panel: rgba(12, 14, 19, 0.88);
+      --font-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      touch-action: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- AMBIENT VANISHING NEBULA & PERSPECTIVE GUIDES ---------- */
+    #nebula {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 48%, var(--glow) 0%, rgba(6, 7, 10, 0) 62%);
+      transition: background 600ms ease;
+    }
+
+    .corridor-guides {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    /* ---------- 3D PERSPECTIVE STAGE ---------- */
+    #stage {
+      position: fixed;
+      inset: 0;
+      perspective: 1100px;
+      perspective-origin: 50% 50%;
+      overflow: hidden;
+    }
+
+    #cameraRig {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .z-node {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+    }
+
+    /* Intro spatial marker at Z = 0 */
+    .intro-portal {
+      width: min(380px, 84vw);
+      padding: 26px 28px;
+      background: #0C0E13;
+      border: 1px solid var(--line);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.85);
+    }
+
+    .intro-portal h1 {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 0.98;
+      margin-top: 8px;
+    }
+
+    .intro-portal p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+
+    /* Floating Photographic Plate in 3D Space */
+    .z-plate {
+      cursor: pointer;
+      padding: 8px;
+      background: #0F1116;
+      border: 1px solid rgba(242, 239, 232, 0.18);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.78);
+      transition: border-color 220ms ease;
+    }
+
+    .z-plate:hover,
+    .z-plate.is-locked {
+      border-color: var(--accent);
+    }
+
+    .z-plate img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .z-plate-tag {
+      position: absolute;
+      left: 0;
+      bottom: -26px;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .z-plate-tag strong {
+      color: var(--fg);
+      font-weight: 500;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Final Colophon Node at Deepest Z */
+    .colophon-portal {
+      width: min(460px, 88vw);
+      background: #0D0F14;
+      border: 1px solid var(--line);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+    }
+
+    .colophon-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .colophon-head img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .colophon-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .pill-btn {
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      background: #141720;
+      transition: border-color 160ms ease, color 160ms ease;
+      overflow-wrap: anywhere;
+    }
+
+    .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---------- RAZOR-THIN RIGHT-EDGE DEPTH ALTIMETER ---------- */
+    .altimeter {
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 60;
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      height: min(460px, 68vh);
+    }
+
+    .alt-ticks {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .alt-btn {
+      color: var(--muted);
+      padding: 3px 6px;
+      transition: color 160ms ease;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .alt-btn:hover,
+    .alt-btn.is-active {
+      color: var(--accent);
+    }
+
+    .alt-rail {
+      position: relative;
+      width: 3px;
+      background: var(--line);
+      cursor: pointer;
+    }
+
+    .alt-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--accent);
+      height: 0%;
+    }
+
+    .alt-needle {
+      position: absolute;
+      left: -4px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--accent);
+      transform: translateY(-50%);
+      top: 0%;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    /* ---------- MINIMAL BOTTOM-LEFT DEPTH READOUT ---------- */
+    .depth-hud {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 60;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: min(430px, calc(100vw - 128px));
+      backdrop-filter: blur(10px);
+    }
+
+    .depth-hud-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .depth-hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .step-btn {
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      background: #12151D;
+    }
+
+    .step-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .step-btn.is-highlight { border-color: var(--accent); color: var(--accent); }
+
+    @media (max-width: 680px) {
+      .altimeter { right: 8px; gap: 6px; height: 56vh; }
+      .alt-btn { font-size: 9px; padding: 2px 3px; }
+      .depth-hud { left: 10px; bottom: 10px; padding: 9px 11px; max-width: calc(100vw - 108px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nebula"></div>
+
+  <!-- Subtle architectural tunnel crosshairs converging to center -->
+  <svg class="corridor-guides" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="0" y1="0" x2="720" y2="450" stroke="rgba(242,239,232,0.12)" stroke-width="1"/>
+    <line x1="1440" y1="0" x2="720" y2="450" stroke="rgba(242,239,232,0.12)" stroke-width="1"/>
+    <line x1="0" y1="900" x2="720" y2="450" stroke="rgba(242,239,232,0.12)" stroke-width="1"/>
+    <line x1="1440" y1="900" x2="720" y2="450" stroke="rgba(242,239,232,0.12)" stroke-width="1"/>
+    <rect x="480" y="300" width="480" height="300" fill="none" stroke="rgba(242,239,232,0.08)" stroke-width="1"/>
+  </svg>
+
+  <!-- 3D Z-AXIS CORRIDOR -->
+  <main id="stage" aria-label="Dreidimensionaler Tiefenraum">
+    <div id="cameraRig"></div>
+  </main>
+
+  <!-- RIGHT-EDGE VERTICAL DEPTH ALTIMETER -->
+  <nav class="altimeter" aria-label="Tiefen-Navigation">
+    <div class="alt-ticks mono" id="altTicks">
+      <button type="button" class="alt-btn is-active" data-z="0">0000m · Start</button>
+      <button type="button" class="alt-btn" data-z="520">0260m · Sizilien</button>
+      <button type="button" class="alt-btn" data-z="2760">1380m · Vallorbe</button>
+      <button type="button" class="alt-btn" data-z="3360">1680m · Jura</button>
+      <button type="button" class="alt-btn" data-z="6360">3180m · La Sauge</button>
+      <button type="button" class="alt-btn" data-z="10560">5280m · 100</button>
+      <button type="button" class="alt-btn" data-z="11400">5700m · Kontakt</button>
+    </div>
+    <div class="alt-rail" id="altRail" title="Tiefe direkt wählen">
+      <div class="alt-fill" id="altFill"></div>
+      <div class="alt-needle" id="altNeedle"></div>
+    </div>
+  </nav>
+
+  <!-- BOTTOM-LEFT DEPTH READOUT -->
+  <aside class="depth-hud" aria-live="polite">
+    <div class="depth-hud-top mono">
+      <a href="index.html" style="color:var(--muted);border-right:1px solid var(--line);padding-right:10px;">← Index</a>
+      <span id="depthMeter" style="color:var(--accent);">Z 0000 m</span>
+      <span id="zoneReadout" style="color:var(--muted);">Ursprung</span>
+    </div>
+    <div id="nearestTitle" style="font-size:13px;font-weight:500;">Mausrad oder Wischen zum Eintauchen</div>
+    <div class="depth-hud-controls mono">
+      <button type="button" class="step-btn" id="stepBackBtn" aria-label="Eine Station zurück">↑ Zurück</button>
+      <button type="button" class="step-btn" id="stepFwdBtn" aria-label="Eine Station tiefer">↓ Tiefer</button>
+      <button type="button" class="step-btn is-highlight" id="releaseLockBtn" style="display:none;">Zentrierung lösen (Esc)</button>
+    </div>
+  </aside>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    /* 18 Photographs + Intro (Z=0) + Colophon (Z=11400) along continuous Z-corridor */
+    const STATIONS = [
+      { type: "intro", z: 0, x: -290, y: -10, zone: "Ursprung", glow: "rgba(196, 138, 68, 0.22)", accent: "#E8A958", title: "Leandro Sinatra — Tiefenraum" },
+
+      /* 01 Valle dei Templi */
+      { type: "plate", id: "01", z: 520,  x: 240,  y: -25, w: 540, h: 360, zone: "01 · Valle dei Templi", glow: "rgba(196, 138, 68, 0.24)", accent: "#E8A958", file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien" },
+      { type: "plate", id: "02", z: 1080, x: -240, y: 35,  w: 540, h: 360, zone: "01 · Valle dei Templi", glow: "rgba(196, 138, 68, 0.26)", accent: "#E8A958", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento" },
+      { type: "plate", id: "03", z: 1640, x: 230,  y: 20,  w: 520, h: 347, zone: "01 · Valle dei Templi", glow: "rgba(160, 150, 135, 0.20)", accent: "#D5CFC4", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento" },
+      { type: "plate", id: "04", z: 2200, x: -180, y: -15, w: 340, h: 510, zone: "01 · Valle dei Templi", glow: "rgba(196, 138, 68, 0.24)", accent: "#E8A958", file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien" },
+
+      /* 02 Vallorbe */
+      { type: "plate", id: "05", z: 2760, x: 0,    y: 0,   w: 600, h: 400, zone: "02 · Höhlen von Vallorbe", glow: "rgba(58, 138, 92, 0.25)", accent: "#6BD195", file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe, Waadt" },
+
+      /* 03 Creux du Van */
+      { type: "plate", id: "06", z: 3360, x: -200, y: -10, w: 346, h: 520, zone: "03 · Creux du Van", glow: "rgba(78, 138, 165, 0.24)", accent: "#7CC4E4", file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van" },
+      { type: "plate", id: "07", z: 3960, x: 205,  y: 25,  w: 540, h: 360, zone: "03 · Creux du Van", glow: "rgba(82, 142, 114, 0.22)", accent: "#88D4AE", file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van" },
+      { type: "plate", id: "08", z: 4560, x: -185, y: 15,  w: 340, h: 510, zone: "03 · Creux du Van", glow: "rgba(128, 142, 82, 0.22)", accent: "#C4D67A", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van" },
+      { type: "plate", id: "09", z: 5160, x: 185,  y: -15, w: 340, h: 510, zone: "03 · Creux du Van", glow: "rgba(150, 150, 150, 0.18)", accent: "#DCDCDC", file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Schwarzweiss" },
+      { type: "plate", id: "10", z: 5760, x: -175, y: 10,  w: 340, h: 510, zone: "03 · Creux du Van", glow: "rgba(120, 140, 160, 0.20)", accent: "#B8CCE0", file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Schwarzweiss" },
+
+      /* 04 La Sauge */
+      { type: "plate", id: "11", z: 6360, x: 195,  y: -20, w: 540, h: 360, zone: "04 · La Sauge", glow: "rgba(168, 146, 86, 0.24)", accent: "#DFC478", file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge" },
+      { type: "plate", id: "12", z: 6960, x: -190, y: 15,  w: 340, h: 510, zone: "04 · La Sauge", glow: "rgba(110, 152, 102, 0.24)", accent: "#9AD48E", file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge" },
+      { type: "plate", id: "13", z: 7560, x: 185,  y: 10,  w: 384, h: 480, zone: "04 · La Sauge", glow: "rgba(142, 162, 108, 0.24)", accent: "#C0DC92", file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge" },
+      { type: "plate", id: "14", z: 8160, x: -200, y: -20, w: 540, h: 360, zone: "04 · La Sauge", glow: "rgba(132, 148, 96, 0.22)", accent: "#BDD18A", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge" },
+      { type: "plate", id: "15", z: 8760, x: 195,  y: 25,  w: 540, h: 360, zone: "04 · La Sauge", glow: "rgba(132, 142, 92, 0.22)", accent: "#C6D08A", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge" },
+      { type: "plate", id: "16", z: 9360, x: -195, y: -15, w: 520, h: 347, zone: "04 · La Sauge", glow: "rgba(88, 122, 82, 0.24)", accent: "#8EC484", file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge" },
+      { type: "plate", id: "17", z: 9960, x: 185,  y: 15,  w: 520, h: 347, zone: "04 · La Sauge", glow: "rgba(68, 106, 62, 0.25)", accent: "#7CC070", file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge" },
+
+      /* Archiv 100 */
+      { type: "plate", id: "100", z: 10560, x: 0,  y: -10, w: 580, h: 387, zone: "Archiv · 100 (001 / 100)", glow: "rgba(116, 158, 174, 0.26)", accent: "#9BD2E6", file: "murtensee-weekly-photo.webp", title: "13.09.2026 — Woche 001 / 100", loc: "Murtensee, Schweiz" },
+
+      /* Deepest Z Colophon */
+      { type: "colophon", z: 11400, x: 0, y: 0, zone: "Kontakt · Lyss", glow: "rgba(196, 138, 68, 0.22)", accent: "#E8A958", title: "Leandro Sinatra — Kontakt" }
+    ];
+
+    const MAX_Z = 11400;
+    const cameraRig = document.getElementById("cameraRig");
+    const nebula = document.getElementById("nebula");
+    const altFill = document.getElementById("altFill");
+    const altNeedle = document.getElementById("altNeedle");
+    const altRail = document.getElementById("altRail");
+    const altBtns = [...document.querySelectorAll(".alt-btn")];
+    const depthMeter = document.getElementById("depthMeter");
+    const zoneReadout = document.getElementById("zoneReadout");
+    const nearestTitle = document.getElementById("nearestTitle");
+    const releaseLockBtn = document.getElementById("releaseLockBtn");
+
+    /* Build DOM nodes inside 3D rig */
+    const nodeRecords = STATIONS.map((st, idx) => {
+      const wrap = document.createElement("div");
+      wrap.className = "z-node";
+      wrap.style.zIndex = String(2000 - idx);
+
+      if (st.type === "intro") {
+        wrap.innerHTML = `
+          <div class="intro-portal">
+            <span class="mono" style="color:var(--accent);">Z 0000 m · Raum-Korridor</span>
+            <h1>Leandro<br>Sinatra</h1>
+            <p>Fotografie aus Lyss, Kanton Bern. Kein Seiten-Scrollen: Gleite mit dem Mausrad, den Pfeiltasten oder per Wischen vorwärts durch 18 freischwebende Bildtafeln im Raum.</p>
+            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;" class="mono">
+              <button type="button" class="pill-btn" id="enterFlightBtn">Eintauchen ↓</button>
+              <button type="button" class="pill-btn" id="jump100Btn">Archiv · 100 →</button>
+            </div>
+          </div>
+        `;
+      } else if (st.type === "plate") {
+        wrap.innerHTML = `
+          <figure class="z-plate" tabindex="0" role="button" aria-label="${st.title}, ${st.loc} im Fokus betrachten">
+            <img src="${ASSETS[st.file]}" alt="${st.title} — ${st.loc}">
+            <figcaption class="z-plate-tag">
+              <strong><span class="mono" style="color:var(--accent);margin-right:6px;">${st.id}</span>${st.title}</strong>
+              <span class="mono">${st.loc}</span>
+            </figcaption>
+          </figure>
+        `;
+      } else {
+        wrap.innerHTML = `
+          <section class="colophon-portal" aria-label="Über Leandro Sinatra und Kontakt">
+            <div class="colophon-head">
+              <img src="${ASSETS["leandro-sinatra-portrait.webp"]}" alt="Porträt von Leandro Sinatra">
+              <div>
+                <span class="mono" style="color:var(--accent);">Z 5700 m · Lyss, Schweiz</span>
+                <h2 style="font-size:26px;font-weight:600;letter-spacing:-0.03em;margin-top:3px;">Leandro Sinatra</h2>
+                <span class="mono" style="color:var(--muted);">Architektur · Landschaft · Wildlife</span>
+              </div>
+            </div>
+            <p style="font-size:13.5px;color:var(--muted);line-height:1.65;">Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Im Wochenprojekt <strong>Archiv · 100</strong> entsteht jedes Wochenende eine neue Aufnahme.</p>
+            <div class="colophon-links mono">
+              <a class="pill-btn" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a>
+              <button type="button" class="pill-btn" id="copyMailColophon">Kopieren</button>
+              <a class="pill-btn" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+              <button type="button" class="pill-btn" id="returnOriginBtn" style="border-color:var(--accent);color:var(--accent);">↺ Zum Ursprung (0m)</button>
+            </div>
+          </section>
+        `;
+      }
+
+      cameraRig.appendChild(wrap);
+      const plateEl = wrap.querySelector(".z-plate");
+      if (plateEl) {
+        plateEl.addEventListener("click", () => lockStation(idx));
+        plateEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            lockStation(idx);
+          }
+        });
+      }
+      return { st, wrap, plateEl };
+    });
+
+    document.getElementById("enterFlightBtn").addEventListener("click", () => { unlock(); state.tz = 520; });
+    document.getElementById("jump100Btn").addEventListener("click", () => lockStation(STATIONS.length - 2));
+    document.getElementById("returnOriginBtn").addEventListener("click", () => { unlock(); state.tz = 0; });
+
+    const copyMailBtn = document.getElementById("copyMailColophon");
+    copyMailBtn.addEventListener("click", () => {
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyMailBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyMailBtn.textContent = "Kopieren"; }, 1800);
+    });
+
+    /* Flight State */
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const state = {
+      z: 0,
+      tz: 0,
+      lockedIdx: -1,
+      lockMix: 0,
+      tiltX: 0,
+      tiltY: 0,
+      targetTiltX: 0,
+      targetTiltY: 0
+    };
+
+    function lockStation(idx) {
+      if (state.lockedIdx === idx) {
+        unlock();
+        return;
+      }
+      state.lockedIdx = idx;
+      state.tz = STATIONS[idx].z;
+      nodeRecords.forEach((r, i) => {
+        if (r.plateEl) r.plateEl.classList.toggle("is-locked", i === idx);
+      });
+      releaseLockBtn.style.display = "inline-block";
+    }
+
+    function unlock() {
+      state.lockedIdx = -1;
+      nodeRecords.forEach((r) => { if (r.plateEl) r.plateEl.classList.remove("is-locked"); });
+      releaseLockBtn.style.display = "none";
+    }
+
+    releaseLockBtn.addEventListener("click", unlock);
+
+    /* Wheel = Fly forward/backward along Z */
+    window.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (state.lockedIdx !== -1 && Math.abs(e.deltaY) > 12) unlock();
+      state.tz = Math.max(0, Math.min(MAX_Z, state.tz + e.deltaY * 1.45));
+    }, { passive: false });
+
+    /* Subtle Pointer Parallax on Desktop + Touch Drag Flight on Mobile */
+    let touchY = null;
+    window.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("button, a, .altimeter")) return;
+      if (e.pointerType === "touch") touchY = e.clientY;
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch" && touchY !== null) {
+        const dy = touchY - e.clientY;
+        touchY = e.clientY;
+        if (Math.abs(dy) > 3 && state.lockedIdx !== -1) unlock();
+        state.tz = Math.max(0, Math.min(MAX_Z, state.tz + dy * 4.2));
+      } else if (!reducedMotion) {
+        const nx = (e.clientX / window.innerWidth) - 0.5;
+        const ny = (e.clientY / window.innerHeight) - 0.5;
+        state.targetTiltY = nx * 4.2;
+        state.targetTiltX = -ny * 3.2;
+      }
+    });
+
+    window.addEventListener("pointerup", () => { touchY = null; });
+    window.addEventListener("pointercancel", () => { touchY = null; });
+
+    /* Altimeter Navigation */
+    altBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        unlock();
+        state.tz = Number(btn.dataset.z);
+      });
+    });
+
+    let railDown = false;
+    function scrubRail(e) {
+      unlock();
+      const rect = altRail.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      state.tz = ratio * MAX_Z;
+    }
+    altRail.addEventListener("pointerdown", (e) => { railDown = true; altRail.setPointerCapture(e.pointerId); scrubRail(e); });
+    altRail.addEventListener("pointermove", (e) => { if (railDown) scrubRail(e); });
+    altRail.addEventListener("pointerup", () => { railDown = false; });
+
+    /* Step Buttons & Keyboard */
+    function nearestStationIndex() {
+      let best = 0;
+      let bestDist = Infinity;
+      STATIONS.forEach((s, i) => {
+        const d = Math.abs(s.z - state.tz);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      return best;
+    }
+
+    function stepStation(dir) {
+      const cur = nearestStationIndex();
+      const next = Math.max(0, Math.min(STATIONS.length - 1, cur + dir));
+      if (STATIONS[next].type === "plate") {
+        lockStation(next);
+      } else {
+        unlock();
+        state.tz = STATIONS[next].z;
+      }
+    }
+
+    document.getElementById("stepBackBtn").addEventListener("click", () => stepStation(-1));
+    document.getElementById("stepFwdBtn").addEventListener("click", () => stepStation(1));
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        unlock();
+      } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        stepStation(1);
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        stepStation(-1);
+      }
+    });
+
+    /* 60fps 3D Render Loop */
+    let activeZoneKey = "";
+
+    function render() {
+      const ease = reducedMotion ? 1 : 0.14;
+      state.z += (state.tz - state.z) * ease;
+      state.lockMix += ((state.lockedIdx !== -1 ? 1 : 0) - state.lockMix) * 0.15;
+      state.tiltX += (state.targetTiltX - state.tiltX) * 0.08;
+      state.tiltY += (state.targetTiltY - state.tiltY) * 0.08;
+
+      const tiltScale = 1 - state.lockMix * 0.85;
+      cameraRig.style.transform = `rotateX(${(state.tiltX * tiltScale).toFixed(2)}deg) rotateY(${(state.tiltY * tiltScale).toFixed(2)}deg)`;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const isCompact = vw < 760;
+      const spreadFactor = isCompact ? 0.24 : Math.min(1, vw / 1380);
+
+      let nearest = STATIONS[0];
+      let minDist = Infinity;
+
+      nodeRecords.forEach((rec, i) => {
+        const st = rec.st;
+        const dist = st.z - state.z; /* >0 ahead in depth, <0 behind viewer */
+        const absD = Math.abs(dist);
+        if (absD < minDist) {
+          minDist = absD;
+          nearest = st;
+        }
+
+        if (dist > 3100 || dist < -320) {
+          rec.wrap.style.display = "none";
+          return;
+        }
+        rec.wrap.style.display = "block";
+
+        /* Compute opacity along Z-corridor */
+        let opacity = 1;
+        if (dist > 450) {
+          opacity = Math.max(0, 1 - (dist - 450) / 2550);
+        } else if (dist < 0) {
+          opacity = Math.max(0, 1 + dist / 280);
+        }
+
+        /* Dim non-locked plates gently when inspecting a single plate */
+        const isLockedThis = i === state.lockedIdx;
+        if (state.lockedIdx !== -1 && !isLockedThis) {
+          opacity *= 0.22;
+        }
+
+        /* Responsive plate sizing + center glide on lock */
+        let offsetX = st.x * spreadFactor * (isLockedThis ? 1 - state.lockMix : 1);
+        let offsetY = st.y * (isCompact ? 0.45 : 1) * (isLockedThis ? 1 - state.lockMix : 1);
+
+        if (st.type === "plate" && rec.plateEl) {
+          const maxW = isCompact ? vw * 0.84 : vw * 0.68;
+          const maxH = isCompact ? vh * 0.56 : vh * 0.72;
+          const scaleFit = Math.min(1, maxW / st.w, maxH / st.h);
+          const boost = isLockedThis ? Math.min(maxW / (st.w * scaleFit), maxH / (st.h * scaleFit), 1.24) : 1;
+          rec.plateEl.style.width = `${(st.w * scaleFit * boost).toFixed(1)}px`;
+          rec.plateEl.style.height = `${(st.h * scaleFit * boost).toFixed(1)}px`;
+        }
+
+        const cssZ = -dist;
+        rec.wrap.style.opacity = opacity.toFixed(3);
+        rec.wrap.style.pointerEvents = (dist < -150 || opacity < 0.12) ? "none" : "auto";
+        rec.wrap.style.transform = `translate3d(calc(-50% + ${offsetX.toFixed(1)}px), calc(-50% + ${offsetY.toFixed(1)}px), ${cssZ.toFixed(1)}px)`;
+      });
+
+      /* Update HUD & Ambient Zone Glow */
+      const pct = Math.max(0, Math.min(100, (state.z / MAX_Z) * 100));
+      altFill.style.height = `${pct.toFixed(1)}%`;
+      altNeedle.style.top = `${pct.toFixed(1)}%`;
+
+      const meters = Math.round(state.z * 0.5);
+      depthMeter.textContent = `Z ${String(meters).padStart(4, "0")} m`;
+      zoneReadout.textContent = nearest.zone;
+      nearestTitle.textContent = nearest.loc ? `${nearest.id} · ${nearest.title} — ${nearest.loc}` : nearest.title;
+
+      if (nearest.zone !== activeZoneKey) {
+        activeZoneKey = nearest.zone;
+        document.documentElement.style.setProperty("--glow", nearest.glow);
+        document.documentElement.style.setProperty("--accent", nearest.accent);
+      }
+
+      /* Highlight closest altimeter button */
+      let activeBtn = altBtns[0];
+      altBtns.forEach((b) => {
+        if (state.z + 240 >= Number(b.dataset.z)) activeBtn = b;
+      });
+      altBtns.forEach((b) => b.classList.toggle("is-active", b === activeBtn));
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  })();
+  </script>
+</body>
+</html>
