@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>LEANDRO SINATRA — KINETIK (Konzept 07)</title>
+  <style>
+    :root {
+      --bg: #050506;
+      --panel: #0E0E10;
+      --fg: #F4F2EC;
+      --muted: #7C7A74;
+      --vermilion: #FF3B1F;
+      --line: rgba(244, 242, 236, 0.14);
+      --font-display: 'Syne', 'Arial Black', 'Helvetica Neue', sans-serif;
+      --font-sans: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+      --pad-x: clamp(18px, 4vw, 56px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-sans); background: var(--bg); color: var(--fg); overflow-x: hidden; line-height: 1.4; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 2px solid var(--vermilion); outline-offset: 4px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .syne {
+      font-family: var(--font-display);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+      line-height: 0.9;
+    }
+
+    /* ---------- HEADER ---------- */
+    .k-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: rgba(5, 5, 6, 0.86);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      padding: 14px var(--pad-x);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .k-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 13px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .k-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--vermilion); }
+
+    .k-nav { display: flex; gap: clamp(12px, 2.4vw, 28px); }
+    .k-tab {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 6px 0;
+      border-bottom: 2px solid transparent;
+      transition: color 180ms ease, border-color 180ms ease;
+      white-space: nowrap;
+    }
+
+    .k-tab:hover { color: var(--fg); }
+    .k-tab.is-active { color: var(--fg); border-bottom-color: var(--vermilion); }
+
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; }
+
+    /* ---------- EXPLOSIVE KINETIC HERO ---------- */
+    .k-hero {
+      position: relative;
+      min-height: calc(100svh - 56px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .k-hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .k-hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.45) contrast(1.08);
+      transition: transform 900ms var(--ease);
+    }
+
+    .k-hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: clamp(28px, 5vw, 64px) var(--pad-x);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .k-hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .k-scene-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scene-pill {
+      padding: 6px 12px;
+      border: 1px solid rgba(244, 242, 236, 0.3);
+      background: rgba(5, 5, 6, 0.55);
+      color: var(--fg);
+      transition: background-color 180ms ease, border-color 180ms ease;
+    }
+
+    .scene-pill.is-active, .scene-pill:hover {
+      background: var(--vermilion);
+      border-color: var(--vermilion);
+      color: #FFF;
+    }
+
+    .k-hero-title {
+      font-size: clamp(34px, 9.4vw, 164px);
+      line-height: 0.84;
+    }
+
+    .k-hero-title .stroke {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--fg);
+      display: block;
+    }
+
+    .k-marquee {
+      position: relative;
+      z-index: 2;
+      background: var(--vermilion);
+      color: #FFF;
+      padding-block: 11px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .k-marquee-track {
+      display: inline-block;
+      animation: kRoll 20s linear infinite;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    @keyframes kRoll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ---------- SPLIT KINETIC WIPE STAGE ---------- */
+    .wipe-section {
+      padding: clamp(56px, 8vw, 112px) var(--pad-x);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wipe-grid {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: clamp(24px, 4vw, 60px);
+      align-items: start;
+    }
+
+    .wipe-list { display: flex; flex-direction: column; }
+
+    .wipe-item {
+      width: 100%;
+      text-align: left;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      color: var(--muted);
+      transition: color 180ms ease, padding-left 260ms var(--ease);
+    }
+
+    .wipe-item:first-child { border-top: 1px solid var(--line); }
+
+    .wipe-item .w-idx { font-size: 12px; color: var(--vermilion); }
+    .wipe-item .w-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(20px, 2.4vw, 36px);
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+    }
+
+    .wipe-item:hover, .wipe-item.is-active {
+      color: var(--fg);
+      padding-left: 14px;
+    }
+
+    .wipe-stage {
+      position: sticky;
+      top: 84px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: clamp(18px, 3vw, 36px);
+      min-height: 480px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .wipe-bg-num {
+      position: absolute;
+      right: 16px;
+      top: -12px;
+      font-size: clamp(90px, 14vw, 190px);
+      color: rgba(244, 242, 236, 0.05);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .wipe-img-holder {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 360px;
+    }
+
+    .wipe-img-holder img {
+      max-width: 100%;
+      max-height: 54vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      animation: clipWipe 420ms var(--ease);
+    }
+
+    @keyframes clipWipe {
+      from { clip-path: inset(0 100% 0 0); transform: scale(1.04); }
+      to { clip-path: inset(0 0 0 0); transform: scale(1); }
+    }
+
+    .wipe-foot {
+      position: relative;
+      z-index: 2;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    /* ---------- HORIZONTAL CINEMA REEL ---------- */
+    .reel-section {
+      padding-block: clamp(48px, 7vw, 96px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .reel-head {
+      padding-inline: var(--pad-x);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .reel-controls { display: flex; gap: 8px; }
+    .reel-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .reel-btn:hover { background: var(--vermilion); border-color: var(--vermilion); }
+
+    .reel-track {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      padding-inline: var(--pad-x);
+      padding-bottom: 12px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+    }
+
+    .reel-card {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 14px;
+      cursor: zoom-in;
+      transition: border-color 200ms ease;
+    }
+
+    .reel-card:hover { border-color: var(--vermilion); }
+
+    .reel-card img {
+      height: clamp(250px, 38vh, 380px);
+      width: auto;
+      object-fit: contain;
+    }
+
+    .reel-cap {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* ---------- ABOUT KINETIC ---------- */
+    .about-k {
+      padding: clamp(56px, 8vw, 112px) var(--pad-x);
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: clamp(28px, 5vw, 68px);
+      align-items: center;
+    }
+
+    .about-k-img { border: 2px solid var(--vermilion); padding: 8px; }
+    .about-k-img img { width: 100%; aspect-ratio: 1 / 1; }
+    .about-k h2 { font-size: clamp(32px, 4.5vw, 64px); margin-bottom: 16px; }
+    .about-k p { color: #C9C7C0; font-size: 16px; line-height: 1.65; max-width: 54ch; }
+
+    /* ---------- PROJEKTE KINETIC SCREENING ---------- */
+    .k-proj-view {
+      padding: clamp(32px, 5vw, 64px) var(--pad-x) clamp(72px, 9vw, 120px);
+    }
+
+    .k-series-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .ks-btn {
+      padding: 10px 18px;
+      border: 1px solid var(--line);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .ks-btn.is-active, .ks-btn:hover {
+      background: var(--vermilion);
+      border-color: var(--vermilion);
+      color: #FFF;
+    }
+
+    .k-screen-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: clamp(18px, 3vw, 36px);
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 46px;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .k-screen-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 440px;
+      cursor: zoom-in;
+    }
+
+    .k-screen-center img {
+      max-width: 100%;
+      max-height: 64vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .k-thumbs {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .k-th {
+      height: 54px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      opacity: 0.45;
+    }
+
+    .k-th img { height: 100%; width: auto; }
+    .k-th.is-active, .k-th:hover { opacity: 1; border-color: var(--vermilion); }
+
+    /* ---------- ARCHIV 100 KINETIC ---------- */
+    .k-arch-view {
+      padding: clamp(36px, 5vw, 72px) var(--pad-x) clamp(72px, 9vw, 120px);
+    }
+
+    .k-arch-split {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: clamp(24px, 4vw, 56px);
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .k-arch-big { font-size: clamp(56px, 9vw, 140px); color: var(--vermilion); }
+
+    .k-arch-frame {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+      cursor: zoom-in;
+    }
+
+    .k-arch-frame img { width: 100%; aspect-ratio: 2200 / 1467; }
+
+    .k-scrubber {
+      display: grid;
+      grid-template-columns: repeat(25, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .k-tick {
+      height: 36px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .k-tick.is-live {
+      background: var(--vermilion);
+      border-color: var(--vermilion);
+      color: #FFF;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .k-footer {
+      border-top: 1px solid var(--line);
+      padding: clamp(32px, 5vw, 56px) var(--pad-x);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .k-mail { font-size: clamp(14px, 2.4vw, 32px); color: var(--vermilion); overflow-wrap: anywhere; word-break: break-word; }
+    .k-copy { margin-top: 10px; padding: 6px 12px; border: 1px solid var(--line); }
+    .k-copy:hover { border-color: var(--vermilion); color: var(--vermilion); }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #040405;
+      color: var(--fg);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; }
+    .lb-btn { padding: 6px 12px; border: 1px solid var(--line); }
+    .lb-btn:hover, .lb-btn.is-active { background: var(--vermilion); border-color: var(--vermilion); color: #FFF; }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 240ms var(--ease); }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: 1px solid var(--line); }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.42; border: 1px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--vermilion); }
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 920px) {
+      .wipe-grid { grid-template-columns: 1fr; }
+      .wipe-stage { position: static; order: -1; min-height: 320px; }
+      .wipe-img-holder { min-height: 240px; }
+      .about-k { grid-template-columns: 1fr; }
+      .about-k-img { max-width: 180px; }
+      .k-arch-split { grid-template-columns: 1fr; }
+      .k-scrubber { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .k-header { flex-wrap: wrap; row-gap: 10px; }
+      .k-screen-box { grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 8px; padding: 12px; }
+      .k-screen-center { min-height: 240px; }
+      .lb-arrow { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .k-marquee-track { animation: none; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="k-header">
+  <a href="#start" class="k-brand" data-view-link="start"><span class="k-dot"></span>Leandro Sinatra</a>
+  <nav class="k-nav" aria-label="Hauptnavigation">
+    <button type="button" class="k-tab is-active" data-view-btn="start" aria-current="page">Bühne</button>
+    <button type="button" class="k-tab" data-view-btn="projekte">Serien</button>
+    <button type="button" class="k-tab" data-view-btn="archiv">100 · Live</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="k-hero">
+      <div class="k-hero-bg"><img id="kHeroImg" alt="Hintergrundszene"></div>
+      <div class="k-hero-inner">
+        <div class="k-hero-top">
+          <span class="mono">Lyss, Schweiz · Kinetische Werkschau</span>
+          <div class="k-scene-pills mono" id="kScenePills"></div>
+        </div>
+        <div>
+          <h1 class="k-hero-title syne">Leandro<span class="stroke">Sinatra</span></h1>
+        </div>
+      </div>
+      <div class="k-marquee" aria-hidden="true">
+        <div class="k-marquee-track">
+          ARCHITEKTUR — LANDSCHAFT — WILDLIFE — KLARHEIT STATT DEKORATION — LYSS, SCHWEIZ —&nbsp;
+          ARCHITEKTUR — LANDSCHAFT — WILDLIFE — KLARHEIT STATT DEKORATION — LYSS, SCHWEIZ —&nbsp;
+        </div>
+      </div>
+    </section>
+
+    <section class="wipe-section">
+      <div class="mono" style="color:var(--vermilion);margin-bottom:20px;">Interaktive Bühne · Auswahl 01—09</div>
+      <div class="wipe-grid">
+        <div class="wipe-list" id="wipeList"></div>
+        <div class="wipe-stage" id="wipeStage" tabindex="0" role="button" aria-label="Aktives Werk im Vollbild öffnen">
+          <span class="wipe-bg-num syne" id="wipeBgNum">01</span>
+          <div class="wipe-img-holder" id="wipeImgHolder">
+            <img id="wipeImg" alt="">
+          </div>
+          <div class="wipe-foot mono">
+            <span id="wipeTitle" style="color:var(--fg);">Tempel der Eintracht</span>
+            <span id="wipeLoc">Sizilien · Vollbild ↗</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="reel-section">
+      <div class="reel-head">
+        <div>
+          <span class="mono" style="color:var(--vermilion);">Horizontal-Rolle</span>
+          <h2 class="syne" style="font-size:clamp(26px,3.6vw,48px);margin-top:4px;">Alle 09 Tafeln</h2>
+        </div>
+        <div class="reel-controls">
+          <button type="button" class="reel-btn" id="reelLeft" aria-label="Links scrollen">←</button>
+          <button type="button" class="reel-btn" id="reelRight" aria-label="Rechts scrollen">→</button>
+        </div>
+      </div>
+      <div class="reel-track" id="reelTrack"></div>
+    </section>
+
+    <section class="about-k">
+      <div class="about-k-img">
+        <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+      </div>
+      <div>
+        <span class="mono" style="color:var(--vermilion);">Über · Kanton Bern</span>
+        <h2 class="syne">Leandro Sinatra</h2>
+        <p>Fotograf aus Lyss. Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld in antiker Architektur, dem Schweizer Jura und der Natur.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="k-proj-view">
+      <div class="k-series-bar" id="kSeriesBar"></div>
+      <div class="k-screen-box">
+        <button type="button" class="reel-btn" id="ksPrev" aria-label="Vorheriges Foto">←</button>
+        <div class="k-screen-center" id="ksCenter" tabindex="0" role="button" aria-label="Im Vollbild öffnen">
+          <img id="ksImg" alt="">
+        </div>
+        <button type="button" class="reel-btn" id="ksNext" aria-label="Nächstes Foto">→</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;" class="mono">
+        <span id="ksCaption">Etna · Sizilien</span>
+        <span id="ksCounter" style="color:var(--vermilion);">01 / 04</span>
+      </div>
+      <div class="k-thumbs" id="kThumbs"></div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100 ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="k-arch-view">
+      <div class="k-arch-split">
+        <div>
+          <span class="mono">Wochenimpuls · Samstag / Sonntag</span>
+          <div class="k-arch-big syne">001/100</div>
+          <p style="color:#C9C7C0;max-width:38ch;margin-top:12px;">Ein Foto pro Woche, ohne nachträgliche Kuratierung — der eine Moment, der geblieben ist.</p>
+        </div>
+        <div class="k-arch-frame" id="kArchTrigger" tabindex="0" role="button" aria-label="Murtensee öffnen">
+          <img id="kArchImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          <div style="display:flex;justify-content:space-between;margin-top:12px;" class="mono">
+            <span style="color:var(--vermilion);">13.09.2026</span>
+            <span>Murtensee, Schweiz</span>
+          </div>
+        </div>
+      </div>
+      <div class="k-scrubber" id="kScrubber"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="k-footer">
+  <div>
+    <div class="mono" style="color:var(--muted);margin-bottom:6px;">Kontakt</div>
+    <a class="k-mail syne" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a><br>
+    <button type="button" class="k-copy mono" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+    <span class="mono" id="copyStatus" style="margin-left:10px;color:var(--vermilion);"></span>
+  </div>
+  <div style="text-align:right;">
+    <a class="mono" style="color:var(--vermilion);display:inline-block;margin-bottom:8px;" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+    <div class="mono" style="color:var(--muted);">© 2026 Leandro Sinatra · Konzept 07 (Kinetik)</div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografie im Vollbild" aria-hidden="true">
+  <div class="lb-top mono">
+    <div><span id="lbCounter" style="color:var(--vermilion);margin-right:12px;">01 / 09</span><span id="lbCaption">Tempel der Eintracht</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn mono" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn mono" id="lbClose">✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const SCENES = [
+    { label: "01 Vallorbe", file: "vallorbe-caves.webp" },
+    { label: "02 Sizilien", file: "temple-of-concordia-sicily.webp" },
+    { label: "03 La Sauge", file: "grey-heron-la-sauge.webp" },
+    { label: "04 Etna", file: "mount-etna-sicily.webp" }
+  ];
+
+  const WORKS = [
+    { idx: "01", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien" },
+    { idx: "02", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien" },
+    { idx: "03", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+    { idx: "04", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+    { idx: "05", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss" },
+    { idx: "06", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge" },
+    { idx: "07", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" },
+    { idx: "08", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+    { idx: "09", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "p1", num: "01", title: "Valle dei Templi",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "p2", num: "02", title: "Vallorbe",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }]
+    },
+    {
+      id: "p3", num: "03", title: "Creux du Van",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "p4", num: "04", title: "La Sauge",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Hero Scenes */
+  const kHeroImg = document.getElementById("kHeroImg");
+  const kScenePills = document.getElementById("kScenePills");
+  function setScene(i) {
+    kHeroImg.src = ASSETS[SCENES[i].file];
+    kScenePills.querySelectorAll(".scene-pill").forEach((p, idx) => p.classList.toggle("is-active", idx === i));
+  }
+  SCENES.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "scene-pill";
+    b.textContent = s.label;
+    b.addEventListener("click", () => setScene(i));
+    kScenePills.appendChild(b);
+  });
+  setScene(0);
+
+  /* Wipe Stage */
+  const wipeList = document.getElementById("wipeList");
+  const wipeImgHolder = document.getElementById("wipeImgHolder");
+  const wipeBgNum = document.getElementById("wipeBgNum");
+  const wipeTitle = document.getElementById("wipeTitle");
+  const wipeLoc = document.getElementById("wipeLoc");
+  let activeWipe = 0;
+
+  function setWipe(idx) {
+    activeWipe = idx;
+    const w = WORKS[idx];
+    wipeBgNum.textContent = w.idx;
+    wipeTitle.textContent = w.title;
+    wipeLoc.textContent = `${w.location} · Vollbild ↗`;
+    wipeImgHolder.innerHTML = `<img src="${ASSETS[w.file]}" alt="${w.title}">`;
+    wipeList.querySelectorAll(".wipe-item").forEach((el, i) => el.classList.toggle("is-active", i === idx));
+  }
+
+  WORKS.forEach((w, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "wipe-item";
+    b.innerHTML = `<span class="w-idx mono">${w.idx}</span><span class="w-name">${w.title}</span>`;
+    b.addEventListener("mouseenter", () => setWipe(i));
+    b.addEventListener("focus", () => setWipe(i));
+    b.addEventListener("click", () => { setWipe(i); openLightbox(WORKS, i); });
+    wipeList.appendChild(b);
+  });
+  setWipe(0);
+
+  const wipeStage = document.getElementById("wipeStage");
+  wipeStage.addEventListener("click", () => openLightbox(WORKS, activeWipe));
+  wipeStage.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WORKS, activeWipe); } });
+
+  /* Horizontal Reel */
+  const reelTrack = document.getElementById("reelTrack");
+  WORKS.forEach((w, i) => {
+    const card = document.createElement("article");
+    card.className = "reel-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${w.title} öffnen`);
+    card.innerHTML = `
+      <img src="${ASSETS[w.file]}" alt="${w.title}" loading="lazy">
+      <div class="reel-cap mono">
+        <span style="color:var(--vermilion);">${w.idx}</span>
+        <span>${w.title}</span>
+      </div>
+    `;
+    card.addEventListener("click", () => openLightbox(WORKS, i));
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WORKS, i); } });
+    reelTrack.appendChild(card);
+  });
+  document.getElementById("reelLeft").addEventListener("click", () => reelTrack.scrollBy({ left: -420, behavior: "smooth" }));
+  document.getElementById("reelRight").addEventListener("click", () => reelTrack.scrollBy({ left: 420, behavior: "smooth" }));
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Projekte Screening */
+  const kSeriesBar = document.getElementById("kSeriesBar");
+  const ksImg = document.getElementById("ksImg");
+  const ksCaption = document.getElementById("ksCaption");
+  const ksCounter = document.getElementById("ksCounter");
+  const kThumbs = document.getElementById("kThumbs");
+  let activeProj = PROJECTS[0];
+  let activeProjIdx = 0;
+
+  function renderProjFrame() {
+    const ph = activeProj.photos[activeProjIdx];
+    ksImg.src = ASSETS[ph.file];
+    ksImg.alt = ph.title;
+    ksCaption.textContent = `${ph.title} · ${ph.location}`;
+    ksCounter.textContent = `${String(activeProjIdx + 1).padStart(2, "0")} / ${String(activeProj.photos.length).padStart(2, "0")}`;
+    kThumbs.querySelectorAll(".k-th").forEach((t, i) => t.classList.toggle("is-active", i === activeProjIdx));
+  }
+
+  function selectProj(id) {
+    activeProj = PROJECTS.find((p) => p.id === id) || PROJECTS[0];
+    activeProjIdx = 0;
+    kSeriesBar.querySelectorAll(".ks-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.pid === activeProj.id));
+    kThumbs.innerHTML = "";
+    activeProj.photos.forEach((ph, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "k-th";
+      b.innerHTML = `<img src="${ASSETS[ph.file]}" alt="">`;
+      b.addEventListener("click", () => { activeProjIdx = i; renderProjFrame(); });
+      kThumbs.appendChild(b);
+    });
+    renderProjFrame();
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "ks-btn";
+    b.dataset.pid = p.id;
+    b.textContent = `${p.num} ${p.title}`;
+    b.addEventListener("click", () => selectProj(p.id));
+    kSeriesBar.appendChild(b);
+  });
+  selectProj(PROJECTS[0].id);
+
+  document.getElementById("ksPrev").addEventListener("click", () => {
+    activeProjIdx = (activeProjIdx - 1 + activeProj.photos.length) % activeProj.photos.length;
+    renderProjFrame();
+  });
+  document.getElementById("ksNext").addEventListener("click", () => {
+    activeProjIdx = (activeProjIdx + 1) % activeProj.photos.length;
+    renderProjFrame();
+  });
+  const ksCenter = document.getElementById("ksCenter");
+  ksCenter.addEventListener("click", () => openLightbox(activeProj.photos, activeProjIdx));
+  ksCenter.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(activeProj.photos, activeProjIdx); } });
+
+  /* Archiv 100 */
+  document.getElementById("kArchImg").src = ASSETS[WEEKLY[0].file];
+  const kArchTrigger = document.getElementById("kArchTrigger");
+  kArchTrigger.addEventListener("click", () => openLightbox(WEEKLY, 0));
+  kArchTrigger.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WEEKLY, 0); } });
+
+  const kScrubber = document.getElementById("kScrubber");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(2, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "k-tick is-live";
+      b.textContent = "01";
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      kScrubber.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "k-tick";
+      d.textContent = i === 100 ? "100" : code;
+      kScrubber.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>

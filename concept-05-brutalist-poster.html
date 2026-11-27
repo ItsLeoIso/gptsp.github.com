@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="paper">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@500;700&family=Inter:wght@500;700;900&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>LEANDRO SINATRA — PLAKAT (Konzept 05)</title>
+  <style>
+    :root {
+      --bg: #F2EFE6;
+      --ink: #0C0C0C;
+      --red: #E0241A;
+      --yellow: #F2C400;
+      --card: #FAF8F2;
+      --muted: #52504B;
+      --border: 2px solid var(--ink);
+      --font-display: 'Anton', 'Arial Black', Impact, 'Helvetica Neue', sans-serif;
+      --font-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    [data-theme="invert"] {
+      --bg: #0C0C0C;
+      --ink: #F2EFE6;
+      --card: #151515;
+      --muted: #A6A39B;
+      --border: 2px solid var(--ink);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-sans); background: var(--bg); color: var(--ink); overflow-x: hidden; line-height: 1.35; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: -3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .display {
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: -0.015em;
+      line-height: 0.88;
+      font-weight: 400;
+    }
+
+    /* ---------- BRUTALIST STICKY HEADER ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: var(--bg);
+      border-bottom: var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: stretch;
+    }
+
+    .brand-cell {
+      padding: 12px 18px;
+      background: var(--red);
+      color: #FFF;
+      border-right: var(--border);
+      display: flex;
+      align-items: center;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .nav-cells {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .nav-cell {
+      padding: 12px 22px;
+      border-right: var(--border);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 120ms ease, color 120ms ease;
+      white-space: nowrap;
+    }
+
+    .nav-cell:hover { background: var(--yellow); color: #0C0C0C; }
+    .nav-cell.is-active { background: var(--ink); color: var(--bg); }
+
+    .invert-btn {
+      padding: 12px 18px;
+      border-left: var(--border);
+      background: var(--yellow);
+      color: #0C0C0C;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .invert-btn:hover { background: var(--red); color: #FFF; }
+
+    /* ---------- VIEWS ---------- */
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; }
+
+    /* ---------- POSTER HERO ---------- */
+    .poster-hero {
+      border-bottom: var(--border);
+    }
+
+    .poster-top {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      border-bottom: var(--border);
+      min-height: clamp(520px, calc(100svh - 90px), 780px);
+    }
+
+    .poster-headline-box {
+      padding: clamp(18px, 2.8vw, 36px);
+      border-right: var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .poster-stamps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .stamp {
+      padding: 4px 9px;
+      border: var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .stamp.is-red { background: var(--red); color: #FFF; border-color: var(--ink); }
+    .stamp.is-yellow { background: var(--yellow); color: #0C0C0C; border-color: var(--ink); }
+
+    .poster-h1 {
+      font-size: clamp(58px, 9.6vw, 148px);
+      line-height: 0.84;
+    }
+
+    .poster-manifesto {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: center;
+      padding-top: 16px;
+      border-top: var(--border);
+    }
+
+    .big-index-box {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 8px 14px;
+      font-size: 28px;
+    }
+
+    .poster-manifesto p {
+      font-weight: 700;
+      font-size: clamp(14px, 1.2vw, 17px);
+      text-transform: uppercase;
+      max-width: 34ch;
+    }
+
+    .poster-hero-visuals {
+      display: grid;
+      grid-template-rows: 1.3fr 1fr;
+      max-height: calc(100svh - 90px);
+    }
+
+    .hero-crop-main {
+      position: relative;
+      border-bottom: var(--border);
+      overflow: hidden;
+      cursor: zoom-in;
+      min-height: 220px;
+      background: #0C0C0C;
+    }
+
+    .hero-crop-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 280ms ease;
+    }
+
+    .hero-crop-main:hover img { transform: scale(1.04); }
+
+    .corner-tag {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      background: var(--yellow);
+      color: #0C0C0C;
+      border: 2px solid #0C0C0C;
+      padding: 4px 10px;
+    }
+
+    .hero-split-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .hero-yellow-callout {
+      background: var(--yellow);
+      color: #0C0C0C;
+      border-right: var(--border);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-yellow-callout .big {
+      font-size: clamp(32px, 3.6vw, 54px);
+    }
+
+    .hero-crop-sub {
+      position: relative;
+      overflow: hidden;
+      cursor: zoom-in;
+      min-height: 180px;
+      background: #1A1A1A;
+    }
+
+    .hero-crop-sub img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      transition: transform 280ms ease;
+    }
+
+    .hero-crop-sub:hover img { transform: scale(1.05); }
+
+    /* ---------- MARQUEE TICKER ---------- */
+    .ticker {
+      background: var(--ink);
+      color: var(--bg);
+      overflow: hidden;
+      white-space: nowrap;
+      padding-block: 10px;
+      border-bottom: var(--border);
+    }
+
+    .ticker-track {
+      display: inline-block;
+      animation: marquee 24s linear infinite;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ---------- SECTION BANNER ---------- */
+    .brutal-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px clamp(16px, 3vw, 36px);
+      border-bottom: var(--border);
+      background: var(--red);
+      color: #FFF;
+    }
+
+    .brutal-banner h2 {
+      font-size: clamp(28px, 4vw, 52px);
+    }
+
+    /* ---------- BRUTALIST CHECKERBOARD GALLERY ---------- */
+    .brutal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .b-cell {
+      border-right: var(--border);
+      border-bottom: var(--border);
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: zoom-in;
+      transition: background-color 140ms ease, color 140ms ease;
+    }
+
+    .b-cell:nth-child(3n) { border-right: 0; }
+
+    .b-cell.span-2 {
+      grid-column: span 2;
+    }
+
+    .b-cell-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: var(--border);
+    }
+
+    .b-num {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .b-cell:hover {
+      background: var(--yellow);
+      color: #0C0C0C;
+    }
+
+    .b-cell:hover .b-loc { color: #0C0C0C; }
+
+    .b-img-stage {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    /* Alternating poster full-bleed vs raw uncropped print */
+    .b-cell.is-bleed .b-img-stage {
+      padding: 0;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+    }
+
+    .b-cell.is-bleed .b-img-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .b-cell.is-uncropped .b-img-stage img {
+      max-height: 400px;
+      width: auto;
+      object-fit: contain;
+      border: var(--border);
+    }
+
+    .b-cell-foot {
+      padding: 12px 14px;
+      border-top: var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .b-title {
+      font-weight: 900;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .b-loc { color: var(--muted); }
+
+    /* ---------- LOUD SERIES POSTER STRIPS ON HOME ---------- */
+    .poster-series-list {
+      border-bottom: var(--border);
+    }
+
+    .ps-row {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 96px 1fr auto;
+      align-items: center;
+      border-bottom: var(--border);
+      background: var(--bg);
+      transition: background-color 120ms ease, color 120ms ease;
+    }
+
+    .ps-row:last-child { border-bottom: 0; }
+
+    .ps-num {
+      padding: 20px;
+      font-size: 42px;
+      text-align: center;
+      border-right: var(--border);
+      background: var(--yellow);
+      color: #0C0C0C;
+    }
+
+    .ps-name {
+      padding: 16px 24px;
+      font-size: clamp(28px, 4.4vw, 64px);
+    }
+
+    .ps-meta {
+      padding: 16px 24px;
+    }
+
+    .ps-row:hover {
+      background: var(--red);
+      color: #FFF;
+    }
+
+    /* ---------- ABOUT POSTER BLOCK ---------- */
+    .about-brutal {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      border-bottom: var(--border);
+    }
+
+    .about-brutal-img {
+      border-right: var(--border);
+      padding: 20px;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-brutal-img img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 2px solid #0C0C0C;
+    }
+
+    .about-brutal-copy {
+      padding: clamp(24px, 4vw, 52px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .about-brutal-copy h2 { font-size: clamp(36px, 5vw, 72px); }
+    .about-brutal-copy p { font-size: 16px; font-weight: 500; max-width: 56ch; line-height: 1.55; }
+
+    /* ---------- PROJEKTE VIEW ---------- */
+    .proj-tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-bottom: var(--border);
+    }
+
+    .proj-tab {
+      padding: 18px 16px;
+      border-right: var(--border);
+      text-align: left;
+      background: var(--card);
+      transition: background-color 120ms ease, color 120ms ease;
+    }
+
+    .proj-tab:last-child { border-right: 0; }
+    .proj-tab:hover { background: var(--yellow); color: #0C0C0C; }
+    .proj-tab.is-active { background: var(--red); color: #FFF; }
+    .proj-tab .t-num { display: block; font-size: 11px; margin-bottom: 4px; }
+    .proj-tab .t-name { font-size: clamp(20px, 2.2vw, 32px); }
+
+    .proj-poster-head {
+      padding: clamp(20px, 3vw, 36px);
+      border-bottom: var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: var(--yellow);
+      color: #0C0C0C;
+    }
+
+    .proj-poster-head h1 { font-size: clamp(42px, 6.5vw, 96px); }
+
+    .proj-wall {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .proj-wall .b-cell:nth-child(3n) { border-right: var(--border); }
+    .proj-wall .b-cell:nth-child(2n) { border-right: 0; }
+
+    /* ---------- ARCHIV 100 VIEW ---------- */
+    .arch-poster-top {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      border-bottom: var(--border);
+    }
+
+    .arch-stamp-col {
+      background: var(--red);
+      color: #FFF;
+      border-right: var(--border);
+      padding: clamp(24px, 4vw, 48px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .arch-stamp-col h1 { font-size: clamp(56px, 8vw, 128px); }
+    .arch-stamp-col p { font-size: 15px; font-weight: 700; text-transform: uppercase; max-width: 32ch; }
+
+    .arch-photo-col {
+      padding: clamp(20px, 3.5vw, 44px);
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .arch-photo-frame {
+      border: var(--border);
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+
+    .arch-photo-frame img { width: 100%; aspect-ratio: 2200 / 1467; }
+
+    .brutal-100-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
+
+    .b100-slot {
+      aspect-ratio: 1 / 1;
+      border-right: var(--border);
+      border-bottom: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: clamp(16px, 2vw, 28px);
+      color: var(--muted);
+    }
+
+    .b100-slot:nth-child(10n) { border-right: 0; }
+
+    .b100-slot.is-live {
+      background: var(--yellow);
+      color: #0C0C0C;
+      cursor: pointer;
+    }
+
+    .b100-slot.is-live:hover { background: var(--red); color: #FFF; }
+
+    /* ---------- FOOTER ---------- */
+    .site-footer {
+      background: var(--ink);
+      color: var(--bg);
+      padding: clamp(28px, 4vw, 48px);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .f-email {
+      font-size: clamp(22px, 3vw, 42px);
+      display: inline-block;
+      border-bottom: 2px solid var(--yellow);
+    }
+
+    .f-copy-btn {
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: var(--yellow);
+      color: #0C0C0C;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .f-copy-btn:hover { background: var(--red); color: #FFF; }
+
+    /* ---------- UNCROPPED BRUTALIST LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #0A0A0A;
+      color: #F2EFE6;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .lightbox.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .lb-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #F2EFE6;
+      padding: 10px 18px;
+      background: #0A0A0A;
+    }
+
+    .lb-btns { display: flex; gap: 8px; }
+    .lb-btn {
+      padding: 6px 12px;
+      border: 2px solid #F2EFE6;
+      background: #0A0A0A;
+      color: #F2EFE6;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .lb-btn:hover, .lb-btn.is-active { background: var(--yellow); color: #0C0C0C; border-color: var(--yellow); }
+
+    .lb-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 16px;
+      min-height: 0;
+    }
+
+    .lb-stage img {
+      max-width: 92vw;
+      max-height: calc(100vh - 165px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      cursor: zoom-in;
+      transition: transform 220ms ease;
+    }
+
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 46px;
+      height: 46px;
+      background: var(--yellow);
+      color: #0C0C0C;
+      border: 2px solid #0C0C0C;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .lb-arrow:hover { background: var(--red); color: #FFF; }
+    .lb-prev { left: 14px; }
+    .lb-next { right: 14px; }
+
+    .lb-strip {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      border-top: 2px solid #F2EFE6;
+      overflow-x: auto;
+    }
+
+    .lb-thumb {
+      flex: 0 0 auto;
+      height: 42px;
+      border: 2px solid transparent;
+      opacity: 0.45;
+    }
+
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--yellow); }
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 920px) {
+      .poster-top { grid-template-columns: 1fr; min-height: 0; }
+      .poster-hero-visuals { max-height: none; }
+      .poster-headline-box { border-right: 0; border-bottom: var(--border); }
+      .brutal-grid { grid-template-columns: 1fr; }
+      .b-cell, .b-cell.span-2 { grid-column: 1 !important; border-right: 0 !important; }
+      .about-brutal { grid-template-columns: 1fr; }
+      .about-brutal-img { border-right: 0; border-bottom: var(--border); }
+      .proj-tabs-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .proj-wall { grid-template-columns: 1fr; }
+      .proj-wall .b-cell { border-right: 0 !important; }
+      .arch-poster-top { grid-template-columns: 1fr; }
+      .arch-stamp-col { border-right: 0; border-bottom: var(--border); }
+      .brutal-100-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .site-header { grid-template-columns: 1fr auto; }
+      .nav-cells { grid-column: 1 / 3; grid-row: 2; border-top: var(--border); overflow-x: auto; }
+      .nav-cell { flex: 1; justify-content: center; padding: 10px 12px; }
+      .ps-row { grid-template-columns: 64px 1fr; }
+      .ps-meta { display: none; }
+      .ps-num { font-size: 28px; padding: 14px; }
+      .lb-arrow { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track { animation: none; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="#start" class="brand-cell" data-view-link="start">LS · CH</a>
+  <nav class="nav-cells" aria-label="Hauptnavigation">
+    <button type="button" class="nav-cell is-active" data-view-btn="start" aria-current="page">01 Plakat</button>
+    <button type="button" class="nav-cell" data-view-btn="projekte">02 Projekte</button>
+    <button type="button" class="nav-cell" data-view-btn="archiv">03 Archiv · 100</button>
+  </nav>
+  <button type="button" class="invert-btn" id="themeToggle">Negativ</button>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="poster-hero">
+      <div class="poster-top">
+        <div class="poster-headline-box">
+          <div class="poster-stamps">
+            <span class="stamp is-red">Lyss · Kanton Bern</span>
+            <span class="stamp is-yellow">Werkschau 25—26</span>
+            <span class="stamp">19 Fotografien</span>
+          </div>
+          <h1 class="poster-h1 display">Leandro<br>Sinatra</h1>
+          <div class="poster-manifesto">
+            <span class="big-index-box display">FIG.00</span>
+            <p>Die Kamera hält fest, was das Auge übersieht. Klarheit statt Dekoration.</p>
+          </div>
+        </div>
+
+        <div class="poster-hero-visuals">
+          <div class="hero-crop-main" id="heroMainTrigger" tabindex="0" role="button" aria-label="Tempel der Eintracht öffnen">
+            <img id="heroMainImg" alt="Tempel der Eintracht, Sizilien">
+            <span class="corner-tag mono">01 · Sizilien ↗</span>
+          </div>
+          <div class="hero-split-bottom">
+            <div class="hero-yellow-callout">
+              <span class="mono">Kategorien</span>
+              <div class="big display">Architektur<br>Landschaft<br>Wildlife</div>
+            </div>
+            <div class="hero-crop-sub" id="heroSubTrigger" tabindex="0" role="button" aria-label="Creux du Van öffnen">
+              <img id="heroSubImg" alt="Wanderwegweiser am Creux du Van">
+              <span class="corner-tag mono">03 · Jura ↗</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          LEANDRO SINATRA — FOTOGRAFIE AUS LYSS — VALLE DEI TEMPLI — HÖHLEN VON VALLORBE — CREUX DU VAN — LA SAUGE — ARCHIV 100 —&nbsp;
+          LEANDRO SINATRA — FOTOGRAFIE AUS LYSS — VALLE DEI TEMPLI — HÖHLEN VON VALLORBE — CREUX DU VAN — LA SAUGE — ARCHIV 100 —&nbsp;
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="brutal-banner">
+        <h2 class="display">Auswahl 2025–2026</h2>
+        <span class="mono">09 Tafeln · Vollbild per Klick</span>
+      </div>
+      <div class="brutal-grid" id="brutalGrid"></div>
+    </section>
+
+    <section>
+      <div class="brutal-banner" style="background:var(--ink);color:var(--bg);">
+        <h2 class="display">Projekt-Serien</h2>
+        <span class="mono">01 — 04</span>
+      </div>
+      <div class="poster-series-list" id="posterSeriesList"></div>
+    </section>
+
+    <section class="about-brutal" id="ueber">
+      <div class="about-brutal-img">
+        <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+      </div>
+      <div class="about-brutal-copy">
+        <span class="mono" style="color:var(--red);">Über den Fotografen</span>
+        <h2 class="display">Ruhe &amp; klare Form</h2>
+        <p>Fotograf aus Lyss, Kanton Bern. Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld in Architektur, Jura-Landschaft und Natur.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <div class="proj-tabs-bar" id="projTabsBar"></div>
+    <div class="proj-poster-head">
+      <h1 class="display" id="projTitle">01 Valle dei Templi</h1>
+      <span class="mono" id="projMeta">Agrigento, Sizilien · 04 Werke</span>
+    </div>
+    <div class="proj-wall" id="projWall"></div>
+  </div>
+
+  <!-- ==================== ARCHIV · 100 ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <div class="arch-poster-top">
+      <div class="arch-stamp-col">
+        <span class="mono">Wochenprojekt · Samstag / Sonntag</span>
+        <h1 class="display">Archiv<br>001 / 100</h1>
+        <p>Ein Foto pro Woche. Keine Auswahl im Nachhinein — nur der eine Moment, der geblieben ist.</p>
+      </div>
+      <div class="arch-photo-col">
+        <div class="arch-photo-frame" id="archTrigger" tabindex="0" role="button" aria-label="Woche 001 öffnen">
+          <img id="archImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+        </div>
+        <div style="display:flex;justify-content:space-between;" class="mono">
+          <span>NR. 001 · 13.09.2026</span>
+          <span>MURTENSEE, SCHWEIZ</span>
+        </div>
+      </div>
+    </div>
+    <div class="brutal-100-grid" id="brutal100Grid"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div>
+    <div class="mono" style="color:var(--yellow);margin-bottom:8px;">Kontakt · Lyss, Schweiz</div>
+    <a class="f-email display" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a><br>
+    <button type="button" class="f-copy-btn" data-copy-email="itsleo.iso.contact@gmail.com">E-Mail kopieren</button>
+    <span class="mono" id="copyStatus" style="margin-left:10px;color:var(--yellow);"></span>
+  </div>
+  <div style="text-align:right;">
+    <a class="mono" style="color:var(--yellow);display:inline-block;margin-bottom:8px;" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+    <div class="mono" style="opacity:0.7;">© 2026 Leandro Sinatra · Konzept 05 (Plakat)</div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vollbildansicht (unbeschnitten)" aria-hidden="true">
+  <div class="lb-bar mono">
+    <div><span id="lbCounter" style="color:var(--yellow);margin-right:12px;">01/09</span><span id="lbCaption">Tempel der Eintracht</span></div>
+    <div class="lb-btns">
+      <button type="button" class="lb-btn" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const WORKS = [
+    { idx: "01", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien", style: "is-bleed span-2" },
+    { idx: "02", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van", style: "is-uncropped" },
+    { idx: "03", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien", style: "is-uncropped" },
+    { idx: "04", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge", style: "is-bleed span-2" },
+    { idx: "05", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss", style: "is-uncropped" },
+    { idx: "06", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge", style: "is-uncropped" },
+    { idx: "07", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien", style: "is-uncropped" },
+    { idx: "08", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van", style: "is-uncropped" },
+    { idx: "09", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe", style: "is-bleed span-2" }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "p1", num: "01", title: "Valle dei Templi", place: "Agrigento, Sizilien",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "p2", num: "02", title: "Höhlen von Vallorbe", place: "Waadt, Schweiz",
+      photos: [
+        { file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+      ]
+    },
+    {
+      id: "p3", num: "03", title: "Creux du Van", place: "Schweizer Jura",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "p4", num: "04", title: "La Sauge", place: "Drei-Seen-Land",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Theme Invert */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const inv = root.getAttribute("data-theme") === "paper";
+    root.setAttribute("data-theme", inv ? "invert" : "paper");
+    themeBtn.textContent = inv ? "Papier" : "Negativ";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Hydrate Hero */
+  document.getElementById("heroMainImg").src = ASSETS["temple-of-concordia-sicily.webp"];
+  document.getElementById("heroSubImg").src = ASSETS["creux-du-van-landscape.webp"];
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  const bindKeyClick = (el, fn) => {
+    el.addEventListener("click", fn);
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+  };
+  bindKeyClick(document.getElementById("heroMainTrigger"), () => openLightbox(WORKS, 0));
+  bindKeyClick(document.getElementById("heroSubTrigger"), () => openLightbox(WORKS, 1));
+
+  /* Brutalist Grid */
+  const brutalGrid = document.getElementById("brutalGrid");
+  WORKS.forEach((w, i) => {
+    const cell = document.createElement("article");
+    cell.className = `b-cell ${w.style}`;
+    cell.tabIndex = 0;
+    cell.setAttribute("role", "button");
+    cell.setAttribute("aria-label", `${w.title} öffnen`);
+    cell.innerHTML = `
+      <div class="b-cell-head">
+        <span class="b-num display">${w.idx}</span>
+        <span class="mono">VOLLBILD ↗</span>
+      </div>
+      <div class="b-img-stage">
+        <img src="${ASSETS[w.file]}" alt="${w.title}, ${w.location}" loading="lazy">
+      </div>
+      <div class="b-cell-foot">
+        <span class="b-title">${w.title}</span>
+        <span class="b-loc mono">${w.location}</span>
+      </div>
+    `;
+    bindKeyClick(cell, () => openLightbox(WORKS, i));
+    brutalGrid.appendChild(cell);
+  });
+
+  /* Series Poster Rows on Home */
+  const posterSeriesList = document.getElementById("posterSeriesList");
+  PROJECTS.forEach((p) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ps-row";
+    btn.innerHTML = `
+      <span class="ps-num display">${p.num}</span>
+      <span class="ps-name display">${p.title}</span>
+      <span class="ps-meta mono">${p.place} · ${String(p.photos.length).padStart(2, "0")} →</span>
+    `;
+    btn.addEventListener("click", () => { renderProj(p.id); setView("projekte"); });
+    posterSeriesList.appendChild(btn);
+  });
+
+  /* Projekte View */
+  const projTabsBar = document.getElementById("projTabsBar");
+  const projTitle = document.getElementById("projTitle");
+  const projMeta = document.getElementById("projMeta");
+  const projWall = document.getElementById("projWall");
+
+  function renderProj(id) {
+    const p = PROJECTS.find((x) => x.id === id) || PROJECTS[0];
+    projTitle.textContent = `${p.num} ${p.title}`;
+    projMeta.textContent = `${p.place} · ${String(p.photos.length).padStart(2, "0")} Werke`;
+    projTabsBar.querySelectorAll(".proj-tab").forEach((t) => t.classList.toggle("is-active", t.dataset.pid === p.id));
+
+    projWall.innerHTML = "";
+    p.photos.forEach((ph, i) => {
+      const cell = document.createElement("article");
+      cell.className = "b-cell is-uncropped";
+      cell.tabIndex = 0;
+      cell.setAttribute("role", "button");
+      cell.setAttribute("aria-label", `${ph.title} öffnen`);
+      cell.innerHTML = `
+        <div class="b-cell-head">
+          <span class="b-num display">${String(i + 1).padStart(2, "0")}</span>
+          <span class="mono">ORIGINALFORMAT</span>
+        </div>
+        <div class="b-img-stage">
+          <img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy">
+        </div>
+        <div class="b-cell-foot">
+          <span class="b-title">${ph.title}</span>
+          <span class="b-loc mono">${ph.location}</span>
+        </div>
+      `;
+      bindKeyClick(cell, () => openLightbox(p.photos, i));
+      projWall.appendChild(cell);
+    });
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "proj-tab";
+    b.dataset.pid = p.id;
+    b.innerHTML = `<span class="t-num mono">SERIE ${p.num}</span><span class="t-name display">${p.title}</span>`;
+    b.addEventListener("click", () => renderProj(p.id));
+    projTabsBar.appendChild(b);
+  });
+  renderProj(PROJECTS[0].id);
+
+  /* Archiv 100 */
+  document.getElementById("archImg").src = ASSETS[WEEKLY[0].file];
+  bindKeyClick(document.getElementById("archTrigger"), () => openLightbox(WEEKLY, 0));
+
+  const brutal100Grid = document.getElementById("brutal100Grid");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "b100-slot is-live";
+      b.textContent = code;
+      b.setAttribute("aria-label", "Woche 001 öffnen");
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      brutal100Grid.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "b100-slot";
+      d.textContent = code;
+      brutal100Grid.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "KOPIERT!";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")}/${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>

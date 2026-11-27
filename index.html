@@ -7,28 +7,28 @@
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
-  <title>Leandro Sinatra — Portfolio Design-Studien</title>
+  <title>Leandro Sinatra — 8 Portfolio Design-Studien (Laut &amp; Leise)</title>
   <style>
     :root {
-      --bg: #0B0B0C;
-      --surface: #131315;
-      --fg: #F1EFEA;
+      --bg: #0A0A0B;
+      --surface: #131316;
+      --fg: #F2F0EA;
       --body: #BEBBB4;
-      --muted: #7C7A75;
+      --muted: #7F7D77;
       --accent: #C4A88B;
-      --line: rgba(241, 239, 234, 0.14);
-      --line-strong: rgba(241, 239, 234, 0.28);
+      --loud: #FF3B1F;
+      --line: rgba(242, 240, 234, 0.14);
       --font-sans: 'Switzer', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
       --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
     body { font-family: var(--font-sans); line-height: 1.5; overflow-x: hidden; }
     a { color: inherit; text-decoration: none; }
     img { display: block; max-width: 100%; height: auto; }
-    :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 4px; }
+    :focus-visible { outline: 2px solid var(--loud); outline-offset: 4px; }
 
     .mono {
       font-family: var(--font-mono);
@@ -39,7 +39,7 @@
     }
 
     .wrap {
-      max-width: 1440px;
+      max-width: 1480px;
       margin-inline: auto;
       padding: clamp(24px, 4vw, 56px);
     }
@@ -47,31 +47,81 @@
     header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: flex-end;
       flex-wrap: wrap;
-      gap: 16px;
-      padding-bottom: 24px;
+      gap: 20px;
+      padding-bottom: 26px;
       border-bottom: 1px solid var(--line);
     }
 
     header h1 {
-      font-size: clamp(26px, 3.2vw, 44px);
+      font-size: clamp(28px, 3.6vw, 48px);
       font-weight: 600;
       letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-top: 6px;
     }
 
     header p {
       color: var(--muted);
-      max-width: 48ch;
+      max-width: 54ch;
       font-size: 14px;
       margin-top: 8px;
     }
 
+    .jump-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .jump-pill {
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      transition: border-color 180ms ease, color 180ms ease;
+    }
+
+    .jump-pill.is-loud { border-color: var(--loud); color: var(--loud); }
+    .jump-pill:hover { border-color: var(--fg); color: var(--fg); }
+
+    .wave-header {
+      margin-top: clamp(36px, 5vw, 64px);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wave-header h2 {
+      font-size: clamp(22px, 2.5vw, 34px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .badge-loud {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--loud);
+      color: #FFF;
+      margin-right: 10px;
+    }
+
+    .badge-quiet {
+      display: inline-block;
+      padding: 3px 8px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      margin-right: 10px;
+    }
+
     .grid {
-      margin-top: clamp(28px, 4vw, 48px);
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(20px, 3vw, 36px);
+      gap: clamp(20px, 2.8vw, 34px);
     }
 
     .card {
@@ -82,66 +132,49 @@
       transition: border-color 220ms var(--ease), transform 260ms var(--ease);
     }
 
-    .card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
+    .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .card.is-loud:hover { border-color: var(--loud); }
 
     .card-preview {
-      aspect-ratio: 3 / 2;
+      aspect-ratio: 16 / 10;
       background: #080809;
       overflow: hidden;
       border-bottom: 1px solid var(--line);
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .card-preview.is-paper { background: #F4F1EA; padding: 18px; display: flex; align-items: center; justify-content: center; }
-    .card-preview.is-sheet { background: #F5F4F0; padding: 14px; display: flex; align-items: center; justify-content: center; }
+    .card-preview img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease); }
+    .card:hover .card-preview img { transform: scale(1.03); }
 
-    .card-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 520ms var(--ease);
-    }
-
-    .card-preview.is-paper img,
-    .card-preview.is-sheet img {
-      object-fit: contain;
-    }
-
-    .card:hover .card-preview img {
-      transform: scale(1.02);
-    }
+    /* Distinct mood frames on cards */
+    .p-brutal { background: #F2C400; padding: 14px; border-bottom: 3px solid #E0241A; }
+    .p-brutal img { border: 2px solid #0C0C0C; }
+    .p-mag { background: #C97D2E; padding: 18px; }
+    .p-mag img { box-shadow: 10px 12px 0 rgba(23, 18, 15, 0.35); }
+    .p-kinetic img { filter: contrast(1.08); }
+    .p-scatter { background: #E5E0D5; padding: 20px; }
+    .p-scatter img { width: 72%; height: 86%; object-fit: contain; background: #FAF9F5; padding: 8px; transform: rotate(-2.5deg); box-shadow: 0 12px 28px rgba(0,0,0,0.25); }
+    .p-paper { background: #F4F1EA; padding: 18px; }
+    .p-paper img, .p-sheet img { object-fit: contain; }
+    .p-sheet { background: #F5F4F0; padding: 16px; }
 
     .card-body {
-      padding: clamp(18px, 2.2vw, 28px);
+      padding: clamp(18px, 2.2vw, 26px);
       display: flex;
       flex-direction: column;
       gap: 10px;
       flex: 1;
     }
 
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      color: var(--muted);
-    }
-
+    .card-top { display: flex; justify-content: space-between; color: var(--muted); }
     .card-top .num { color: var(--accent); }
+    .card.is-loud .card-top .num { color: var(--loud); font-weight: 700; }
 
-    .card-title {
-      font-size: clamp(20px, 2vw, 28px);
-      font-weight: 500;
-      letter-spacing: -0.03em;
-    }
-
-    .card-desc {
-      font-size: 13.5px;
-      color: var(--body);
-      line-height: 1.55;
-    }
+    .card-title { font-size: clamp(20px, 2vw, 26px); font-weight: 600; letter-spacing: -0.03em; }
+    .card-desc { font-size: 13.5px; color: var(--body); line-height: 1.55; }
 
     .card-cta {
       margin-top: auto;
@@ -149,13 +182,13 @@
       border-top: 1px solid var(--line);
       display: flex;
       justify-content: space-between;
-      color: var(--fg);
     }
 
     .card:hover .card-cta { color: var(--accent); }
+    .card.is-loud:hover .card-cta { color: var(--loud); }
 
     footer {
-      margin-top: clamp(36px, 5vw, 64px);
+      margin-top: clamp(44px, 6vw, 72px);
       padding-top: 20px;
       border-top: 1px solid var(--line);
       display: flex;
@@ -174,66 +207,135 @@
   <div class="wrap">
     <header>
       <div>
-        <span class="mono" style="color:var(--accent);">Design-Studien · itsleoiso.ch</span>
-        <h1>Leandro Sinatra — 4 Richtungen</h1>
-        <p>Vier eigenständige, interaktive Prototypen mit allen 19 Fotografien, umschaltbaren Ansichten (Startseite, Projekte, Archiv · 100) und Zoom-Lightbox.</p>
+        <span class="mono" style="color:var(--loud);">Design-Exploration · itsleoiso.ch</span>
+        <h1>Leandro Sinatra — 8 Richtungen</h1>
+        <p>Zwei kontrastierende Wellen mit allen 19 echten Fotografien: <strong>Wave 2 (Laut &amp; Anders)</strong> und <strong>Wave 1 (Leise &amp; Kuratorisch)</strong>.</p>
       </div>
-      <span class="mono" style="color:var(--muted);">01 — 04</span>
+      <div class="jump-links mono">
+        <a class="jump-pill is-loud" href="#wave-loud">Wave 2 · Laut (05–08) ↓</a>
+        <a class="jump-pill" href="#wave-quiet">Wave 1 · Leise (01–04) ↓</a>
+      </div>
     </header>
 
-    <main class="grid">
-      <a class="card" href="concept-01-swiss-atelier.html">
-        <div class="card-preview">
-          <img src="Arbeiten/mount-etna-sicily.webp" alt="Konzept 01 — Swiss Atelier">
-        </div>
-        <div class="card-body">
-          <div class="card-top mono"><span class="num">01</span><span>Dunkel / Hell · Switzer</span></div>
-          <h2 class="card-title">Swiss Atelier</h2>
-          <p class="card-desc">Weiterentwicklung der aktuellen Swiss-Editorial-DNA: fotozentrierter Split-Hero, asymmetrisches unbeschnittenes 12-Spalten-Raster, Hover-Vorschau für Projekte und 100er-Archivraster.</p>
-          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
-        </div>
-      </a>
+    <!-- WAVE 2: LOUD & DIFFERENT -->
+    <section id="wave-loud">
+      <div class="wave-header">
+        <h2><span class="badge-loud mono">Wave 2</span>Laut &amp; Anders</h2>
+        <span class="mono" style="color:var(--muted);">Konzepte 05 — 08 · Plakativ · Chromatisch · Kinetisch · Räumlich</span>
+      </div>
 
-      <a class="card" href="concept-02-monograph.html">
-        <div class="card-preview is-paper">
-          <img src="Arbeiten/temple-of-concordia-sicily.webp" alt="Konzept 02 — Katalog">
-        </div>
-        <div class="card-body">
-          <div class="card-top mono"><span class="num">02</span><span>Warmes Papier / Nacht · Serif</span></div>
-          <h2 class="card-title">Katalog (Monograph)</h2>
-          <p class="card-desc">Ruhige Kunstbuch-Dramaturgie auf warmem Büttenpapier: einzelne Bildtafeln und Diptychen, Ausstellungsräume für Projekte, Passepartout für Archiv · 100 und Wand/Dunkel-Lightbox.</p>
-          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
-        </div>
-      </a>
+      <div class="grid">
+        <a class="card is-loud" href="concept-05-brutalist-poster.html">
+          <div class="card-preview p-brutal">
+            <img src="Arbeiten/creux-du-van-landscape.webp" alt="Konzept 05 — Plakat">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">05 · Laut</span><span>Signalrot &amp; Wanderweg-Gelb · Brutalist</span></div>
+            <h3 class="card-title">Plakat (Swiss Brutalist Poster)</h3>
+            <p class="card-desc">Rohe Schweizer Plakat-Energie: monumentale Typografie, harte 2px-Linien, Laufschrift-Ticker, Wechsel aus Plakat-Anschnitt und unbeschnittenen Originalen sowie Negativ-Modus.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
 
-      <a class="card" href="concept-03-darkroom.html">
-        <div class="card-preview">
-          <img src="Arbeiten/vallorbe-caves.webp" alt="Konzept 03 — Dunkelkammer">
-        </div>
-        <div class="card-body">
-          <div class="card-top mono"><span class="num">03</span><span>Obsidian · Kino &amp; Filmstreifen</span></div>
-          <h2 class="card-title">Dunkelkammer</h2>
-          <p class="card-desc">Vollformatige Kino-Bühne auf tiefem Schwarz, Fokus-Beleuchtung beim Hover, umschaltbare Filmstreifen-Ansicht für Serien und ablenkungsfreier Vollbild-Modus mit Leuchttisch-Umschalter.</p>
-          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
-        </div>
-      </a>
+        <a class="card is-loud" href="concept-06-art-magazine.html">
+          <div class="card-preview p-mag">
+            <img src="Arbeiten/temple-of-concordia-sicily.webp" alt="Konzept 06 — Monument">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">06 · Laut</span><span>Ocker · Kobalt · Tannengrün · Editorial</span></div>
+            <h3 class="card-title">Monument (Avant-Garde Art Magazine)</h3>
+            <p class="card-desc">Expressives Kunstmagazin: riesiges überlappendes Cover-Masthead, asymmetrische Collagen und kräftige Farbkapitel (Sizilien-Ocker, Jura-Kobalt, Vallorbe-Grün).</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
 
-      <a class="card" href="concept-04-contact-sheet.html">
-        <div class="card-preview is-sheet">
-          <img src="Arbeiten/creux-du-van-landscape.webp" alt="Konzept 04 — Kontaktbogen">
-        </div>
-        <div class="card-body">
-          <div class="card-top mono"><span class="num">04</span><span>Studio-Weiss / Dunkel · Index</span></div>
-          <h2 class="card-title">Kontaktbogen &amp; Index</h2>
-          <p class="card-desc">Präzises Schweizer Archiv-Werkzeug: interaktiver Split-Index über dem Fold, Umschalter zwischen Kontaktbogen, Index-Tabelle und Grossansicht, Filter sowie ikonische 10×10-Matrix für Archiv · 100.</p>
-          <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
-        </div>
-      </a>
-    </main>
+        <a class="card is-loud" href="concept-07-kinetic-stage.html">
+          <div class="card-preview p-kinetic">
+            <img src="Arbeiten/vallorbe-caves.webp" alt="Konzept 07 — Kinetik">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">07 · Laut</span><span>Schwarz &amp; Zinnoberrot · Kinetik</span></div>
+            <h3 class="card-title">Kinetik (Kinetic Stage &amp; Reel)</h3>
+            <p class="card-desc">Dramatische Vollbild-Bühne mit Outline-Typografie, Live-Marquee, interaktiver Clip-Path-Wipe-Bühne beim Hover und horizontaler Kino-Rolle.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+
+        <a class="card is-loud" href="concept-08-scatter-wall.html">
+          <div class="card-preview p-scatter">
+            <img src="Arbeiten/grey-heron-la-sauge.webp" alt="Konzept 08 — Ateliertisch">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">08 · Laut</span><span>Ateliertisch &amp; Safety-Orange · Drag &amp; Drop</span></div>
+            <h3 class="card-title">Ateliertisch (Interactive Scatter Wall)</h3>
+            <p class="card-desc">Bricht klassische Websites komplett auf: echte Fotoabzüge mit Klebeband auf dem Arbeitstisch — frei per Maus verschiebbar, neu mischbar oder per Klick ins Raster sortierbar.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- WAVE 1: QUIET & CURATORIAL -->
+    <section id="wave-quiet">
+      <div class="wave-header">
+        <h2><span class="badge-quiet mono">Wave 1</span>Leise &amp; Kuratorisch</h2>
+        <span class="mono" style="color:var(--muted);">Konzepte 01 — 04 · Ruhig · Präzise · Zeitlos</span>
+      </div>
+
+      <div class="grid">
+        <a class="card" href="concept-01-swiss-atelier.html">
+          <div class="card-preview">
+            <img src="Arbeiten/mount-etna-sicily.webp" alt="Konzept 01 — Swiss Atelier">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">01 · Leise</span><span>Dunkel / Hell · Switzer</span></div>
+            <h3 class="card-title">Swiss Atelier</h3>
+            <p class="card-desc">Weiterentwicklung der aktuellen Swiss-Editorial-DNA: fotozentrierter Split-Hero, asymmetrisches unbeschnittenes 12-Spalten-Raster und Hover-Vorschau für Projekte.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+
+        <a class="card" href="concept-02-monograph.html">
+          <div class="card-preview p-paper">
+            <img src="Arbeiten/temple-of-concordia-sicily.webp" alt="Konzept 02 — Katalog">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">02 · Leise</span><span>Warmes Papier / Nacht · Serif</span></div>
+            <h3 class="card-title">Katalog (Monograph)</h3>
+            <p class="card-desc">Ruhige Kunstbuch-Dramaturgie auf warmem Büttenpapier: einzelne Bildtafeln und Diptychen, Ausstellungsräume und Passepartout für Archiv · 100.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+
+        <a class="card" href="concept-03-darkroom.html">
+          <div class="card-preview">
+            <img src="Arbeiten/vallorbe-caves.webp" alt="Konzept 03 — Dunkelkammer">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">03 · Leise</span><span>Obsidian · Kino &amp; Filmstreifen</span></div>
+            <h3 class="card-title">Dunkelkammer</h3>
+            <p class="card-desc">Vollformatige Kino-Bühne auf tiefem Schwarz, Fokus-Beleuchtung beim Hover, Filmstreifen-Ansicht für Serien und Leuchttisch-Umschalter.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+
+        <a class="card" href="concept-04-contact-sheet.html">
+          <div class="card-preview p-sheet">
+            <img src="Arbeiten/creux-du-van-landscape.webp" alt="Konzept 04 — Kontaktbogen">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">04 · Leise</span><span>Studio-Weiss / Dunkel · Index</span></div>
+            <h3 class="card-title">Kontaktbogen &amp; Index</h3>
+            <p class="card-desc">Präzises Schweizer Archiv-Werkzeug: Split-Index über dem Fold, Umschalter zwischen Kontaktbogen, Index und Grossansicht sowie 10×10-Matrix.</p>
+            <div class="card-cta mono"><span>Prototyp öffnen</span><span>→</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
 
     <footer class="mono">
-      <span>Leandro Sinatra · Portfolio Design Exploration</span>
-      <span>19 Werke · Kein Bildbeschnitt</span>
+      <span>Leandro Sinatra · 8 interaktive Portfolio-Studien</span>
+      <span>Wave 2 (Laut) + Wave 1 (Leise)</span>
     </footer>
   </div>
 </body>

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>LEANDRO SINATRA — MONUMENT (Konzept 06)</title>
+  <style>
+    :root {
+      --ochre: #C97D2E;
+      --espresso: #17120F;
+      --cobalt: #183E78;
+      --forest: #143325;
+      --bone: #F5EFE3;
+      --crimson: #8F251C;
+      --font-serif: 'Playfair Display', Didot, 'Bodoni MT', 'Iowan Old Style', Georgia, serif;
+      --font-sans: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --pad-x: clamp(20px, 4.5vw, 64px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--espresso); color: var(--bone); -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-sans); background: var(--espresso); color: var(--bone); overflow-x: hidden; line-height: 1.45; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 2px solid var(--bone); outline-offset: 4px; }
+
+    .serif { font-family: var(--font-serif); }
+    .kicker { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+
+    /* ---------- FLOATING MAGAZINE HEADER ---------- */
+    .mag-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: rgba(23, 18, 15, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245, 239, 227, 0.18);
+      padding: 14px var(--pad-x);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mag-logo {
+      font-family: var(--font-serif);
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .mag-nav { display: flex; gap: clamp(14px, 2.5vw, 32px); align-items: center; }
+
+    .mag-tab {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: rgba(245, 239, 227, 0.72);
+      transition: background-color 200ms ease, color 200ms ease;
+      white-space: nowrap;
+    }
+
+    .mag-tab:hover { color: var(--bone); }
+    .mag-tab.is-active { background: var(--bone); color: var(--espresso); }
+
+    .issue-pill {
+      padding: 5px 12px;
+      background: var(--ochre);
+      color: #FFF;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; animation: magFade 360ms var(--ease); }
+    @keyframes magFade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ---------- MAGAZINE COVER HERO ---------- */
+    .cover-hero {
+      background: var(--ochre);
+      color: var(--espresso);
+      padding: clamp(28px, 4vw, 56px) var(--pad-x) clamp(56px, 7vw, 96px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-masthead {
+      font-family: var(--font-serif);
+      font-weight: 900;
+      font-size: clamp(58px, 13.5vw, 210px);
+      line-height: 0.82;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .cover-masthead em {
+      font-style: italic;
+      font-weight: 400;
+      display: block;
+      font-size: 0.48em;
+      letter-spacing: -0.01em;
+      margin-top: 6px;
+    }
+
+    .cover-collage {
+      margin-top: clamp(-16px, -2.5vw, -36px);
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: clamp(20px, 4vw, 56px);
+      align-items: end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-main-plate {
+      background: var(--espresso);
+      padding: clamp(10px, 1.5vw, 18px);
+      box-shadow: 24px 28px 0 rgba(23, 18, 15, 0.25);
+      cursor: zoom-in;
+    }
+
+    .cover-main-plate img {
+      width: 100%;
+      aspect-ratio: 2200 / 1467;
+      transition: transform 500ms var(--ease);
+    }
+
+    .cover-main-plate:hover img { transform: scale(1.015); }
+
+    .cover-side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .cover-inset-plate {
+      width: min(300px, 75%);
+      align-self: flex-end;
+      background: var(--bone);
+      padding: 10px;
+      transform: rotate(2.2deg);
+      box-shadow: 14px 18px 0 rgba(23, 18, 15, 0.22);
+      cursor: zoom-in;
+      transition: transform 320ms var(--ease);
+    }
+
+    .cover-inset-plate:hover { transform: rotate(0deg) scale(1.03); }
+
+    .cover-lead {
+      background: var(--espresso);
+      color: var(--bone);
+      padding: 22px 24px;
+    }
+
+    .cover-lead p {
+      font-family: var(--font-serif);
+      font-size: clamp(18px, 1.6vw, 23px);
+      line-height: 1.38;
+      margin-top: 8px;
+    }
+
+    /* ---------- CHROMATIC CHAPTER SPREADS ---------- */
+    .chapter {
+      padding: clamp(56px, 8vw, 120px) var(--pad-x);
+      position: relative;
+    }
+
+    .chapter.is-cobalt { background: var(--cobalt); color: var(--bone); }
+    .chapter.is-bone { background: var(--bone); color: var(--espresso); }
+    .chapter.is-forest { background: var(--forest); color: var(--bone); }
+
+    .chapter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: clamp(36px, 5vw, 72px);
+      padding-bottom: 20px;
+      border-bottom: 2px solid currentColor;
+    }
+
+    .chapter-num {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(44px, 6vw, 88px);
+      line-height: 0.85;
+    }
+
+    .chapter-title {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: clamp(34px, 5vw, 72px);
+      line-height: 0.95;
+      letter-spacing: -0.025em;
+    }
+
+    .spread-asymmetric {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: clamp(24px, 3.5vw, 52px);
+      align-items: center;
+    }
+
+    .mag-card { min-width: 0; cursor: zoom-in; }
+    .mag-card.c-wide-l { grid-column: 1 / 8; }
+    .mag-card.c-tall-r { grid-column: 9 / 13; }
+    .mag-card.c-tall-l { grid-column: 1 / 5; }
+    .mag-card.c-tall-m { grid-column: 5 / 9; margin-top: clamp(24px, 5vw, 72px); }
+    .mag-card.c-tall-end { grid-column: 9 / 13; margin-top: clamp(-12px, -2vw, -32px); }
+    .mag-card.c-half-l { grid-column: 1 / 7; }
+    .mag-card.c-half-r { grid-column: 7 / 13; margin-top: clamp(20px, 4vw, 56px); }
+
+    .mag-mat {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid currentColor;
+      transition: transform 420ms var(--ease);
+    }
+
+    .chapter.is-bone .mag-mat { background: #FFF; }
+    .mag-card:hover .mag-mat { transform: translateY(-6px); }
+
+    .mag-cap {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .mag-cap .t {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 20px;
+    }
+
+    /* ---------- EDITORIAL FEATURE INDEX ON HOME ---------- */
+    .issues-band {
+      background: var(--crimson);
+      color: var(--bone);
+      padding: clamp(56px, 7vw, 100px) var(--pad-x);
+    }
+
+    .issue-row {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 20px;
+      padding: 22px 0;
+      border-bottom: 1px solid rgba(245, 239, 227, 0.35);
+      transition: padding-left 260ms var(--ease);
+    }
+
+    .issue-row:first-of-type { border-top: 1px solid rgba(245, 239, 227, 0.35); }
+    .issue-row:hover { padding-left: 18px; }
+
+    .issue-row .i-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 4.2vw, 60px);
+      line-height: 1;
+    }
+
+    .issue-row .i-title em { font-style: italic; font-weight: 400; margin-right: 14px; }
+
+    /* ---------- ABOUT SPREAD ---------- */
+    .about-mag {
+      background: var(--espresso);
+      color: var(--bone);
+      padding: clamp(56px, 8vw, 112px) var(--pad-x);
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: clamp(28px, 5vw, 72px);
+      align-items: center;
+    }
+
+    .about-mag-photo {
+      background: var(--ochre);
+      padding: 14px;
+      transform: rotate(-2deg);
+    }
+
+    .about-mag-photo img { width: 100%; aspect-ratio: 1 / 1; }
+    .about-mag h2 { font-family: var(--font-serif); font-size: clamp(34px, 4.5vw, 64px); margin-bottom: 16px; }
+    .about-mag p { font-size: 16px; line-height: 1.7; max-width: 54ch; opacity: 0.9; }
+
+    /* ---------- PROJEKTE CHROMATIC FEATURE VIEW ---------- */
+    .proj-chromatic {
+      min-height: 85vh;
+      padding: clamp(36px, 5vw, 72px) var(--pad-x) clamp(72px, 9vw, 128px);
+      transition: background-color 420ms var(--ease), color 420ms var(--ease);
+    }
+
+    .proj-switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: clamp(32px, 5vw, 60px);
+    }
+
+    .p-chip {
+      padding: 9px 18px;
+      border: 1.5px solid currentColor;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.68;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .p-chip:hover, .p-chip.is-active { opacity: 1; transform: translateY(-2px); }
+    .p-chip.is-active { background: rgba(255, 255, 255, 0.16); }
+
+    .proj-feature-title {
+      font-family: var(--font-serif);
+      font-weight: 900;
+      font-size: clamp(44px, 7.5vw, 118px);
+      line-height: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .proj-spread-grid {
+      margin-top: clamp(32px, 5vw, 64px);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(24px, 4vw, 56px);
+      align-items: start;
+    }
+
+    .proj-spread-grid .mag-card:nth-child(even) { margin-top: clamp(20px, 4vw, 60px); }
+
+    /* ---------- ARCHIV 100 GATEFOLD ---------- */
+    .gatefold {
+      background: var(--cobalt);
+      color: var(--bone);
+      padding: clamp(40px, 6vw, 84px) var(--pad-x);
+    }
+
+    .gatefold-top {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: clamp(28px, 4vw, 60px);
+      align-items: center;
+      margin-bottom: clamp(44px, 6vw, 80px);
+    }
+
+    .gatefold-top h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(48px, 7vw, 108px);
+      line-height: 0.9;
+    }
+
+    .gatefold-top h1 em { font-style: italic; font-weight: 400; display: block; color: var(--ochre); }
+
+    .gatefold-plate {
+      background: var(--bone);
+      padding: clamp(14px, 2.5vw, 32px);
+      color: var(--espresso);
+      cursor: zoom-in;
+    }
+
+    .gatefold-plate img { width: 100%; aspect-ratio: 2200 / 1467; }
+
+    .mag-100-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .m100 {
+      aspect-ratio: 4 / 3;
+      border: 1px solid rgba(245, 239, 227, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 15px;
+      opacity: 0.55;
+    }
+
+    .m100.is-live {
+      opacity: 1;
+      background: var(--ochre);
+      color: #FFF;
+      border-color: #FFF;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .mag-footer {
+      background: #100C0A;
+      color: var(--bone);
+      padding: clamp(36px, 5vw, 64px) var(--pad-x);
+      border-top: 1px solid rgba(245, 239, 227, 0.16);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .mag-footer a.mail { font-family: var(--font-serif); font-style: italic; font-size: clamp(22px, 3vw, 38px); color: var(--ochre); }
+
+    .copy-pill {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border: 1px solid rgba(245, 239, 227, 0.4);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #0F0C0A;
+      color: var(--bone);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .lb-btn { padding: 6px 12px; border: 1px solid rgba(245, 239, 227, 0.4); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .lb-btn:hover, .lb-btn.is-active { background: var(--ochre); border-color: var(--ochre); color: #FFF; }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 260ms var(--ease); }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: 1px solid rgba(245, 239, 227, 0.4); }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.42; border: 1px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--ochre); }
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 900px) {
+      .cover-collage { grid-template-columns: 1fr; margin-top: 16px; }
+      .cover-inset-plate { display: none; }
+      .spread-asymmetric .mag-card { grid-column: 1 / 13 !important; margin-top: 0 !important; }
+      .about-mag { grid-template-columns: 1fr; }
+      .about-mag-photo { max-width: 200px; }
+      .proj-spread-grid { grid-template-columns: 1fr; }
+      .proj-spread-grid .mag-card:nth-child(even) { margin-top: 0; }
+      .gatefold-top { grid-template-columns: 1fr; }
+      .mag-100-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .mag-header { flex-wrap: wrap; row-gap: 10px; }
+      .issue-pill { display: none; }
+      .lb-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="mag-header">
+  <a href="#start" class="mag-logo" data-view-link="start">SINATRA.</a>
+  <nav class="mag-nav" aria-label="Hauptnavigation">
+    <button type="button" class="mag-tab is-active" data-view-btn="start" aria-current="page">Ausgabe</button>
+    <button type="button" class="mag-tab" data-view-btn="projekte">Kapitel</button>
+    <button type="button" class="mag-tab" data-view-btn="archiv">Edition · 100</button>
+  </nav>
+  <span class="issue-pill">No. 25/26 · Lyss</span>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="cover-hero">
+      <h1 class="cover-masthead">Sinatra<em>Leandro · Fotografie</em></h1>
+      <div class="cover-collage">
+        <div class="cover-main-plate" id="coverMain" tabindex="0" role="button" aria-label="Tempel der Eintracht öffnen">
+          <img id="coverMainImg" alt="Tempel der Eintracht, Sizilien" width="2200" height="1467">
+        </div>
+        <div class="cover-side-col">
+          <div class="cover-inset-plate" id="coverInset" tabindex="0" role="button" aria-label="Etna öffnen">
+            <img id="coverInsetImg" alt="Etna, Sizilien" width="2200" height="1467">
+          </div>
+          <div class="cover-lead">
+            <span class="kicker" style="color:var(--ochre);">Editorial · Lyss, Schweiz</span>
+            <p>«Die Kamera hält fest, was das Auge übersieht — Architektur, Jura-Weite und stille Begegnungen.»</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter I: Cobalt (Jura & Monochrome) -->
+    <section class="chapter is-cobalt">
+      <div class="chapter-head">
+        <div>
+          <span class="kicker" style="opacity:0.75;">Kapitel Eins</span>
+          <h2 class="chapter-title">Jura &amp; Monochrom</h2>
+        </div>
+        <span class="chapter-num">01—03</span>
+      </div>
+      <div class="spread-asymmetric" id="chapterOneGrid"></div>
+    </section>
+
+    <!-- Chapter II: Warm Bone (Sizilien) -->
+    <section class="chapter is-bone">
+      <div class="chapter-head">
+        <div>
+          <span class="kicker" style="color:var(--crimson);">Kapitel Zwei</span>
+          <h2 class="chapter-title">Antike &amp; Schatten</h2>
+        </div>
+        <span class="chapter-num">04—06</span>
+      </div>
+      <div class="spread-asymmetric" id="chapterTwoGrid"></div>
+    </section>
+
+    <!-- Chapter III: Deep Forest (La Sauge & Vallorbe) -->
+    <section class="chapter is-forest">
+      <div class="chapter-head">
+        <div>
+          <span class="kicker" style="color:var(--ochre);">Kapitel Drei</span>
+          <h2 class="chapter-title">Wasser &amp; Fauna</h2>
+        </div>
+        <span class="chapter-num">07—09</span>
+      </div>
+      <div class="spread-asymmetric" id="chapterThreeGrid"></div>
+    </section>
+
+    <section class="issues-band">
+      <div class="kicker" style="margin-bottom:24px;">Vier Dossiers · Farbwechsel pro Serie</div>
+      <div id="issuesList"></div>
+    </section>
+
+    <section class="about-mag">
+      <div class="about-mag-photo">
+        <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+      </div>
+      <div>
+        <span class="kicker" style="color:var(--ochre);">Kolophon · Lyss, Kanton Bern</span>
+        <h2>Leandro Sinatra</h2>
+        <p>Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Ob antike Architektur, die Weite des Schweizer Juras oder flüchtige Begegnungen in der Natur.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="proj-chromatic" id="projChromatic">
+      <div class="proj-switcher" id="projSwitcher"></div>
+      <span class="kicker" id="projKicker">Dossier I · Agrigento, Sizilien</span>
+      <h1 class="proj-feature-title" id="projFeatureTitle">Valle dei Templi</h1>
+      <div class="proj-spread-grid" id="projSpreadGrid"></div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100 ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="gatefold">
+      <div class="gatefold-top">
+        <div>
+          <span class="kicker">Wochen-Edition</span>
+          <h1>Archiv<em>Nr. 001 / 100</em></h1>
+          <p style="margin-top:18px;max-width:38ch;opacity:0.9;">Ein Foto pro Woche, immer Samstag oder Sonntag neu — der eine Moment, der diese Woche geblieben ist.</p>
+        </div>
+        <div class="gatefold-plate" id="gatefoldTrigger" tabindex="0" role="button" aria-label="Murtensee öffnen">
+          <img id="gatefoldImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          <div style="display:flex;justify-content:space-between;margin-top:12px;" class="kicker">
+            <span>001 · 13.09.2026</span>
+            <span>Murtensee, Schweiz</span>
+          </div>
+        </div>
+      </div>
+      <div class="mag-100-grid" id="mag100Grid"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="mag-footer">
+  <div>
+    <div class="kicker" style="opacity:0.65;margin-bottom:6px;">Redaktion &amp; Kontakt</div>
+    <a class="mail" href="mailto:itsleo.iso.contact@gmail.com">itsleo.iso.contact@gmail.com</a><br>
+    <button type="button" class="copy-pill" data-copy-email="itsleo.iso.contact@gmail.com">E-Mail kopieren</button>
+    <span class="kicker" id="copyStatus" style="margin-left:10px;color:var(--ochre);"></span>
+  </div>
+  <div style="text-align:right;">
+    <a class="kicker" style="color:var(--ochre);display:inline-block;margin-bottom:8px;" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+    <div class="kicker" style="opacity:0.55;">© 2026 Leandro Sinatra · Konzept 06 (Monument)</div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografie im Vollbild" aria-hidden="true">
+  <div class="lb-top">
+    <div class="kicker"><span id="lbCounter" style="color:var(--ochre);margin-right:12px;">01 / 09</span><span id="lbCaption">Tempel der Eintracht</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const ALL_HOME = [
+    { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien" },
+    { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+    { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van", cls: "c-tall-l" },
+    { file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss", cls: "c-tall-m" },
+    { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van", cls: "c-tall-end" },
+    { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien", cls: "c-wide-l" },
+    { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien", cls: "c-tall-r" },
+    { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge", cls: "c-half-l" },
+    { file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe", cls: "c-half-r" },
+    { file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge", cls: "c-tall-l" }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "p1", roman: "I", title: "Valle dei Templi", place: "Agrigento, Sizilien", bg: "#C97D2E", fg: "#17120F",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "p2", roman: "II", title: "Höhlen von Vallorbe", place: "Waadt, Schweiz", bg: "#143325", fg: "#F5EFE3",
+      photos: [
+        { file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+      ]
+    },
+    {
+      id: "p3", roman: "III", title: "Creux du Van", place: "Schweizer Jura", bg: "#183E78", fg: "#F5EFE3",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "p4", roman: "IV", title: "La Sauge", place: "Drei-Seen-Land", bg: "#8F251C", fg: "#F5EFE3",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  const bindOpen = (el, fn) => {
+    el.addEventListener("click", fn);
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+  };
+
+  document.getElementById("coverMainImg").src = ASSETS["temple-of-concordia-sicily.webp"];
+  document.getElementById("coverInsetImg").src = ASSETS["mount-etna-sicily.webp"];
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+  bindOpen(document.getElementById("coverMain"), () => openLightbox(ALL_HOME, 0));
+  bindOpen(document.getElementById("coverInset"), () => openLightbox(ALL_HOME, 1));
+
+  function makeCard(item, homeIndex, numLabel) {
+    const fig = document.createElement("figure");
+    fig.className = `mag-card ${item.cls || ""}`;
+    fig.tabIndex = 0;
+    fig.setAttribute("role", "button");
+    fig.setAttribute("aria-label", `${item.title} öffnen`);
+    fig.innerHTML = `
+      <div class="mag-mat"><img src="${ASSETS[item.file]}" alt="${item.title}" loading="lazy"></div>
+      <figcaption class="mag-cap">
+        <span class="t">${numLabel}. ${item.title}</span>
+        <span class="kicker" style="opacity:0.7;">${item.location}</span>
+      </figcaption>
+    `;
+    bindOpen(fig, () => openLightbox(ALL_HOME, homeIndex));
+    return fig;
+  }
+
+  const c1 = document.getElementById("chapterOneGrid");
+  [2, 3, 4].forEach((idx, n) => c1.appendChild(makeCard(ALL_HOME[idx], idx, `0${n + 1}`)));
+
+  const c2 = document.getElementById("chapterTwoGrid");
+  [5, 6].forEach((idx, n) => c2.appendChild(makeCard(ALL_HOME[idx], idx, `0${n + 4}`)));
+
+  const c3 = document.getElementById("chapterThreeGrid");
+  [7, 8, 9].forEach((idx, n) => c3.appendChild(makeCard(ALL_HOME[idx], idx, `0${n + 6}`)));
+
+  /* Issues Band */
+  const issuesList = document.getElementById("issuesList");
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "issue-row";
+    b.innerHTML = `
+      <span class="i-title"><em>${p.roman}.</em>${p.title}</span>
+      <span class="kicker">${p.place} · ${String(p.photos.length).padStart(2, "0")} →</span>
+    `;
+    b.addEventListener("click", () => { renderProject(p.id); setView("projekte"); });
+    issuesList.appendChild(b);
+  });
+
+  /* Chromatic Projekte View */
+  const projChromatic = document.getElementById("projChromatic");
+  const projSwitcher = document.getElementById("projSwitcher");
+  const projKicker = document.getElementById("projKicker");
+  const projFeatureTitle = document.getElementById("projFeatureTitle");
+  const projSpreadGrid = document.getElementById("projSpreadGrid");
+
+  function renderProject(id) {
+    const p = PROJECTS.find((x) => x.id === id) || PROJECTS[0];
+    projChromatic.style.backgroundColor = p.bg;
+    projChromatic.style.color = p.fg;
+    projKicker.textContent = `Dossier ${p.roman} · ${p.place}`;
+    projFeatureTitle.textContent = p.title;
+    projSwitcher.querySelectorAll(".p-chip").forEach((c) => c.classList.toggle("is-active", c.dataset.pid === p.id));
+
+    projSpreadGrid.innerHTML = "";
+    p.photos.forEach((ph, i) => {
+      const fig = document.createElement("figure");
+      fig.className = "mag-card";
+      fig.tabIndex = 0;
+      fig.setAttribute("role", "button");
+      fig.setAttribute("aria-label", `${ph.title} öffnen`);
+      fig.innerHTML = `
+        <div class="mag-mat"><img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy"></div>
+        <figcaption class="mag-cap">
+          <span class="t">0${i + 1}. ${ph.title}</span>
+          <span class="kicker" style="opacity:0.75;">${ph.location}</span>
+        </figcaption>
+      `;
+      bindOpen(fig, () => openLightbox(p.photos, i));
+      projSpreadGrid.appendChild(fig);
+    });
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "p-chip";
+    b.dataset.pid = p.id;
+    b.textContent = `${p.roman}. ${p.title}`;
+    b.addEventListener("click", () => renderProject(p.id));
+    projSwitcher.appendChild(b);
+  });
+  renderProject(PROJECTS[0].id);
+
+  /* Archiv 100 */
+  document.getElementById("gatefoldImg").src = ASSETS[WEEKLY[0].file];
+  bindOpen(document.getElementById("gatefoldTrigger"), () => openLightbox(WEEKLY, 0));
+
+  const mag100Grid = document.getElementById("mag100Grid");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "m100 is-live";
+      b.textContent = code;
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      mag100Grid.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "m100";
+      d.textContent = code;
+      mag100Grid.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>
