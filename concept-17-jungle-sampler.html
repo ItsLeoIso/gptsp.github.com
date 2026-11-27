@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-fit="contain">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — AKAI-168 (Atmospheric Jungle Visual Sampler · Konzept 17)</title>
+  <style>
+    :root {
+      --chassis: #060D0F;
+      --deck: #0B1619;
+      --deck-raised: #102024;
+      --lcd-bg: #041915;
+      --mint: #4DFFBE;
+      --cyan: #38D9FF;
+      --amber: #FFB020;
+      --danger: #FF4A3D;
+      --fg: #E6F7F2;
+      --muted: #7BA39B;
+      --line: rgba(77, 255, 190, 0.18);
+      --line-soft: rgba(230, 247, 242, 0.11);
+      --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--chassis);
+      color: var(--fg);
+      font-family: var(--font-display);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- FULL-VIEWPORT SAMPLER INSTRUMENT ---------- */
+    .sampler-rig {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.58fr) minmax(360px, 1fr);
+      background: var(--chassis);
+    }
+
+    /* ---------- LEFT: ATMOSPHERIC VISUAL MONITOR & AMEN OSCILLOSCOPE ---------- */
+    .visual-bay {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) 86px;
+      border-right: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 45%, rgba(56, 217, 255, 0.11) 0%, rgba(77, 255, 190, 0.04) 38%, #040A0C 78%);
+      overflow: hidden;
+    }
+
+    .bay-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(6, 15, 18, 0.88);
+      flex-wrap: wrap;
+      z-index: 15;
+    }
+
+    .bay-left, .bay-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hw-chip {
+      padding: 5px 9px;
+      border: 1px solid var(--line-soft);
+      background: var(--deck);
+      color: var(--muted);
+      transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+    }
+
+    .hw-chip:hover { border-color: var(--mint); color: var(--fg); }
+    .hw-chip.is-on {
+      border-color: var(--mint);
+      color: var(--mint);
+      background: rgba(77, 255, 190, 0.11);
+    }
+    .hw-chip.is-amber.is-on {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: rgba(255, 176, 32, 0.13);
+    }
+
+    .led-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint);
+      margin-right: 5px;
+    }
+
+    /* Main Slice Stage */
+    .slice-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 28px;
+      overflow: hidden;
+    }
+
+    [data-fit="cover"] .slice-stage { padding: 0; }
+
+    #stageImg {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      border: 1px solid rgba(77, 255, 190, 0.22);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.72), 0 0 40px rgba(56, 217, 255, 0.08);
+      transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease;
+    }
+
+    [data-fit="cover"] #stageImg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: 0;
+    }
+
+    .slice-stage.is-triggered #stageImg {
+      transform: scale(1.012);
+      filter: brightness(1.08) contrast(1.04);
+      border-color: var(--mint);
+    }
+
+    .stage-corner-hud {
+      position: absolute;
+      left: 16px;
+      bottom: 12px;
+      background: rgba(4, 15, 16, 0.84);
+      border: 1px solid var(--line);
+      padding: 6px 11px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      pointer-events: none;
+      max-width: calc(100% - 32px);
+    }
+
+    .stage-corner-hud strong {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 100-Dubplate Crate Overlay inside Monitor */
+    .crate-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      background: #061012;
+      padding: clamp(16px, 2.5vw, 28px);
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .crate-overlay.is-open { display: flex; }
+
+    .dubplate-hero {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid rgba(255, 176, 32, 0.4);
+      background: rgba(255, 176, 32, 0.05);
+    }
+
+    .acetate-disc {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle, #111617 0px, #111617 3px, #1B2325 4px, #111617 6px);
+      border: 2px solid var(--amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 26px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .acetate-label {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #F4EFE4;
+      position: relative;
+    }
+
+    .acetate-label img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .crate-grid-100 {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .sleeve-cell {
+      padding: 6px 4px;
+      border: 1px dashed rgba(230, 247, 242, 0.14);
+      text-align: center;
+      font-size: 9.5px;
+      color: var(--muted);
+    }
+
+    .sleeve-cell.is-cut {
+      border: 1px solid var(--amber);
+      background: rgba(255, 176, 32, 0.16);
+      color: var(--amber);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Bottom Breakbeat Oscilloscope & Stereo VU Bar */
+    .scope-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      border-top: 1px solid var(--line);
+      background: #040C0E;
+      padding: 8px 14px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .scope-wrap {
+      position: relative;
+      height: 66px;
+      border: 1px solid rgba(77, 255, 190, 0.22);
+      background: #03120F;
+      overflow: hidden;
+    }
+
+    #amenScope {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .scope-tag {
+      position: absolute;
+      top: 4px;
+      left: 7px;
+      color: var(--mint);
+      font-size: 9px;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    .vu-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .vu-row {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vu-bars {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2px;
+      height: 12px;
+    }
+
+    .vu-seg {
+      background: rgba(77, 255, 190, 0.12);
+      transition: background-color 60ms linear;
+    }
+
+    .vu-seg.on-green { background: var(--mint); }
+    .vu-seg.on-amber { background: var(--amber); }
+    .vu-seg.on-red { background: var(--danger); }
+
+    /* ---------- RIGHT: AKAI S950 / MPC HARDWARE DECK ---------- */
+    .mpc-deck {
+      background: var(--deck);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* Backlit Phosphor LCD */
+    .lcd-bezel {
+      background: #030A09;
+      padding: 6px;
+      border: 2px solid #1A2E33;
+      box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.85);
+    }
+
+    .lcd-glass {
+      background:
+        repeating-linear-gradient(to bottom, rgba(77, 255, 190, 0.03) 0px, rgba(77, 255, 190, 0.03) 1px, transparent 1px, transparent 3px),
+        var(--lcd-bg);
+      border: 1px solid rgba(77, 255, 190, 0.35);
+      padding: 12px 14px;
+      min-height: 132px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--mint);
+    }
+
+    .lcd-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(77, 255, 190, 0.28);
+    }
+
+    .lcd-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #D8FFF0;
+      line-height: 1.15;
+    }
+
+    .lcd-sub {
+      color: var(--cyan);
+      font-size: 11px;
+    }
+
+    .lcd-info-view {
+      display: none;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .lcd-info-view.is-visible { display: flex; }
+    .lcd-sample-view.is-hidden { display: none; }
+
+    .lcd-portrait {
+      width: 58px;
+      height: 58px;
+      object-fit: cover;
+      border: 1px solid var(--mint);
+      flex-shrink: 0;
+    }
+
+    .lcd-btn {
+      padding: 3px 8px;
+      border: 1px solid rgba(77, 255, 190, 0.45);
+      color: var(--mint);
+      background: rgba(77, 255, 190, 0.08);
+    }
+
+    .lcd-btn:hover, .lcd-btn.is-active {
+      background: var(--mint);
+      color: #031510;
+      font-weight: 700;
+    }
+
+    /* Bank Filter & Tempo Pitch Strip */
+    .bank-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .bank-btn {
+      flex: 1 1 auto;
+      padding: 6px 7px;
+      border: 1px solid var(--line-soft);
+      background: var(--deck-raised);
+      color: var(--muted);
+      text-align: center;
+      font-size: 9.5px;
+      transition: all 140ms ease;
+    }
+
+    .bank-btn:hover { border-color: var(--mint); color: var(--fg); }
+    .bank-btn.is-active {
+      border-color: var(--mint);
+      color: #031510;
+      background: var(--mint);
+      font-weight: 700;
+    }
+
+    .tempo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 10px;
+      background: var(--deck-raised);
+      border: 1px solid var(--line-soft);
+    }
+
+    #bpmSlider {
+      flex: 1;
+      accent-color: var(--mint);
+      cursor: pointer;
+    }
+
+    /* 18-Pad Tactile MPC Matrix (6x3) */
+    .pad-matrix {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      flex: 1;
+    }
+
+    .mpc-pad {
+      position: relative;
+      min-height: 70px;
+      background: #15262B;
+      border: 1.5px solid rgba(230, 247, 242, 0.16);
+      border-bottom-width: 4px;
+      border-bottom-color: #050B0D;
+      border-radius: 4px;
+      overflow: hidden;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      transition: transform 70ms ease, border-color 140ms ease, opacity 180ms ease;
+    }
+
+    .mpc-pad img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.42;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .mpc-pad:hover img,
+    .mpc-pad.is-selected img {
+      opacity: 0.78;
+    }
+
+    .mpc-pad:active,
+    .mpc-pad.is-pressed {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+    }
+
+    .mpc-pad.is-selected {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(56, 217, 255, 0.35);
+    }
+
+    .mpc-pad.is-dub {
+      border-color: rgba(255, 176, 32, 0.55);
+    }
+
+    .mpc-pad.is-dub.is-selected {
+      border-color: var(--amber);
+      box-shadow: 0 0 16px rgba(255, 176, 32, 0.4);
+    }
+
+    .mpc-pad.is-dimmed {
+      opacity: 0.24;
+    }
+
+    .pad-top, .pad-bottom {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .pad-id {
+      background: rgba(4, 14, 16, 0.84);
+      padding: 1px 5px;
+      font-size: 9.5px;
+      color: var(--mint);
+    }
+
+    .mpc-pad.is-dub .pad-id { color: var(--amber); }
+
+    .pad-led {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .mpc-pad.is-selected .pad-led {
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .mpc-pad.is-dub.is-selected .pad-led {
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
+    }
+
+    .pad-name {
+      background: rgba(4, 14, 16, 0.86);
+      padding: 2px 5px;
+      font-size: 10px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    @media (max-width: 920px) {
+      .sampler-rig {
+        grid-template-columns: 1fr;
+        grid-template-rows: 48vh 52vh;
+      }
+      .visual-bay {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        grid-template-rows: auto minmax(0, 1fr) 62px;
+      }
+      .slice-stage { padding: 10px 12px; }
+      .scope-strip { grid-template-columns: 1fr; padding: 6px 10px; }
+      .vu-stack { display: none; }
+      .scope-wrap { height: 46px; }
+      .pad-matrix { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .mpc-pad { min-height: 58px; }
+      .dubplate-hero { grid-template-columns: 96px 1fr; }
+      .acetate-disc { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="sampler-rig" aria-label="AKAI-168 Atmospheric Jungle Visual Sampler">
+    <!-- LEFT: DUBPLATE STAGE + BREAKBEAT OSCILLOSCOPE -->
+    <section class="visual-bay">
+      <div class="bay-topbar mono">
+        <div class="bay-left">
+          <a href="index.html" class="hw-chip">← Index</a>
+          <span style="color:var(--mint);"><span class="led-dot"></span>LS-S950 · Atmospheric Jungle</span>
+        </div>
+        <div class="bay-right">
+          <button type="button" class="hw-chip" id="autoChopBtn" title="Automatischer visueller Slice-Wechsel im Takt">Auto-Chop</button>
+          <button type="button" class="hw-chip" id="fitToggleBtn" title="Originalformat oder Randlos">Randlos</button>
+          <button type="button" class="hw-chip is-amber" id="crateToggleBtn" title="100-Dubplate-Archiv öffnen">100 Crate</button>
+        </div>
+      </div>
+
+      <div class="slice-stage" id="sliceStage">
+        <img id="stageImg" src="" alt="">
+        <div class="stage-corner-hud">
+          <span class="mono" style="color:var(--mint);" id="stagePadNum">PAD 01</span>
+          <strong id="stageTitle">Licht im Fels</strong>
+          <span class="mono" style="color:var(--muted);" id="stageLoc">Vallorbe</span>
+        </div>
+
+        <!-- 100-DUBPLATE CRATE VIEW -->
+        <div class="crate-overlay" id="crateOverlay" aria-label="Archiv 100 Dubplate Crate">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div>
+              <span class="mono" style="color:var(--amber);">10&quot; Acetate Dubplate Archive · 001 / 100 Cut</span>
+              <h2 style="font-size:22px;font-weight:700;letter-spacing:-0.03em;">Archiv · 100 — Dubplate Crate</h2>
+            </div>
+            <button type="button" class="hw-chip mono" id="closeCrateBtn">Zurück zum Monitor ✕</button>
+          </div>
+
+          <div class="dubplate-hero">
+            <div class="acetate-disc">
+              <div class="acetate-label">
+                <img id="dubLabelImg" alt="Dubplate 001 — Murtensee">
+              </div>
+            </div>
+            <div>
+              <span class="mono" style="color:var(--amber);">DUB 001 · LIVE PRESSING · 13.09.2026</span>
+              <h3 style="font-size:20px;margin-top:4px;">Murtensee, Schweiz</h3>
+              <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-top:6px;max-width:48ch;">Ein Foto pro Woche, immer Samstag oder Sonntag neu geschnitten. Platte 001 liegt auf Pad 18 auf — 99 Rohlinge warten in der Kiste.</p>
+              <button type="button" class="hw-chip is-amber is-on mono" id="loadDubBtn" style="margin-top:10px;">Dubplate 001 auflegen →</button>
+            </div>
+          </div>
+
+          <div class="crate-grid-100 mono" id="crateGrid100"></div>
+        </div>
+      </div>
+
+      <!-- VISUAL-ONLY AMEN BREAK OSCILLOSCOPE + STEREO VU -->
+      <div class="scope-strip">
+        <div class="scope-wrap">
+          <span class="scope-tag mono" id="scopeReadout">AMEN-ENVELOPE · 168 BPM · VISUAL SILENT</span>
+          <canvas id="amenScope" width="760" height="66"></canvas>
+        </div>
+        <div class="vu-stack mono" aria-hidden="true">
+          <div class="vu-row"><span>L</span><div class="vu-bars" id="vuLeft"></div></div>
+          <div class="vu-row"><span>R</span><div class="vu-bars" id="vuRight"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: AKAI S950 / MPC3000 CONTROL SURFACE -->
+    <aside class="mpc-deck" aria-label="Sampler Bedienfeld">
+      <div class="lcd-bezel">
+        <div class="lcd-glass">
+          <div class="lcd-row-top mono">
+            <span id="lcdStatus">BANK: ALLE · CHOP: MANUELL</span>
+            <button type="button" class="lcd-btn mono" id="lcdInfoToggle">Studio / Info</button>
+          </div>
+
+          <!-- Default Sample Readout -->
+          <div class="lcd-sample-view" id="lcdSampleView">
+            <div class="lcd-title" id="lcdMainTitle">01 · Licht im Fels</div>
+            <div class="lcd-sub mono" id="lcdSubMeta">Serie 02 · Höhlen von Vallorbe · 2200×1467</div>
+            <div class="mono" style="display:flex;justify-content:space-between;color:var(--muted);margin-top:6px;">
+              <span id="lcdSlicePos">SLICE 01 / 18</span>
+              <span id="lcdTempoTag">TIME-STRETCH: 168 BPM</span>
+            </div>
+          </div>
+
+          <!-- Studio / Leandro Bio Readout inside LCD -->
+          <div class="lcd-info-view" id="lcdInfoView">
+            <img class="lcd-portrait" id="lcdPortrait" alt="Porträt von Leandro Sinatra">
+            <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
+              <strong style="color:#D8FFF0;font-size:14px;">Leandro Sinatra · Lyss, Bern</strong>
+              <p style="font-size:11.5px;color:var(--muted);line-height:1.45;">Architektur, Landschaft &amp; Wildlife — beobachtet mit Geduld, Licht und klarer Geometrie.</p>
+              <div class="mono" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;">
+                <a class="lcd-btn" href="mailto:itsleo.iso.contact@gmail.com" style="overflow-wrap:anywhere;">Mail</a>
+                <button type="button" class="lcd-btn" id="copySamplerMail">E-Mail kopieren</button>
+                <a class="lcd-btn" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">IG ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BANK SOLO SELECTOR -->
+      <div class="bank-strip mono" role="group" aria-label="Serien-Bank wählen">
+        <button type="button" class="bank-btn is-active" data-bank="all">Alle (18)</button>
+        <button type="button" class="bank-btn" data-bank="s2">02 Vallorbe</button>
+        <button type="button" class="bank-btn" data-bank="s1">01 Sizilien</button>
+        <button type="button" class="bank-btn" data-bank="s3">03 Jura</button>
+        <button type="button" class="bank-btn" data-bank="s4">04 La Sauge</button>
+        <button type="button" class="bank-btn" data-bank="dub">Dub 100</button>
+      </div>
+
+      <!-- PITCH / BPM FADER -->
+      <div class="tempo-bar mono">
+        <label for="bpmSlider" style="color:var(--muted);">Pitch / Tempo</label>
+        <input type="range" id="bpmSlider" min="156" max="176" value="168">
+        <span style="color:var(--mint);min-width:62px;text-align:right;" id="bpmValue">168 BPM</span>
+      </div>
+
+      <!-- 18 TACTILE RUBBER PADS -->
+      <div class="pad-matrix" id="padMatrix" aria-label="18 Fotografie-Sampler-Pads"></div>
+    </aside>
+  </main>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    /* Lead with lush emerald Vallorbe caves for immediate Atmospheric Jungle mood */
+    const PADS = [
+      { pad: "P01", bank: "s2", series: "02 · Höhlen von Vallorbe", file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe, Waadt", dim: "2200×1467" },
+      { pad: "P02", bank: "s4", series: "04 · La Sauge", file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge", dim: "2200×1467" },
+      { pad: "P03", bank: "s4", series: "04 · La Sauge", file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge", dim: "2200×1467" },
+      { pad: "P04", bank: "s4", series: "04 · La Sauge", file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge", dim: "1466×2200" },
+      { pad: "P05", bank: "s4", series: "04 · La Sauge", file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge", dim: "1760×2200" },
+      { pad: "P06", bank: "s4", series: "04 · La Sauge", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge", dim: "2200×1467" },
+      { pad: "P07", bank: "s4", series: "04 · La Sauge", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge", dim: "2200×1466" },
+      { pad: "P08", bank: "s4", series: "04 · La Sauge", file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge", dim: "2200×1467" },
+      { pad: "P09", bank: "s3", series: "03 · Creux du Van", file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van", dim: "1467×2200" },
+      { pad: "P10", bank: "s3", series: "03 · Creux du Van", file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van", dim: "2200×1467" },
+      { pad: "P11", bank: "s3", series: "03 · Creux du Van", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van", dim: "1467×2200" },
+      { pad: "P12", bank: "s3", series: "03 · Creux du Van", file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Schwarzweiss", dim: "1467×2200" },
+      { pad: "P13", bank: "s3", series: "03 · Creux du Van", file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Schwarzweiss", dim: "1467×2200" },
+      { pad: "P14", bank: "s1", series: "01 · Valle dei Templi", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento", dim: "2200×1467" },
+      { pad: "P15", bank: "s1", series: "01 · Valle dei Templi", file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien", dim: "2200×1467" },
+      { pad: "P16", bank: "s1", series: "01 · Valle dei Templi", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento", dim: "2200×1467" },
+      { pad: "P17", bank: "s1", series: "01 · Valle dei Templi", file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien", dim: "1467×2200" },
+      { pad: "P18", bank: "dub", series: "Archiv · 100 (001/100)", file: "murtensee-weekly-photo.webp", title: "13.09.2026 — Dub 001", loc: "Murtensee", dim: "2200×1467", dub: true }
+    ];
+
+    const stageImg = document.getElementById("stageImg");
+    const sliceStage = document.getElementById("sliceStage");
+    const stagePadNum = document.getElementById("stagePadNum");
+    const stageTitle = document.getElementById("stageTitle");
+    const stageLoc = document.getElementById("stageLoc");
+    const lcdStatus = document.getElementById("lcdStatus");
+    const lcdMainTitle = document.getElementById("lcdMainTitle");
+    const lcdSubMeta = document.getElementById("lcdSubMeta");
+    const lcdSlicePos = document.getElementById("lcdSlicePos");
+    const lcdTempoTag = document.getElementById("lcdTempoTag");
+    const padMatrix = document.getElementById("padMatrix");
+    const crateOverlay = document.getElementById("crateOverlay");
+    const crateToggleBtn = document.getElementById("crateToggleBtn");
+
+    document.getElementById("lcdPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+    document.getElementById("dubLabelImg").src = ASSETS["murtensee-weekly-photo.webp"];
+
+    /* Build 100-Sleeve Dubplate Crate Grid */
+    const crateGrid = document.getElementById("crateGrid100");
+    for (let i = 1; i <= 100; i++) {
+      const cell = document.createElement("div");
+      const code = String(i).padStart(3, "0");
+      if (i === 1) {
+        cell.className = "sleeve-cell is-cut";
+        cell.textContent = "001 ★";
+        cell.title = "Dub 001 — 13.09.2026 Murtensee";
+        cell.addEventListener("click", () => {
+          closeCrate();
+          triggerPad(17);
+        });
+      } else {
+        cell.className = "sleeve-cell";
+        cell.textContent = code;
+      }
+      crateGrid.appendChild(cell);
+    }
+
+    /* Build VU Meter Segments */
+    function buildVu(el) {
+      const segs = [];
+      for (let i = 0; i < 12; i++) {
+        const s = document.createElement("div");
+        s.className = "vu-seg";
+        el.appendChild(s);
+        segs.push(s);
+      }
+      return segs;
+    }
+    const vuL = buildVu(document.getElementById("vuLeft"));
+    const vuR = buildVu(document.getElementById("vuRight"));
+
+    /* Build 18 Tactile MPC Rubber Pads */
+    const padButtons = PADS.map((item, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mpc-pad" + (item.dub ? " is-dub" : "");
+      btn.setAttribute("aria-label", `${item.pad}: ${item.title}`);
+      btn.innerHTML = `
+        <img src="${ASSETS[item.file]}" alt="${item.title}">
+        <div class="pad-top mono">
+          <span class="pad-id">${item.pad}</span>
+          <span class="pad-led"></span>
+        </div>
+        <div class="pad-bottom">
+          <span class="pad-name">${item.title}</span>
+        </div>
+      `;
+      btn.addEventListener("click", () => {
+        if (crateOverlay.classList.contains("is-open")) closeCrate();
+        triggerPad(idx);
+      });
+      padMatrix.appendChild(btn);
+      return btn;
+    });
+
+    const state = {
+      activeIdx: 0,
+      bank: "all",
+      bpm: 168,
+      autoChop: false,
+      energy: 0.75,
+      infoOpen: false
+    };
+
+    let flashTimer = null;
+    function triggerPad(idx) {
+      const safe = ((idx % PADS.length) + PADS.length) % PADS.length;
+      state.activeIdx = safe;
+      state.energy = 1.0;
+
+      const item = PADS[safe];
+      stageImg.src = ASSETS[item.file];
+      stageImg.alt = `${item.title} — ${item.loc}`;
+      stagePadNum.textContent = item.pad;
+      stageTitle.textContent = item.title;
+      stageLoc.textContent = item.loc;
+
+      lcdMainTitle.textContent = `${item.pad} · ${item.title}`;
+      lcdSubMeta.textContent = `${item.series} · ${item.dim}`;
+      lcdSlicePos.textContent = `SLICE ${String(safe + 1).padStart(2, "0")} / 18`;
+
+      padButtons.forEach((b, i) => b.classList.toggle("is-selected", i === safe));
+
+      sliceStage.classList.add("is-triggered");
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => sliceStage.classList.remove("is-triggered"), 140);
+    }
+
+    triggerPad(0);
+
+    /* Bank Solo Filter */
+    const bankNames = { all: "ALLE", s2: "02 VALLORBE", s1: "01 SIZILIEN", s3: "03 JURA", s4: "04 LA SAUGE", dub: "DUB 100" };
+    document.querySelectorAll(".bank-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const b = btn.dataset.bank;
+        state.bank = b;
+        document.querySelectorAll(".bank-btn").forEach((el) => el.classList.toggle("is-active", el === btn));
+        padButtons.forEach((padEl, i) => {
+          const match = b === "all" || PADS[i].bank === b;
+          padEl.classList.toggle("is-dimmed", !match);
+        });
+        updateStatusLine();
+        const firstMatch = PADS.findIndex((p) => b === "all" || p.bank === b);
+        if (firstMatch >= 0) triggerPad(firstMatch);
+      });
+    });
+
+    function updateStatusLine() {
+      lcdStatus.textContent = `BANK: ${bankNames[state.bank]} · CHOP: ${state.autoChop ? "AUTO" : "MANUELL"}`;
+    }
+
+    /* Tempo Fader */
+    const bpmSlider = document.getElementById("bpmSlider");
+    const bpmValue = document.getElementById("bpmValue");
+    const scopeReadout = document.getElementById("scopeReadout");
+    bpmSlider.addEventListener("input", () => {
+      state.bpm = Number(bpmSlider.value);
+      bpmValue.textContent = `${state.bpm} BPM`;
+      lcdTempoTag.textContent = `TIME-STRETCH: ${state.bpm} BPM`;
+      scopeReadout.textContent = `AMEN-ENVELOPE · ${state.bpm} BPM · VISUAL SILENT`;
+    });
+
+    /* Auto-Chop Visual Sequencer */
+    const autoChopBtn = document.getElementById("autoChopBtn");
+    let chopInterval = null;
+    function syncAutoChop() {
+      clearInterval(chopInterval);
+      if (state.autoChop) {
+        const msPerBar = (60000 / state.bpm) * 4;
+        chopInterval = setInterval(() => {
+          const pool = PADS.map((p, i) => ({ p, i })).filter((x) => state.bank === "all" || x.p.bank === state.bank);
+          const curPos = pool.findIndex((x) => x.i === state.activeIdx);
+          const next = pool[(curPos + 1) % pool.length];
+          if (next) triggerPad(next.i);
+        }, msPerBar);
+      }
+      autoChopBtn.classList.toggle("is-on", state.autoChop);
+      updateStatusLine();
+    }
+    autoChopBtn.addEventListener("click", () => {
+      state.autoChop = !state.autoChop;
+      syncAutoChop();
+    });
+
+    /* Fit Toggle (Contain vs Cover) */
+    const fitBtn = document.getElementById("fitToggleBtn");
+    fitBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isContain = root.getAttribute("data-fit") === "contain";
+      root.setAttribute("data-fit", isContain ? "cover" : "contain");
+      fitBtn.classList.toggle("is-on", isContain);
+      fitBtn.textContent = isContain ? "Original" : "Randlos";
+    });
+
+    /* 100 Crate Toggle */
+    function openCrate() {
+      crateOverlay.classList.add("is-open");
+      crateToggleBtn.classList.add("is-on");
+    }
+    function closeCrate() {
+      crateOverlay.classList.remove("is-open");
+      crateToggleBtn.classList.remove("is-on");
+    }
+    crateToggleBtn.addEventListener("click", () => {
+      if (crateOverlay.classList.contains("is-open")) closeCrate();
+      else openCrate();
+    });
+    document.getElementById("closeCrateBtn").addEventListener("click", closeCrate);
+    document.getElementById("loadDubBtn").addEventListener("click", () => {
+      closeCrate();
+      triggerPad(17);
+    });
+
+    /* LCD Studio / Bio Flip */
+    const lcdInfoToggle = document.getElementById("lcdInfoToggle");
+    const lcdSampleView = document.getElementById("lcdSampleView");
+    const lcdInfoView = document.getElementById("lcdInfoView");
+    lcdInfoToggle.addEventListener("click", () => {
+      state.infoOpen = !state.infoOpen;
+      lcdInfoToggle.classList.toggle("is-active", state.infoOpen);
+      lcdInfoToggle.textContent = state.infoOpen ? "← Sample" : "Studio / Info";
+      lcdSampleView.classList.toggle("is-hidden", state.infoOpen);
+      lcdInfoView.classList.toggle("is-visible", state.infoOpen);
+    });
+
+    const copyBtn = document.getElementById("copySamplerMail");
+    copyBtn.addEventListener("click", () => {
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyBtn.textContent = "E-Mail kopieren"; }, 1800);
+    });
+
+    /* Keyboard Pad Triggers */
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeCrate();
+      else if (e.key === "ArrowRight") triggerPad(state.activeIdx + 1);
+      else if (e.key === "ArrowLeft") triggerPad(state.activeIdx - 1);
+    });
+
+    /* Purely Visual Breakbeat Oscilloscope & VU Animation (100% Silent) */
+    const canvas = document.getElementById("amenScope");
+    const ctx = canvas.getContext("2d");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Classic syncopated Jungle kick-snare-hat transient weights across 16 steps */
+    const AMEN_STEPS = [1.0, 0.28, 0.45, 0.32, 0.92, 0.25, 0.62, 0.85, 0.35, 0.88, 0.96, 0.30, 0.75, 0.40, 0.82, 0.48];
+
+    function paintVu(segs, level) {
+      const lit = Math.round(level * 12);
+      segs.forEach((s, i) => {
+        s.className = "vu-seg";
+        if (i < lit) {
+          if (i >= 10) s.classList.add("on-red");
+          else if (i >= 7) s.classList.add("on-amber");
+          else s.classList.add("on-green");
+        }
+      });
+    }
+
+    function drawScope(now) {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      /* 16 slice grid lines */
+      ctx.strokeStyle = "rgba(77, 255, 190, 0.10)";
+      ctx.lineWidth = 1;
+      for (let s = 1; s < 16; s++) {
+        const gx = (w / 16) * s;
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, h);
+        ctx.stroke();
+      }
+
+      const beatsPerSec = state.bpm / 60;
+      const barProgress = reducedMotion ? 0.25 : ((now / 1000) * (beatsPerSec / 4)) % 1;
+      const stepIdx = Math.floor(barProgress * 16) % 16;
+      const stepTransient = AMEN_STEPS[stepIdx];
+
+      state.energy = Math.max(0.35, state.energy * 0.96);
+
+      /* Draw breakbeat waveform */
+      ctx.strokeStyle = "#4DFFBE";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      const mid = h * 0.54;
+      for (let x = 0; x < w; x += 2) {
+        const norm = x / w;
+        const slice = AMEN_STEPS[Math.floor(norm * 16) % 16];
+        const localPhase = (norm * 16) % 1;
+        const env = Math.exp(-localPhase * 3.4) * slice * state.energy;
+        const sub = Math.sin(norm * Math.PI * 32 + (reducedMotion ? 0 : now * 0.008)) * 0.55;
+        const chop = Math.sin(norm * Math.PI * 148 + (state.activeIdx + 1) * 1.7) * 0.45;
+        const y = mid + (sub + chop) * env * (h * 0.42);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      /* Sweeping cyan slice playhead */
+      const playX = barProgress * w;
+      ctx.strokeStyle = "#38D9FF";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(playX, 0);
+      ctx.lineTo(playX, h);
+      ctx.stroke();
+
+      const vuVal = Math.min(1, stepTransient * state.energy * 0.95);
+      paintVu(vuL, vuVal);
+      paintVu(vuR, Math.min(1, vuVal * 0.9 + 0.06));
+
+      if (!reducedMotion) requestAnimationFrame(drawScope);
+    }
+    requestAnimationFrame(drawScope);
+  })();
+  </script>
+</body>
+</html>

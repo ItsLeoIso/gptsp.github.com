@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-fit="contain" data-scanlines="on">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — KOOL-94.6 (Pirate Radio FM &amp; Rave Deck · Konzept 18)</title>
+  <style>
+    :root {
+      --bg: #070709;
+      --console: #0E0F13;
+      --lime: #C8FF00;
+      --magenta: #FF2A85;
+      --cyan: #00F0FF;
+      --fg: #F5F6F0;
+      --muted: #8E9088;
+      --line: rgba(200, 255, 0, 0.24);
+      --line-soft: rgba(245, 246, 240, 0.14);
+      --font-rave: 'Syne', 'Arial Black', Impact, sans-serif;
+      --font-mono: 'Space Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-mono);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      touch-action: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- FULL-VIEWPORT PIRATE BROADCAST DECK ---------- */
+    .pirate-rig {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 216px;
+      background: var(--bg);
+    }
+
+    /* ---------- TOP: BROADCAST MONITOR + RAVE FLYER STAMP ---------- */
+    .tx-monitor {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 58px clamp(18px, 5vw, 72px) 28px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(200, 255, 0, 0.07), rgba(255, 42, 133, 0.04) 42%, #060608 78%);
+    }
+
+    [data-fit="cover"] .tx-monitor { padding: 0; }
+
+    /* Optional CRT Broadcast Scanlines */
+    [data-scanlines="on"] .tx-monitor::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0px,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0.26) 3px,
+        rgba(0, 0, 0, 0.26) 4px
+      );
+    }
+
+    #txImage {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      border: 2px solid rgba(200, 255, 0, 0.35);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.85);
+    }
+
+    [data-fit="cover"] #txImage {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: 0;
+    }
+
+    /* Silent Visual RF Static Snow Burst Canvas */
+    #staticCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 11;
+      opacity: 0;
+      transition: opacity 90ms linear;
+    }
+
+    /* Broadcast Top Telemetry Bar */
+    .tx-topbar {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tx-cluster {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tx-badge {
+      padding: 5px 10px;
+      background: rgba(8, 8, 11, 0.88);
+      border: 1.5px solid var(--line-soft);
+      font-size: 10.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button.tx-badge:hover, a.tx-badge:hover {
+      border-color: var(--lime);
+      color: var(--lime);
+    }
+
+    .tx-badge.is-lime {
+      border-color: var(--lime);
+      color: #090B04;
+      background: var(--lime);
+      font-weight: 700;
+    }
+
+    .tx-badge.is-magenta {
+      border-color: var(--magenta);
+      color: #FFF;
+      background: var(--magenta);
+      font-weight: 700;
+    }
+
+    .on-air-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--magenta);
+      box-shadow: 0 0 10px var(--magenta);
+      animation: pulseAir 1.2s infinite alternate;
+    }
+
+    @keyframes pulseAir { from { opacity: 0.45; } to { opacity: 1; } }
+
+    /* 90s Rave Flyer Corner Callsign Plate */
+    .flyer-stamp {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 20;
+      background: rgba(8, 8, 11, 0.92);
+      border: 2px solid var(--lime);
+      box-shadow: 6px 6px 0 var(--magenta);
+      padding: 10px 14px;
+      max-width: min(470px, calc(100vw - 32px));
+    }
+
+    .flyer-freq-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--lime);
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .flyer-title {
+      font-family: var(--font-rave);
+      font-weight: 800;
+      font-size: clamp(20px, 2.5vw, 32px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .flyer-loc {
+      color: var(--cyan);
+      font-size: 10.5px;
+      margin-top: 4px;
+    }
+
+    /* ---------- BOTTOM: ANALOG FM TUNER CONSOLE (88.0 - 108.0 MHz) ---------- */
+    .fm-console {
+      background: var(--console);
+      border-top: 2px solid var(--lime);
+      padding: 12px clamp(14px, 3vw, 28px) 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .console-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .freq-digital {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    #mhzReadout {
+      font-family: var(--font-rave);
+      font-size: clamp(24px, 2.8vw, 36px);
+      font-weight: 800;
+      color: var(--lime);
+      letter-spacing: -0.03em;
+    }
+
+    .preset-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mem-btn {
+      padding: 5px 9px;
+      border: 1px solid var(--line-soft);
+      background: #15171E;
+      font-size: 10px;
+      color: var(--muted);
+      transition: all 140ms ease;
+    }
+
+    .mem-btn:hover { border-color: var(--lime); color: var(--fg); }
+    .mem-btn.is-locked {
+      border-color: var(--lime);
+      background: rgba(200, 255, 0, 0.14);
+      color: var(--lime);
+      font-weight: 700;
+    }
+
+    /* Illuminated Linear FM Dial Scale */
+    .dial-window {
+      position: relative;
+      height: 84px;
+      background: #060709;
+      border: 1.5px solid rgba(200, 255, 0, 0.35);
+      padding: 0 18px;
+      cursor: ew-resize;
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    .dial-scale-Inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mhz-labels {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 10px;
+      pointer-events: none;
+    }
+
+    .station-pip {
+      position: absolute;
+      top: 34px;
+      width: 6px;
+      height: 22px;
+      transform: translateX(-50%);
+      background: rgba(200, 255, 0, 0.42);
+      border-radius: 1px;
+      cursor: pointer;
+      transition: background-color 140ms ease, height 140ms ease;
+    }
+
+    .station-pip.is-100 {
+      background: var(--magenta);
+      height: 28px;
+    }
+
+    .station-pip.is-current {
+      background: var(--lime);
+      height: 32px;
+      box-shadow: 0 0 10px var(--lime);
+    }
+
+    .scale-baseline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 45px;
+      height: 1px;
+      background: rgba(245, 246, 240, 0.18);
+      pointer-events: none;
+    }
+
+    /* Glowing Red/Lime Tuning Needle */
+    #tuningNeedle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 33%;
+      width: 3px;
+      transform: translateX(-50%);
+      background: var(--magenta);
+      box-shadow: 0 0 14px var(--magenta);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #tuningNeedle::after {
+      content: "▼";
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--lime);
+    }
+
+    .dial-hint {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 9.5px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    /* ---------- CEEFAX / TELETEXT P.100 STUDIO & ARCHIVE PAGE ---------- */
+    .teletext-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #050507;
+      color: var(--fg);
+      padding: clamp(16px, 3.5vw, 42px);
+      overflow-y: auto;
+      touch-action: pan-y;
+      user-select: text;
+      display: none;
+    }
+
+    .teletext-screen.is-open { display: block; }
+
+    .ttx-wrap {
+      max-width: 1080px;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .ttx-banner {
+      background: var(--lime);
+      color: #050603;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-weight: 700;
+      box-shadow: 6px 6px 0 var(--magenta);
+    }
+
+    .ttx-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 22px;
+    }
+
+    .ttx-box {
+      border: 2px solid var(--cyan);
+      padding: 18px;
+      background: #0B0C10;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ttx-box.is-magenta { border-color: var(--magenta); }
+
+    .ttx-bio-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ttx-bio-head img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border: 2px solid var(--lime);
+      flex-shrink: 0;
+    }
+
+    .freq-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 6px;
+    }
+
+    .freq-jump {
+      text-align: left;
+      padding: 6px 8px;
+      border: 1px solid var(--line-soft);
+      background: #12141B;
+      font-size: 10.5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .freq-jump:hover { border-color: var(--lime); color: var(--lime); }
+
+    @media (max-width: 760px) {
+      .pirate-rig { grid-template-rows: minmax(0, 1fr) 236px; }
+      .tx-monitor { padding: 86px 10px 92px; }
+      .flyer-stamp { left: 10px; bottom: 10px; padding: 8px 10px; }
+      .mem-btn { padding: 4px 6px; font-size: 9px; }
+      .dial-window { height: 74px; padding: 0 10px; }
+      .ttx-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="pirate-rig" aria-label="KOOL-94.6 Pirate Radio FM Empfänger">
+    <!-- TOP: BROADCAST STAGE -->
+    <section class="tx-monitor">
+      <div class="tx-topbar mono">
+        <div class="tx-cluster">
+          <a href="index.html" class="tx-badge">← Index</a>
+          <span class="tx-badge"><span class="on-air-dot"></span>ON AIR · LYSS TX</span>
+          <span class="tx-badge" style="color:var(--lime);" id="signalLockBadge">AFC LOCK · STEREO</span>
+        </div>
+        <div class="tx-cluster">
+          <button type="button" class="tx-badge" id="bleedBtn">Randlos</button>
+          <button type="button" class="tx-badge is-lime" id="scanlineBtn">Scanlines</button>
+          <button type="button" class="tx-badge is-magenta" id="openTeletextBtn">P.100 Teletext · Bio</button>
+        </div>
+      </div>
+
+      <img id="txImage" src="" alt="">
+      <canvas id="staticCanvas" width="320" height="200" aria-hidden="true"></canvas>
+
+      <div class="flyer-stamp">
+        <div class="flyer-freq-row mono">
+          <span id="stampFreq">94.6 FM</span>
+          <span>//</span>
+          <span id="stampSeries">02 · HÖHLEN VON VALLORBE</span>
+        </div>
+        <div class="flyer-title" id="stampTitle">Licht im Fels</div>
+        <div class="flyer-loc mono" id="stampLoc">LOC: VALLORBE, KANTON WAADT</div>
+      </div>
+    </section>
+
+    <!-- BOTTOM: LINEAR FM FREQUENCY TUNER (88.0 - 108.0 MHz) -->
+    <section class="fm-console" aria-label="FM Frequenz-Skala">
+      <div class="console-top mono">
+        <div class="freq-digital">
+          <span id="mhzReadout">94.6 MHz</span>
+          <span style="color:var(--muted);" id="stationCounter">CH 05 / 18</span>
+        </div>
+
+        <div class="preset-row">
+          <button type="button" class="mem-btn" id="seekPrevBtn" aria-label="Vorherige Frequenz">◀ Seek</button>
+          <button type="button" class="mem-btn" data-preset="0">88.6 Sizilien</button>
+          <button type="button" class="mem-btn is-locked" data-preset="4">94.6 Vallorbe</button>
+          <button type="button" class="mem-btn" data-preset="5">96.4 Jura</button>
+          <button type="button" class="mem-btn" data-preset="10">101.8 La Sauge</button>
+          <button type="button" class="mem-btn" data-preset="17" style="border-color:var(--magenta);color:var(--magenta);">107.8 · 100</button>
+          <button type="button" class="mem-btn" id="seekNextBtn" aria-label="Nächste Frequenz">Seek ▶</button>
+        </div>
+      </div>
+
+      <div class="dial-window" id="dialWindow" role="slider" tabindex="0" aria-valuemin="88.0" aria-valuemax="108.0" aria-valuenow="94.6" aria-label="FM Frequenzregler 88 bis 108 MHz">
+        <div class="dial-scale-Inner" id="dialScaleInner">
+          <div class="mhz-labels mono">
+            <span>88</span><span>90</span><span>92</span><span>94</span><span>96</span><span>98</span><span>100</span><span>102</span><span>104</span><span>106</span><span>108 MHz</span>
+          </div>
+          <div class="scale-baseline"></div>
+          <div id="stationPips"></div>
+          <div id="tuningNeedle"></div>
+          <div class="dial-hint mono">Nadel ziehen · Mausrad drehen · Pfeiltasten zum Tunen</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CEEFAX / TELETEXT P.100 STUDIO, DIRECTORY & ARCHIV 100 OVERLAY -->
+  <aside class="teletext-screen" id="teletextScreen" role="dialog" aria-modal="true" aria-label="Teletext Seite 100 — Studio Info und Frequenzverzeichnis">
+    <div class="ttx-wrap">
+      <div class="ttx-banner mono">
+        <span>CEEFAX P.100 // LEANDRO SINATRA PIRATE TX · LYSS, BERN</span>
+        <button type="button" class="tx-badge is-magenta" id="closeTeletextBtn">Zurück zum Empfänger ✕</button>
+      </div>
+
+      <div class="ttx-grid">
+        <div class="ttx-box">
+          <span class="mono" style="color:var(--cyan);">P.101 // OPERATOR &amp; KONTAKT</span>
+          <div class="ttx-bio-head">
+            <img id="ttxPortrait" alt="Porträt von Leandro Sinatra">
+            <div>
+              <h2 style="font-family:var(--font-rave);font-size:24px;text-transform:uppercase;">Leandro Sinatra</h2>
+              <span class="mono" style="color:var(--lime);">Fotograf · Lyss, Kanton Bern</span>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#C9CBC2;line-height:1.6;">Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld. Jede Werkserie sendet hier auf ihrem eigenen UKW-Piratenband zwischen 88.6 und 107.8 MHz.</p>
+          <div class="mono" style="display:flex;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--line-soft);">
+            <a class="tx-badge" href="mailto:itsleo.iso.contact@gmail.com" style="overflow-wrap:anywhere;">itsleo.iso.contact@gmail.com</a>
+            <button type="button" class="tx-badge is-lime" id="copyTtxMail">Kopieren</button>
+            <a class="tx-badge" href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+          </div>
+        </div>
+
+        <div class="ttx-box is-magenta">
+          <span class="mono" style="color:var(--magenta);">P.100 // ARCHIV · 100 TRANSMISSION LOG</span>
+          <h3 style="font-family:var(--font-rave);font-size:20px;text-transform:uppercase;">107.8 FM — 001 / 100 LIVE ON AIR</h3>
+          <p style="font-size:12.5px;color:#C9CBC2;line-height:1.55;">Wöchentliche Übertragung immer Samstag oder Sonntag. Sendung <strong>001 (13.09.2026 — Murtensee, Schweiz)</strong> sendet auf <strong>107.8 MHz</strong>; 99 weitere Wochenfrequenzen folgen.</p>
+          <div class="mono" id="ttxBar100" style="font-size:11px;line-height:1.45;letter-spacing:0.12em;color:var(--muted);word-break:break-all;"></div>
+          <div>
+            <button type="button" class="tx-badge is-magenta mono" id="tune100FromTtx">Direkt auf 107.8 FM abstimmen →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ttx-box" style="border-color:var(--lime);">
+        <span class="mono" style="color:var(--lime);">P.102 // KOMPLETTES FREQUENZ-VERZEICHNIS (18 STATIONEN)</span>
+        <div class="freq-list mono" id="ttxFreqList"></div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+  (() => {
+    const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+      "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+      "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+      "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+      "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+      "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+      "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+      "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+      "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+      "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+      "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+      "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+      "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+      "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+      "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+      "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+      "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+      "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+      "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+      "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+    };
+
+    const STATIONS = [
+      /* 88.6 - 92.2 MHz: 01 Valle dei Templi */
+      { mhz: 88.6, series: "01 · VALLE DEI TEMPLI", file: "mount-etna-sicily.webp", title: "Etna", loc: "Sizilien" },
+      { mhz: 89.8, series: "01 · VALLE DEI TEMPLI", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", loc: "Agrigento, Sizilien" },
+      { mhz: 91.0, series: "01 · VALLE DEI TEMPLI", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", loc: "Agrigento, Sizilien" },
+      { mhz: 92.2, series: "01 · VALLE DEI TEMPLI", file: "cat-sicily.webp", title: "Wächterin am Fels", loc: "Sizilien" },
+
+      /* 94.6 MHz: Flagship Kool FM Tribute -> 02 Vallorbe */
+      { mhz: 94.6, series: "02 · HÖHLEN VON VALLORBE", file: "vallorbe-caves.webp", title: "Licht im Fels", loc: "Vallorbe, Kanton Waadt" },
+
+      /* 96.4 - 100.4 MHz: 03 Creux du Van */
+      { mhz: 96.4, series: "03 · CREUX DU VAN", file: "creux-du-van-landscape.webp", title: "Kante des Jura", loc: "Creux du Van, Jura" },
+      { mhz: 97.4, series: "03 · CREUX DU VAN", file: "cattle-creux-du-van.webp", title: "Weide im Jura", loc: "Creux du Van, Jura" },
+      { mhz: 98.4, series: "03 · CREUX DU VAN", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", loc: "Creux du Van, Jura" },
+      { mhz: 99.4, series: "03 · CREUX DU VAN", file: "monochrome-moss-study.webp", title: "Studie im Jura", loc: "Creux du Van · Schwarzweiss" },
+      { mhz: 100.4, series: "03 · CREUX DU VAN", file: "monochrome-natural-texture.webp", title: "Felsstruktur", loc: "Creux du Van · Schwarzweiss" },
+
+      /* 101.8 - 106.6 MHz: 04 La Sauge */
+      { mhz: 101.8, series: "04 · LA SAUGE", file: "grey-heron-la-sauge.webp", title: "Graureiher", loc: "La Sauge, Drei-Seen-Land" },
+      { mhz: 102.6, series: "04 · LA SAUGE", file: "blue-tit-la-sauge.webp", title: "Blaumeise", loc: "La Sauge" },
+      { mhz: 103.4, series: "04 · LA SAUGE", file: "songbird-la-sauge.webp", title: "Singvogel im Licht", loc: "La Sauge" },
+      { mhz: 104.2, series: "04 · LA SAUGE", file: "bird-in-flight-la-sauge.webp", title: "Im Flug", loc: "La Sauge" },
+      { mhz: 105.0, series: "04 · LA SAUGE", file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", loc: "La Sauge" },
+      { mhz: 105.8, series: "04 · LA SAUGE", file: "frog-close-up-la-sauge.webp", title: "Frosch im Wasser I", loc: "La Sauge" },
+      { mhz: 106.6, series: "04 · LA SAUGE", file: "frog-in-water-la-sauge.webp", title: "Frosch im Wasser II", loc: "La Sauge" },
+
+      /* 107.8 MHz: Archiv 100 Pirate Dub */
+      { mhz: 107.8, series: "ARCHIV · 100 (001 / 100)", file: "murtensee-weekly-photo.webp", title: "13.09.2026 — Woche 001", loc: "Murtensee, Schweiz", is100: true }
+    ];
+
+    const MIN_MHZ = 88.0;
+    const MAX_MHZ = 108.0;
+
+    const txImage = document.getElementById("txImage");
+    const staticCanvas = document.getElementById("staticCanvas");
+    const sCtx = staticCanvas.getContext("2d");
+    const stampFreq = document.getElementById("stampFreq");
+    const stampSeries = document.getElementById("stampSeries");
+    const stampTitle = document.getElementById("stampTitle");
+    const stampLoc = document.getElementById("stampLoc");
+    const mhzReadout = document.getElementById("mhzReadout");
+    const stationCounter = document.getElementById("stationCounter");
+    const tuningNeedle = document.getElementById("tuningNeedle");
+    const dialWindow = document.getElementById("dialWindow");
+    const stationPips = document.getElementById("stationPips");
+    const teletextScreen = document.getElementById("teletextScreen");
+
+    document.getElementById("ttxPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+    /* Build Teletext 100-block progress bar & 18-frequency directory */
+    document.getElementById("ttxBar100").innerHTML =
+      `<span style="color:var(--lime);">█</span>` + "░".repeat(99);
+
+    const ttxFreqList = document.getElementById("ttxFreqList");
+    const pipEls = STATIONS.map((st, idx) => {
+      const pct = ((st.mhz - MIN_MHZ) / (MAX_MHZ - MIN_MHZ)) * 100;
+      const pip = document.createElement("div");
+      pip.className = "station-pip" + (st.is100 ? " is-100" : "");
+      pip.style.left = `${pct.toFixed(2)}%`;
+      pip.title = `${st.mhz.toFixed(1)} FM — ${st.title}`;
+      pip.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        tuneToIndex(idx, true);
+      });
+      stationPips.appendChild(pip);
+
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "freq-jump";
+      row.innerHTML = `<span style="color:${st.is100 ? 'var(--magenta)' : 'var(--lime)'};">${st.mhz.toFixed(1)} FM</span><span>${st.title}</span>`;
+      row.addEventListener("click", () => {
+        closeTeletext();
+        tuneToIndex(idx, true);
+      });
+      ttxFreqList.appendChild(row);
+
+      return pip;
+    });
+
+    /* Silent Visual Static Snow Burst (Zero Audio) */
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let staticTimer = null;
+    function flashVisualStatic() {
+      if (reducedMotion) return;
+      const w = staticCanvas.width;
+      const h = staticCanvas.height;
+      const imgData = sCtx.createImageData(w, h);
+      const buf = imgData.data;
+      for (let i = 0; i < buf.length; i += 4) {
+        const v = Math.random() > 0.5 ? 235 : 18;
+        buf[i] = v;
+        buf[i + 1] = v;
+        buf[i + 2] = v;
+        buf[i + 3] = 95;
+      }
+      sCtx.putImageData(imgData, 0, 0);
+      staticCanvas.style.opacity = "0.55";
+      clearTimeout(staticTimer);
+      staticTimer = setTimeout(() => { staticCanvas.style.opacity = "0"; }, 120);
+    }
+
+    let currentIdx = 4; /* Start tuned to flagship 94.6 FM (Vallorbe) */
+
+    function updateStationDisplay(idx, customMhz) {
+      const st = STATIONS[idx];
+      const shownMhz = customMhz !== undefined ? customMhz : st.mhz;
+      const pct = Math.max(0, Math.min(100, ((shownMhz - MIN_MHZ) / (MAX_MHZ - MIN_MHZ)) * 100));
+
+      tuningNeedle.style.left = `${pct.toFixed(2)}%`;
+      mhzReadout.textContent = `${shownMhz.toFixed(1)} MHz`;
+      dialWindow.setAttribute("aria-valuenow", shownMhz.toFixed(1));
+
+      if (idx !== currentIdx || !txImage.getAttribute("src")) {
+        if (txImage.getAttribute("src")) flashVisualStatic();
+        currentIdx = idx;
+        txImage.src = ASSETS[st.file];
+        txImage.alt = `${st.title} — ${st.loc}`;
+      }
+
+      stampFreq.textContent = `${st.mhz.toFixed(1)} FM`;
+      stampSeries.textContent = st.series;
+      stampTitle.textContent = st.title;
+      stampLoc.textContent = `LOC: ${st.loc}`;
+      stationCounter.textContent = `CH ${String(idx + 1).padStart(2, "0")} / ${STATIONS.length}`;
+
+      pipEls.forEach((p, i) => p.classList.toggle("is-current", i === idx));
+      document.querySelectorAll("[data-preset]").forEach((b) => {
+        b.classList.toggle("is-locked", Number(b.dataset.preset) === idx);
+      });
+    }
+
+    function tuneToIndex(nextIdx) {
+      const safe = ((nextIdx % STATIONS.length) + STATIONS.length) % STATIONS.length;
+      updateStationDisplay(safe);
+    }
+
+    /* Start on 94.6 FM */
+    updateStationDisplay(4);
+
+    /* Interactive Linear FM Dial Dragging */
+    let draggingDial = false;
+    function scrubDial(e) {
+      const rect = dialWindow.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const mhz = MIN_MHZ + ratio * (MAX_MHZ - MIN_MHZ);
+      let nearest = 0;
+      let bestDist = Infinity;
+      STATIONS.forEach((st, i) => {
+        const d = Math.abs(st.mhz - mhz);
+        if (d < bestDist) { bestDist = d; nearest = i; }
+      });
+      updateStationDisplay(nearest, mhz);
+    }
+
+    dialWindow.addEventListener("pointerdown", (e) => {
+      draggingDial = true;
+      dialWindow.setPointerCapture(e.pointerId);
+      scrubDial(e);
+    });
+    dialWindow.addEventListener("pointermove", (e) => {
+      if (draggingDial) scrubDial(e);
+    });
+    dialWindow.addEventListener("pointerup", () => {
+      if (!draggingDial) return;
+      draggingDial = false;
+      /* AFC Magnetic Lock onto exact station carrier */
+      updateStationDisplay(currentIdx);
+    });
+
+    /* Wheel Tuning */
+    let wheelCarry = 0;
+    window.addEventListener("wheel", (e) => {
+      if (teletextScreen.classList.contains("is-open")) return;
+      e.preventDefault();
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      wheelCarry += delta;
+      if (Math.abs(wheelCarry) >= 48) {
+        tuneToIndex(currentIdx + (wheelCarry > 0 ? 1 : -1));
+        wheelCarry = 0;
+      }
+    }, { passive: false });
+
+    /* Presets, Seek, Scanlines & Bleed */
+    document.querySelectorAll("[data-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => tuneToIndex(Number(btn.dataset.preset)));
+    });
+    document.getElementById("seekPrevBtn").addEventListener("click", () => tuneToIndex(currentIdx - 1));
+    document.getElementById("seekNextBtn").addEventListener("click", () => tuneToIndex(currentIdx + 1));
+
+    const bleedBtn = document.getElementById("bleedBtn");
+    bleedBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isContain = root.getAttribute("data-fit") === "contain";
+      root.setAttribute("data-fit", isContain ? "cover" : "contain");
+      bleedBtn.classList.toggle("is-lime", isContain);
+      bleedBtn.textContent = isContain ? "Original" : "Randlos";
+    });
+
+    const scanlineBtn = document.getElementById("scanlineBtn");
+    scanlineBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isOn = root.getAttribute("data-scanlines") === "on";
+      root.setAttribute("data-scanlines", isOn ? "off" : "on");
+      scanlineBtn.classList.toggle("is-lime", !isOn);
+    });
+
+    /* Teletext P.100 Modal */
+    function openTeletext() { teletextScreen.classList.add("is-open"); }
+    function closeTeletext() { teletextScreen.classList.remove("is-open"); }
+
+    document.getElementById("openTeletextBtn").addEventListener("click", openTeletext);
+    document.getElementById("closeTeletextBtn").addEventListener("click", closeTeletext);
+    document.getElementById("tune100FromTtx").addEventListener("click", () => {
+      closeTeletext();
+      tuneToIndex(17);
+    });
+
+    const copyBtn = document.getElementById("copyTtxMail");
+    copyBtn.addEventListener("click", () => {
+      if (navigator.clipboard) navigator.clipboard.writeText("itsleo.iso.contact@gmail.com").catch(() => {});
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(() => { copyBtn.textContent = "Kopieren"; }, 1800);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeTeletext();
+      else if (!teletextScreen.classList.contains("is-open") && (e.key === "ArrowRight" || e.key === "ArrowUp")) {
+        e.preventDefault();
+        tuneToIndex(currentIdx + 1);
+      } else if (!teletextScreen.classList.contains("is-open") && (e.key === "ArrowLeft" || e.key === "ArrowDown")) {
+        e.preventDefault();
+        tuneToIndex(currentIdx - 1);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

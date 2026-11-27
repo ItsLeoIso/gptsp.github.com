@@ -241,6 +241,7 @@
 
     .card-top { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); }
     .card-top .num { color: var(--accent); }
+    .card.is-jungle .card-top .num { color: #C8FF00; font-weight: 700; }
     .card.is-spatial .card-top .num { color: var(--spatial); font-weight: 700; }
     .card.is-loud .card-top .num { color: var(--loud); font-weight: 700; }
     .card.is-world .card-top .num { color: var(--world); font-weight: 700; }
@@ -257,9 +258,40 @@
     }
 
     .card:hover .card-cta { color: var(--accent); }
+    .card.is-jungle:hover { border-color: #C8FF00; }
+    .card.is-jungle:hover .card-cta { color: #C8FF00; }
     .card.is-spatial:hover .card-cta { color: var(--spatial); }
     .card.is-loud:hover .card-cta { color: var(--loud); }
     .card.is-world:hover .card-cta { color: var(--world); }
+
+    .badge-jungle { background: #C8FF00; color: #060903; font-weight: 700; }
+    .jump-pill.is-jungle { border-color: #C8FF00; color: #C8FF00; }
+
+    .p-sampler {
+      background: radial-gradient(circle at 40% 45%, rgba(77,255,190,0.22), #051113 72%);
+      padding: 18px;
+      border-bottom: 2px solid #4DFFBE;
+    }
+    .p-sampler img {
+      width: 68%;
+      height: 80%;
+      object-fit: contain;
+      border: 1px solid rgba(77,255,190,0.45);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.75);
+    }
+
+    .p-pirate {
+      background: #070709;
+      padding: 18px;
+      border-bottom: 2px solid #C8FF00;
+    }
+    .p-pirate img {
+      width: 68%;
+      height: 80%;
+      object-fit: contain;
+      border: 2px solid #C8FF00;
+      box-shadow: 6px 6px 0 #FF2A85;
+    }
 
     /* Collapsible Archive for Waves 1–3 */
     details.archive-drawer {
@@ -308,20 +340,55 @@
   <div class="wrap">
     <header>
       <div>
-        <span class="mono" style="color:var(--spatial);">Wave 4 · Radikal neue Interaktions-Paradigmen · itsleoiso.ch</span>
-        <h1>Keine Webseite. Vier Räume.</h1>
-        <p>Komplett ohne Navbar, ohne 3-Tab-Schema, ohne vertikales Seiten-Scrollen, ohne Footer und ohne Modal-Lightbox: vier eigenständige räumliche und gestische Motoren für alle 19 Fotografien von Leandro Sinatra.</p>
+        <span class="mono" style="color:#C8FF00;">Wave 5 · UK Jungle Edition + Raum-Paradigmen · itsleoiso.ch</span>
+        <h1>Jungle Decks &amp; Freie Räume.</h1>
+        <p>Komplett ohne Navbar, ohne 3-Tab-Schema, ohne vertikales Seiten-Scrollen und ohne Modal-Lightbox: zwei lautlose visuelle 90s-UK-Jungle-Instrumente (<strong>17–18</strong>) sowie vier räumliche Motoren (<strong>13–16</strong>).</p>
       </div>
       <div class="jump-links mono">
-        <a class="jump-pill is-spatial" href="#wave-spatial">Wave 4 · Raum-Paradigmen (13–16) ↓</a>
-        <a class="jump-pill" href="#archive-waves">Archiv · Wellen 1–3 (01–12) ↓</a>
+        <a class="jump-pill is-jungle" href="#wave-jungle">Wave 5 · Jungle (17–18) ↓</a>
+        <a class="jump-pill is-spatial" href="#wave-spatial">Wave 4 · Räume (13–16) ↓</a>
+        <a class="jump-pill" href="#archive-waves">Archiv (01–12) ↓</a>
       </div>
     </header>
+
+    <!-- ==================== WAVE 5: 90s UK JUNGLE EDITION ==================== -->
+    <section id="wave-jungle">
+      <div class="wave-header">
+        <h2><span class="badge badge-jungle mono">Neu · Wave 5</span>Jungle Edition (Rein Visuell &amp; Lautlos)</h2>
+        <span class="mono" style="color:var(--muted);">Konzepte 17 — 18 · Atmospheric Akai S950 Sampler · 94.6 FM Pirate Radio</span>
+      </div>
+
+      <div class="grid">
+        <a class="card is-jungle" href="concept-17-jungle-sampler.html">
+          <div class="card-preview p-sampler">
+            <img src="Arbeiten/vallorbe-caves.webp" alt="Konzept 17 — AKAI-168 Atmospheric Jungle Sampler">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">17 · Atmospheric Jungle</span><span>18 MPC-Pads · Amen-Oszilloskop · 100 Crate</span></div>
+            <h3 class="card-title">AKAI-168 (Atmospheric Jungle Visual Sampler)</h3>
+            <p class="card-desc">Inspiriert von 1995 Good Looking / LTJ Bukem &amp; Akai S950 Hardware: 18 beleuchtete Gummi-Pads für alle Werke, Serien-Solo-Bänke, lautloses 168-BPM-Breakbeat-Oszilloskop, grünes Phosphor-LCD und eine 10&quot;-Dubplate-Plattenkiste für Archiv · 100.</p>
+            <div class="card-cta mono"><span>Sampler starten</span><span>→</span></div>
+          </div>
+        </a>
+
+        <a class="card is-jungle" href="concept-18-pirate-radio.html">
+          <div class="card-preview p-pirate">
+            <img src="Arbeiten/temple-of-concordia-sicily.webp" alt="Konzept 18 — KOOL-94.6 Pirate Radio Deck">
+          </div>
+          <div class="card-body">
+            <div class="card-top mono"><span class="num">18 · Pirate Radio 94.6</span><span>88–108 MHz Tuner · Rave Flyer · Teletext</span></div>
+            <h3 class="card-title">KOOL-94.6 (Pirate Radio FM &amp; Rave Deck)</h3>
+            <p class="card-desc">Rohe 1993er London-Piratensender-Ästhetik in Acid-Lime &amp; Rave-Magenta: ziehbare analoge UKW-Frequenzskala (88.6–107.8 MHz) mit kurzem visuellem Bildrauschen beim Tunen, Scanlines und einer echten CEEFAX-Teletext-Seite P.100.</p>
+            <div class="card-cta mono"><span>Frequenz einschalten</span><span>→</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
 
     <!-- ==================== WAVE 4: NON-WEBPAGE SPATIAL PARADIGMS ==================== -->
     <section id="wave-spatial">
       <div class="wave-header">
-        <h2><span class="badge badge-spatial mono">Neu · Wave 4</span>Vier Nicht-Webseiten-Paradigmen</h2>
+        <h2><span class="badge badge-spatial mono">Wave 4</span>Vier Nicht-Webseiten-Paradigmen</h2>
         <span class="mono" style="color:var(--muted);">Konzepte 13 — 16 · 2D-Weltfeld · 3D-Z-Flug · Gegenläufiges Diptychon · 360°-Blende</span>
       </div>
 
