@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="aluminum">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Diaprojektor D26 (Konzept 10)</title>
+  <style>
+    :root {
+      --chassis: #E4E1DA;
+      --chassis-hi: #EFECE6;
+      --chassis-lo: #CECAC1;
+      --bezel: #1B1B1A;
+      --screen: #080809;
+      --ink: #1C1C1A;
+      --muted: #66645E;
+      --orange: #E65100;
+      --led-on: #2BB656;
+      --seam: rgba(28, 28, 26, 0.16);
+      --key-bg: #F4F2EC;
+      --key-shadow: 0 3px 0 #B6B2A8, 0 5px 10px rgba(0, 0, 0, 0.12);
+      --font-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --pad-x: clamp(16px, 3.5vw, 48px);
+    }
+
+    [data-theme="charcoal"] {
+      --chassis: #1C1C1E;
+      --chassis-hi: #262629;
+      --chassis-lo: #121214;
+      --ink: #EDEBE5;
+      --muted: #8E8C85;
+      --seam: rgba(255, 255, 255, 0.13);
+      --key-bg: #2A2A2D;
+      --key-shadow: 0 3px 0 #0B0B0C, 0 6px 12px rgba(0, 0, 0, 0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--chassis); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--chassis);
+      color: var(--ink);
+      line-height: 1.45;
+      overflow-x: hidden;
+      transition: background-color 220ms ease, color 220ms ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wrap {
+      max-width: 1460px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+    }
+
+    /* ---------- HARDWARE TOP RAIL ---------- */
+    .hw-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: var(--chassis);
+      border-bottom: 1.5px solid var(--seam);
+      padding-block: 12px;
+    }
+
+    .hw-header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .model-plate {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .power-led {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--led-on);
+      box-shadow: 0 0 8px rgba(43, 182, 86, 0.7);
+    }
+
+    .model-plate strong {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .model-code {
+      padding: 2px 7px;
+      border: 1px solid var(--seam);
+      color: var(--muted);
+    }
+
+    .hw-switches {
+      display: flex;
+      gap: 8px;
+    }
+
+    .hw-key {
+      padding: 7px 14px;
+      background: var(--key-bg);
+      border: 1px solid var(--seam);
+      border-radius: 4px;
+      box-shadow: var(--key-shadow);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: transform 90ms ease, background-color 140ms ease, color 140ms ease;
+      white-space: nowrap;
+    }
+
+    .hw-key:active {
+      transform: translateY(2px);
+    }
+
+    .hw-key.is-active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #FFF;
+    }
+
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; }
+
+    /* ---------- MAIN PROJECTOR CHASSIS ---------- */
+    .projector-unit {
+      margin-top: clamp(18px, 2.5vw, 32px);
+      background: var(--chassis-hi);
+      border: 1.5px solid var(--seam);
+      border-radius: 12px;
+      padding: clamp(16px, 2.5vw, 30px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 18px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .projector-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: clamp(18px, 2.5vw, 32px);
+      align-items: stretch;
+    }
+
+    /* Recessed Optical Projection Screen */
+    .optical-bay {
+      background: var(--bezel);
+      border-radius: 8px;
+      padding: clamp(12px, 2vw, 22px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.75);
+    }
+
+    .bay-top {
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 10px;
+    }
+
+    .bay-screen {
+      flex: 1;
+      min-height: clamp(320px, 54vh, 540px);
+      background: var(--screen);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      cursor: zoom-in;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bay-screen img {
+      max-width: 100%;
+      max-height: 50vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transition: opacity 95ms linear;
+    }
+
+    .bay-screen.is-blinking img {
+      opacity: 0.08;
+    }
+
+    .bay-foot {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #EAE8E1;
+    }
+
+    /* Tactile Right Control Deck */
+    .control-deck {
+      background: var(--chassis);
+      border: 1px solid var(--seam);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .engraved-title h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .engraved-title p {
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    /* Vent Louvers (Classic Braun Detail) */
+    .louvers {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-block: 6px;
+    }
+
+    .louvers span {
+      display: block;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--chassis-lo);
+    }
+
+    .transport-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .tactile-btn {
+      padding: 13px 10px;
+      background: var(--key-bg);
+      border: 1px solid var(--seam);
+      border-radius: 6px;
+      box-shadow: var(--key-shadow);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      text-transform: uppercase;
+      transition: transform 90ms ease;
+    }
+
+    .tactile-btn:active { transform: translateY(2px); }
+
+    .tactile-btn.is-orange {
+      grid-column: 1 / 3;
+      background: var(--orange);
+      border-color: #B53F00;
+      color: #FFF;
+      box-shadow: 0 3px 0 #8F3100, 0 6px 12px rgba(230, 81, 0, 0.25);
+    }
+
+    .tray-selector-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .tray-slots {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .slot-key {
+      padding: 8px 0;
+      background: var(--key-bg);
+      border: 1px solid var(--seam);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .slot-key.is-active {
+      background: var(--ink);
+      color: var(--chassis-hi);
+    }
+
+    .auto-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--seam);
+    }
+
+    .auto-led {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--chassis-lo);
+      margin-right: 6px;
+    }
+
+    .auto-led.is-on {
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    /* ---------- SLIDE MOUNT CONTACT SHEET BELOW ---------- */
+    .mounts-section {
+      padding-block: clamp(36px, 5vw, 64px);
+    }
+
+    .mounts-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .slide-mount {
+      background: #F7F5EF;
+      color: #1C1C1A;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .slide-mount:hover {
+      transform: translateY(-3px);
+      border-color: var(--orange);
+    }
+
+    .mount-window {
+      aspect-ratio: 1 / 1;
+      background: #0D0D0E;
+      border-radius: 3px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mount-window img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .mount-stamp {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #555;
+    }
+
+    /* ---------- SPEC PLATE (ÜBER) ---------- */
+    .spec-plate {
+      margin-bottom: clamp(40px, 6vw, 72px);
+      background: var(--chassis-hi);
+      border: 1.5px solid var(--seam);
+      border-radius: 10px;
+      padding: clamp(20px, 3vw, 36px);
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 28px;
+      align-items: center;
+    }
+
+    .spec-plate img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      border: 1px solid var(--seam);
+    }
+
+    /* ---------- PROJEKTE: SLIDE MAGAZINES ---------- */
+    .magazines-view {
+      padding-block: clamp(24px, 4vw, 48px) clamp(64px, 8vw, 104px);
+    }
+
+    .mag-selector {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .mag-box {
+      padding: 14px;
+      background: var(--chassis-hi);
+      border: 1.5px solid var(--seam);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .mag-box.is-active {
+      border-color: var(--orange);
+      box-shadow: inset 0 0 0 1px var(--orange);
+    }
+
+    /* ---------- ARCHIV 100: RUNDMAGAZIN 100 ---------- */
+    .carousel-view {
+      padding-block: clamp(24px, 4vw, 48px) clamp(64px, 8vw, 104px);
+    }
+
+    .carousel-split {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .tray-100 {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 5px;
+      background: var(--chassis-hi);
+      border: 1.5px solid var(--seam);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .t100-slot {
+      aspect-ratio: 1 / 1;
+      border-radius: 3px;
+      background: var(--chassis);
+      border: 1px solid var(--seam);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .t100-slot.is-live {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #FFF;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .hw-footer {
+      border-top: 1.5px solid var(--seam);
+      padding-block: 26px;
+    }
+
+    .hw-footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #070708;
+      color: #EFECE6;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .lb-btn { padding: 6px 12px; border: 1px solid rgba(239, 236, 230, 0.35); border-radius: 4px; color: #EFECE6; }
+    .lb-btn:hover, .lb-btn.is-active { background: var(--orange); border-color: var(--orange); color: #FFF; }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 220ms ease; }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: 1px solid rgba(239, 236, 230, 0.35); border-radius: 4px; color: #EFECE6; }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.42; border: 1px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--orange); }
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 960px) {
+      .projector-grid { grid-template-columns: 1fr; }
+      .mag-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .carousel-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .hw-header-inner { flex-wrap: wrap; row-gap: 10px; }
+      .hw-switches { order: 3; width: 100%; }
+      .hw-key { flex: 1; text-align: center; padding: 7px 8px; }
+      .model-code { display: none; }
+      .bay-screen { min-height: 250px; }
+      .spec-plate { grid-template-columns: 1fr; }
+      .spec-plate img { max-width: 150px; }
+      .mag-selector { grid-template-columns: 1fr; }
+      .lb-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hw-header">
+  <div class="wrap hw-header-inner">
+    <a href="#start" class="model-plate" data-view-link="start">
+      <span class="power-led" aria-hidden="true"></span>
+      <strong>Sinatra D26</strong>
+      <span class="model-code mono">Optik · Lyss</span>
+    </a>
+    <nav class="hw-switches" aria-label="Gerätemodus">
+      <button type="button" class="hw-key is-active" data-view-btn="start" aria-current="page">Projektor</button>
+      <button type="button" class="hw-key" data-view-btn="projekte">Magazine</button>
+      <button type="button" class="hw-key" data-view-btn="archiv">Magazin · 100</button>
+    </nav>
+    <button type="button" class="hw-key" id="themeToggle">Gehäuse: Dunkel</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ==================== STARTSEITE: HARDWARE PROJECTOR ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="projector-unit" aria-label="Optischer Diaprojektor">
+      <div class="projector-grid">
+        <div class="optical-bay">
+          <div class="bay-top mono">
+            <span id="baySlotLabel">SCHACHT 01 / 10</span>
+            <span>50×50 MM · UNBESCHNITTEN</span>
+          </div>
+          <div class="bay-screen" id="bayScreen" tabindex="0" role="button" aria-label="Aktuelles Dia im Vollbild projizieren">
+            <img id="bayImg" alt="">
+          </div>
+          <div class="bay-foot mono">
+            <span id="bayTitle">Etna</span>
+            <span id="bayLoc" style="color:var(--orange);">Sizilien</span>
+          </div>
+        </div>
+
+        <aside class="control-deck">
+          <div class="engraved-title">
+            <span class="mono" style="color:var(--orange);">Leandro Sinatra</span>
+            <h1>Diaprojektor<br>Werkschau 25–26</h1>
+            <p>Die Kamera hält fest, was das Auge übersieht. Klarheit statt Dekoration.</p>
+          </div>
+
+          <div class="louvers" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+
+          <div>
+            <div class="tray-selector-label mono">
+              <span>Magazin-Wahl</span>
+              <span id="deckReadout">DIA 01</span>
+            </div>
+            <div class="tray-slots" id="traySlots"></div>
+          </div>
+
+          <div class="transport-row">
+            <button type="button" class="tactile-btn" id="btnPrevSlide">◀ Zurück</button>
+            <button type="button" class="tactile-btn" id="btnNextSlide">Weiter ▶</button>
+            <button type="button" class="tactile-btn is-orange" id="btnFullProject">Vollbild-Projektion ⛶</button>
+          </div>
+
+          <div class="auto-row mono">
+            <span><span class="auto-led" id="autoLed"></span>Automatik (4s)</span>
+            <button type="button" class="hw-key" id="btnAutoToggle">Start</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="mounts-section">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;" class="mono">
+        <span>Leuchtpult · Alle 10 Diarahmen</span>
+        <span style="color:var(--muted);">Klick lädt Dia in Schacht</span>
+      </div>
+      <div class="mounts-grid" id="mountsGrid"></div>
+    </section>
+
+    <section class="spec-plate">
+      <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+      <div>
+        <span class="mono" style="color:var(--orange);">Typenschild · Fotograf</span>
+        <h2 style="font-size:clamp(22px,2.6vw,32px);margin-block:4px 10px;">Leandro Sinatra · Lyss, Kanton Bern</h2>
+        <p style="color:var(--muted);max-width:56ch;font-size:14.5px;">Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld in Architektur, Landschaft und Wildlife.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE: 4 SLIDE MAGAZINES ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="magazines-view">
+      <div class="mag-selector" id="magSelector"></div>
+      <div class="mounts-grid" id="magMountsGrid"></div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100: RUNDMAGAZIN ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="carousel-view">
+      <div style="margin-bottom:20px;">
+        <span class="mono" style="color:var(--orange);">Langzeit-Rundmagazin</span>
+        <h1 style="font-size:clamp(28px,3.6vw,44px);letter-spacing:-0.03em;">Archiv · 100</h1>
+      </div>
+      <div class="carousel-split">
+        <div class="optical-bay" id="archBay" tabindex="0" role="button" aria-label="Woche 001 projizieren" style="cursor:zoom-in;">
+          <div class="bay-top mono"><span>SCHACHT 001 / 100</span><span>13.09.2026</span></div>
+          <div class="bay-screen" style="min-height:300px;">
+            <img id="archSlideImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          </div>
+          <div class="bay-foot mono"><span>Murtensee, Schweiz</span><span style="color:var(--orange);">Vollbild ⛶</span></div>
+        </div>
+        <div class="tray-100" id="tray100"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="hw-footer mono">
+  <div class="wrap hw-footer-inner">
+    <div>
+      <a href="mailto:itsleo.iso.contact@gmail.com" style="color:var(--orange);font-weight:600;">itsleo.iso.contact@gmail.com</a>
+      <button type="button" class="hw-key" style="margin-left:10px;" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+      <span id="copyStatus" style="margin-left:8px;color:var(--orange);"></span>
+    </div>
+    <div>
+      <a href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer" style="margin-right:16px;">Instagram ↗</a>
+      <span style="color:var(--muted);">© 2026 Leandro Sinatra · Konzept 10 (Diaprojektor)</span>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vollbild-Projektion" aria-hidden="true">
+  <div class="lb-top mono">
+    <div><span id="lbCounter" style="color:var(--orange);margin-right:12px;">01 / 10</span><span id="lbCaption">Etna</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn mono" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn mono" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Dia">◀</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Dia">▶</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const SLIDES = [
+    { num: "01", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien" },
+    { num: "02", file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+    { num: "03", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+    { num: "04", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+    { num: "05", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien" },
+    { num: "06", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss" },
+    { num: "07", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge" },
+    { num: "08", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" },
+    { num: "09", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+    { num: "10", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+  ];
+
+  const MAGAZINES = [
+    {
+      id: "m1", code: "MAG 01", title: "Valle dei Templi",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "m2", code: "MAG 02", title: "Vallorbe",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }]
+    },
+    {
+      id: "m3", code: "MAG 03", title: "Creux du Van",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "m4", code: "MAG 04", title: "La Sauge",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Chassis Theme */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const alum = root.getAttribute("data-theme") === "aluminum";
+    root.setAttribute("data-theme", alum ? "charcoal" : "aluminum");
+    themeBtn.textContent = alum ? "Gehäuse: Hell" : "Gehäuse: Dunkel";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Hardware Projector Deck */
+  const bayScreen = document.getElementById("bayScreen");
+  const bayImg = document.getElementById("bayImg");
+  const baySlotLabel = document.getElementById("baySlotLabel");
+  const bayTitle = document.getElementById("bayTitle");
+  const bayLoc = document.getElementById("bayLoc");
+  const deckReadout = document.getElementById("deckReadout");
+  const traySlots = document.getElementById("traySlots");
+  const mountsGrid = document.getElementById("mountsGrid");
+  let currentSlide = 0;
+  let autoTimer = null;
+
+  function loadSlide(idx, blink = true) {
+    currentSlide = (idx + SLIDES.length) % SLIDES.length;
+    const s = SLIDES[currentSlide];
+    if (blink) {
+      bayScreen.classList.add("is-blinking");
+      setTimeout(() => {
+        bayImg.src = ASSETS[s.file];
+        bayImg.alt = s.title;
+        bayScreen.classList.remove("is-blinking");
+      }, 85);
+    } else {
+      bayImg.src = ASSETS[s.file];
+      bayImg.alt = s.title;
+    }
+    baySlotLabel.textContent = `SCHACHT ${s.num} / 10`;
+    bayTitle.textContent = s.title;
+    bayLoc.textContent = s.location;
+    deckReadout.textContent = `DIA ${s.num}`;
+    traySlots.querySelectorAll(".slot-key").forEach((k, i) => k.classList.toggle("is-active", i === currentSlide));
+  }
+
+  SLIDES.forEach((s, i) => {
+    const k = document.createElement("button");
+    k.type = "button";
+    k.className = "slot-key";
+    k.textContent = s.num;
+    k.setAttribute("aria-label", `Dia ${s.num}: ${s.title}`);
+    k.addEventListener("click", () => loadSlide(i, true));
+    traySlots.appendChild(k);
+
+    const m = document.createElement("article");
+    m.className = "slide-mount";
+    m.tabIndex = 0;
+    m.setAttribute("role", "button");
+    m.setAttribute("aria-label", `Dia ${s.num} laden: ${s.title}`);
+    m.innerHTML = `
+      <div class="mount-window"><img src="${ASSETS[s.file]}" alt="${s.title}" loading="lazy"></div>
+      <div class="mount-stamp"><span>DIA ${s.num}</span><span>${s.title}</span></div>
+    `;
+    const selectAndScroll = () => {
+      loadSlide(i, true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    m.addEventListener("click", selectAndScroll);
+    m.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectAndScroll(); } });
+    mountsGrid.appendChild(m);
+  });
+
+  loadSlide(0, false);
+
+  document.getElementById("btnPrevSlide").addEventListener("click", () => loadSlide(currentSlide - 1, true));
+  document.getElementById("btnNextSlide").addEventListener("click", () => loadSlide(currentSlide + 1, true));
+  document.getElementById("btnFullProject").addEventListener("click", () => openLightbox(SLIDES, currentSlide));
+  bayScreen.addEventListener("click", () => openLightbox(SLIDES, currentSlide));
+  bayScreen.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(SLIDES, currentSlide); } });
+
+  const autoLed = document.getElementById("autoLed");
+  const btnAutoToggle = document.getElementById("btnAutoToggle");
+  btnAutoToggle.addEventListener("click", () => {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      autoLed.classList.remove("is-on");
+      btnAutoToggle.textContent = "Start";
+    } else {
+      autoLed.classList.add("is-on");
+      btnAutoToggle.textContent = "Stopp";
+      autoTimer = setInterval(() => loadSlide(currentSlide + 1, true), 4000);
+    }
+  });
+
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Magazine View (Projekte) */
+  const magSelector = document.getElementById("magSelector");
+  const magMountsGrid = document.getElementById("magMountsGrid");
+
+  function renderMag(id) {
+    const m = MAGAZINES.find((x) => x.id === id) || MAGAZINES[0];
+    magSelector.querySelectorAll(".mag-box").forEach((b) => b.classList.toggle("is-active", b.dataset.mid === m.id));
+    magMountsGrid.innerHTML = "";
+    m.photos.forEach((ph, i) => {
+      const el = document.createElement("article");
+      el.className = "slide-mount";
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", `${ph.title} projizieren`);
+      el.innerHTML = `
+        <div class="mount-window"><img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy"></div>
+        <div class="mount-stamp"><span>0${i + 1}</span><span>${ph.title}</span></div>
+      `;
+      el.addEventListener("click", () => openLightbox(m.photos, i));
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(m.photos, i); } });
+      magMountsGrid.appendChild(el);
+    });
+  }
+
+  MAGAZINES.forEach((m) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mag-box";
+    b.dataset.mid = m.id;
+    b.innerHTML = `<div class="mono" style="color:var(--orange);">${m.code}</div><div style="font-weight:700;margin-top:4px;">${m.title}</div><div class="mono" style="color:var(--muted);margin-top:4px;">${String(m.photos.length).padStart(2, "0")} Dias</div>`;
+    b.addEventListener("click", () => renderMag(m.id));
+    magSelector.appendChild(b);
+  });
+  renderMag(MAGAZINES[0].id);
+
+  /* Archiv 100 */
+  document.getElementById("archSlideImg").src = ASSETS[WEEKLY[0].file];
+  const archBay = document.getElementById("archBay");
+  archBay.addEventListener("click", () => openLightbox(WEEKLY, 0));
+  archBay.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WEEKLY, 0); } });
+
+  const tray100 = document.getElementById("tray100");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "t100-slot is-live";
+      b.textContent = code;
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      tray100.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "t100-slot";
+      d.textContent = code;
+      tray100.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>

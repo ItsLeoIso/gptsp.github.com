@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="washi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Ma · 間 (Konzept 12)</title>
+  <style>
+    :root {
+      --washi: #F6F3EC;
+      --mat: #FDFBF7;
+      --sumi: #171614;
+      --ash: #767168;
+      --hanko: #B8291E;
+      --hair: rgba(23, 22, 20, 0.13);
+      --font-serif: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-theme="sumi"] {
+      --washi: #100F0E;
+      --mat: #171614;
+      --sumi: #ECE8DF;
+      --ash: #8C867B;
+      --hanko: #D94136;
+      --hair: rgba(236, 232, 223, 0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--washi); color: var(--sumi); -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--washi);
+      color: var(--sumi);
+      line-height: 1.6;
+      overflow-x: hidden;
+      transition: background-color 320ms var(--ease), color 320ms var(--ease);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 1.5px solid var(--hanko); outline-offset: 4px; }
+
+    .serif { font-family: var(--font-serif); }
+    .micro { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+
+    /* ---------- SERENE HEADER WITH HANKO SEAL ---------- */
+    .ma-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: var(--washi);
+      border-bottom: 1px solid var(--hair);
+      padding: 14px clamp(20px, 4vw, 56px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ma-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .hanko-seal {
+      width: 26px;
+      height: 26px;
+      border: 1.5px solid var(--hanko);
+      color: var(--hanko);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .ma-nav { display: flex; gap: clamp(18px, 3vw, 38px); }
+    .ma-tab {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ash);
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: color 200ms ease, border-color 200ms ease;
+      white-space: nowrap;
+    }
+
+    .ma-tab:hover, .ma-tab.is-active { color: var(--sumi); }
+    .ma-tab.is-active { border-bottom-color: var(--hanko); }
+
+    .sumi-btn {
+      padding: 5px 11px;
+      border: 1px solid var(--hair);
+      color: var(--ash);
+      white-space: nowrap;
+    }
+
+    .sumi-btn:hover { border-color: var(--hanko); color: var(--hanko); }
+
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; animation: breathIn 420ms var(--ease); }
+    @keyframes breathIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ---------- HORIZONTAL SCROLL EXHIBITION CORRIDOR (MA / 間) ---------- */
+    .corridor-shell {
+      position: relative;
+      border-bottom: 1px solid var(--hair);
+    }
+
+    .corridor-track {
+      display: flex;
+      align-items: center;
+      gap: clamp(80px, 11vw, 180px);
+      overflow-x: auto;
+      padding: clamp(32px, 5vh, 64px) clamp(32px, 6vw, 96px);
+      min-height: calc(100svh - 122px);
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+
+    .corridor-track::-webkit-scrollbar { display: none; }
+
+    /* Intro Scroll Panel */
+    .scroll-intro {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: stretch;
+      gap: 36px;
+      padding-right: clamp(24px, 4vw, 64px);
+      border-right: 1px solid var(--hair);
+    }
+
+    .vertical-kicker {
+      writing-mode: vertical-rl;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ash);
+    }
+
+    .intro-body {
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 28px;
+    }
+
+    .intro-body h1 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: clamp(42px, 5vw, 68px);
+      line-height: 0.96;
+      letter-spacing: -0.015em;
+    }
+
+    .intro-body p {
+      font-size: 14.5px;
+      color: var(--ash);
+      line-height: 1.75;
+    }
+
+    /* Individual Tokonoma / Ma Plate Station */
+    .ma-station {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .ma-plate {
+      background: var(--mat);
+      border: 1px solid var(--hair);
+      padding: clamp(14px, 2vw, 26px);
+      cursor: zoom-in;
+      transition: border-color 260ms ease, transform 420ms var(--ease);
+    }
+
+    .ma-plate:hover {
+      border-color: var(--hanko);
+      transform: translateY(-3px);
+    }
+
+    .ma-plate img {
+      height: clamp(300px, 54vh, 520px);
+      width: auto;
+      max-width: 74vw;
+      object-fit: contain;
+    }
+
+    .ma-vertical-cap {
+      writing-mode: vertical-rl;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--ash);
+      padding-top: 4px;
+    }
+
+    .ma-vertical-cap .num {
+      color: var(--hanko);
+      font-family: var(--font-serif);
+      font-size: 14px;
+      writing-mode: horizontal-tb;
+    }
+
+    /* End Colophon Station inside Corridor */
+    .scroll-colophon {
+      flex: 0 0 auto;
+      width: 360px;
+      padding-left: 48px;
+      border-left: 1px solid var(--hair);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .scroll-colophon img {
+      width: 120px;
+      height: 120px;
+      border: 1px solid var(--hair);
+      padding: 6px;
+      background: var(--mat);
+    }
+
+    /* Corridor Bottom Progress & Controls */
+    .corridor-bar {
+      padding: 12px clamp(20px, 4vw, 56px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid var(--hair);
+    }
+
+    .ink-progress {
+      flex: 1;
+      max-width: 360px;
+      height: 1px;
+      background: var(--hair);
+      position: relative;
+    }
+
+    .ink-progress-fill {
+      position: absolute;
+      left: 0;
+      top: -1px;
+      height: 2px;
+      width: 12%;
+      background: var(--hanko);
+      transition: width 150ms linear;
+    }
+
+    .glide-btns { display: flex; gap: 10px; }
+    .glide-btn {
+      padding: 5px 12px;
+      border: 1px solid var(--hair);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .glide-btn:hover { border-color: var(--hanko); color: var(--hanko); }
+
+    /* ---------- PROJEKTE: FOUR MEDITATIVE ROOMS ---------- */
+    .ma-rooms {
+      max-width: 1240px;
+      margin-inline: auto;
+      padding: clamp(32px, 5vw, 64px) clamp(20px, 4vw, 56px) clamp(72px, 9vw, 128px);
+    }
+
+    .ma-room-tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--hair);
+      margin-bottom: clamp(40px, 6vw, 76px);
+    }
+
+    .mr-tab {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--ash);
+      padding-bottom: 4px;
+      border-bottom: 1px solid transparent;
+    }
+
+    .mr-tab.is-active, .mr-tab:hover { color: var(--sumi); }
+    .mr-tab.is-active { border-bottom-color: var(--hanko); }
+
+    .ma-vertical-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(56px, 8vw, 116px);
+    }
+
+    .ma-vertical-stack .ma-plate img {
+      height: auto;
+      max-height: 70vh;
+      max-width: min(760px, 82vw);
+    }
+
+    /* ---------- ARCHIV 100: KAKEMONO HANGING SCROLL ---------- */
+    .kakemono-view {
+      max-width: 1180px;
+      margin-inline: auto;
+      padding: clamp(36px, 5vw, 68px) clamp(20px, 4vw, 56px) clamp(72px, 9vw, 128px);
+    }
+
+    .kakemono-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 5vw, 72px);
+      align-items: start;
+    }
+
+    .hanging-scroll {
+      background: var(--mat);
+      border: 1px solid var(--hair);
+      padding: clamp(24px, 4vw, 48px) clamp(18px, 3vw, 32px);
+      cursor: zoom-in;
+      text-align: center;
+    }
+
+    .hanging-scroll img { width: 100%; aspect-ratio: 2200 / 1467; }
+
+    .seal-grid-100 {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .seal-slot {
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--hair);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-size: 12px;
+      color: var(--ash);
+      opacity: 0.55;
+    }
+
+    .seal-slot.is-live {
+      opacity: 1;
+      border-color: var(--hanko);
+      color: var(--hanko);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .ma-footer {
+      border-top: 1px solid var(--hair);
+      padding: 28px clamp(20px, 4vw, 56px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: var(--washi);
+      color: var(--sumi);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 240ms var(--ease);
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; }
+    .lb-btn { padding: 5px 12px; border: 1px solid var(--hair); color: var(--sumi); }
+    .lb-btn:hover, .lb-btn.is-active { border-color: var(--hanko); color: var(--hanko); }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 90vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 280ms var(--ease); }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 1px solid var(--hair); }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.4; border: 1px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--hanko); }
+    body.lb-open { overflow: hidden; }
+
+    .hint-mobile { display: none; }
+
+    /* Mobile vertical flow with preserved vertical side captions */
+    @media (max-width: 860px) {
+      .hint-desktop { display: none; }
+      .hint-mobile { display: inline; }
+      .ma-header { flex-wrap: wrap; row-gap: 10px; }
+      .ma-nav { order: 3; width: 100%; justify-content: space-between; }
+      .corridor-track {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 52px;
+        min-height: 0;
+        padding: 28px 20px 56px;
+        overflow-x: hidden;
+      }
+      .scroll-intro { border-right: 0; border-bottom: 1px solid var(--hair); padding-right: 0; padding-bottom: 28px; gap: 18px; }
+      .ma-station { justify-content: center; gap: 10px; }
+      .ma-plate img { height: auto; max-width: 100%; width: 100%; }
+      .scroll-colophon { width: 100%; padding-left: 0; padding-top: 28px; border-left: 0; border-top: 1px solid var(--hair); }
+      .corridor-bar { display: none; }
+      .kakemono-split { grid-template-columns: 1fr; }
+      .lb-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="ma-header">
+  <a href="#start" class="ma-brand" data-view-link="start">
+    <span class="hanko-seal" aria-hidden="true">LS</span>
+    <span class="serif" style="font-size:20px;">Leandro Sinatra</span>
+  </a>
+  <nav class="ma-nav" aria-label="Hauptnavigation">
+    <button type="button" class="ma-tab is-active" data-view-btn="start" aria-current="page">Wandelgang · 間</button>
+    <button type="button" class="ma-tab" data-view-btn="projekte">Vier Räume</button>
+    <button type="button" class="ma-tab" data-view-btn="archiv">Rolle · 100</button>
+  </nav>
+  <button type="button" class="sumi-btn micro" id="themeToggle">Tusche</button>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE: HORIZONTAL MA CORRIDOR ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="corridor-shell" aria-label="Horizontaler Ausstellungsraum">
+      <div class="corridor-track" id="corridorTrack">
+        <div class="scroll-intro">
+          <span class="vertical-kicker">Lyss · Schweiz · 2025–2026</span>
+          <div class="intro-body">
+            <div>
+              <span class="micro" style="color:var(--hanko);">Ma · 間 · Der Zwischenraum</span>
+              <h1 style="margin-top:10px;">Leandro<br>Sinatra</h1>
+            </div>
+            <p>Die Kamera hält fest, was das Auge übersieht. Jede Fotografie steht frei im Raum — unbeschnitten, getragen von Stille und Mass.</p>
+            <span class="micro" style="color:var(--ash);"><span class="hint-desktop">Seitwärts gleiten →</span><span class="hint-mobile">Nach unten gleiten ↓</span></span>
+          </div>
+        </div>
+        <!-- Stations injected by JS -->
+        <div class="scroll-colophon" id="corridorColophon">
+          <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+          <h2 class="serif" style="font-size:28px;font-weight:400;">Leandro Sinatra</h2>
+          <p style="font-size:14px;color:var(--ash);">Fotograf aus Lyss, Kanton Bern. Architektur, Landschaft und Wildlife — beobachtet mit Geduld und klarer Form.</p>
+        </div>
+      </div>
+
+      <div class="corridor-bar">
+        <span class="micro" style="color:var(--ash);">10 Tafeln · Mausrad oder Pfeile</span>
+        <div class="ink-progress" aria-hidden="true">
+          <div class="ink-progress-fill" id="inkProgressFill"></div>
+        </div>
+        <div class="glide-btns">
+          <button type="button" class="glide-btn" id="glidePrev">← Zurück</button>
+          <button type="button" class="glide-btn" id="glideNext">Weiter →</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE: VIER RÄUME ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="ma-rooms">
+      <div class="ma-room-tabs" id="maRoomTabs"></div>
+      <div class="ma-vertical-stack" id="maRoomStack"></div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100: KAKEMONO ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="kakemono-view">
+      <div class="kakemono-split">
+        <div class="hanging-scroll" id="kakemonoTrigger" tabindex="0" role="button" aria-label="Woche 001 öffnen">
+          <span class="hanko-seal" style="margin-bottom:18px;">壱</span>
+          <img id="kakemonoImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          <div style="margin-top:18px;" class="micro">001 / 100 · 13.09.2026 · Murtensee</div>
+        </div>
+        <div>
+          <span class="micro" style="color:var(--hanko);">Hundert Wochen</span>
+          <h1 class="serif" style="font-size:clamp(34px,4vw,52px);font-weight:400;margin-block:6px 12px;">Archiv · 100</h1>
+          <p style="color:var(--ash);font-size:14.5px;margin-bottom:24px;max-width:44ch;">Ein Foto pro Woche, immer Samstag oder Sonntag neu — jedes Bild erhält sein rotes Siegel im Hunderter-Register.</p>
+          <div class="seal-grid-100" id="sealGrid100"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="ma-footer micro">
+  <div>
+    <a href="mailto:itsleo.iso.contact@gmail.com" style="color:var(--hanko);">itsleo.iso.contact@gmail.com</a>
+    <button type="button" class="sumi-btn micro" style="margin-left:10px;" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+    <span id="copyStatus" style="margin-left:8px;color:var(--hanko);"></span>
+  </div>
+  <div style="color:var(--ash);">
+    <a href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer" style="margin-right:16px;color:var(--sumi);">Instagram ↗</a>
+    <span>© 2026 Leandro Sinatra · Konzept 12 (Ma · 間)</span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografie im Vollbild" aria-hidden="true">
+  <div class="lb-top micro">
+    <div><span id="lbCounter" style="color:var(--hanko);margin-right:12px;">01 / 10</span><span id="lbCaption">Etna</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn micro" id="lbZoom">Lupe</button>
+      <button type="button" class="lb-btn micro" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const PLATES = [
+    { num: "00", file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+    { num: "01", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien" },
+    { num: "02", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+    { num: "03", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+    { num: "04", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien" },
+    { num: "05", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss" },
+    { num: "06", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge" },
+    { num: "07", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" },
+    { num: "08", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+    { num: "09", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+  ];
+
+  const ROOMS = [
+    {
+      id: "r1", roman: "I", title: "Valle dei Templi",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "r2", roman: "II", title: "Vallorbe",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }]
+    },
+    {
+      id: "r3", roman: "III", title: "Creux du Van",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "r4", roman: "IV", title: "La Sauge",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Theme */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const w = root.getAttribute("data-theme") === "washi";
+    root.setAttribute("data-theme", w ? "sumi" : "washi");
+    themeBtn.textContent = w ? "Washi" : "Tusche";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Populate Horizontal Corridor */
+  const corridorTrack = document.getElementById("corridorTrack");
+  const corridorColophon = document.getElementById("corridorColophon");
+  const inkProgressFill = document.getElementById("inkProgressFill");
+
+  PLATES.forEach((p, idx) => {
+    const st = document.createElement("figure");
+    st.className = "ma-station";
+    st.innerHTML = `
+      <div class="ma-plate" tabindex="0" role="button" aria-label="${p.title} öffnen">
+        <img src="${ASSETS[p.file]}" alt="${p.title}, ${p.location}" loading="${idx < 2 ? 'eager' : 'lazy'}">
+      </div>
+      <figcaption class="ma-vertical-cap">
+        <span class="num">${p.num}</span>
+        <span>${p.title} · ${p.location}</span>
+      </figcaption>
+    `;
+    const pl = st.querySelector(".ma-plate");
+    pl.addEventListener("click", () => openLightbox(PLATES, idx));
+    pl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(PLATES, idx); } });
+    corridorTrack.insertBefore(st, corridorColophon);
+  });
+
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Convert vertical wheel to smooth horizontal glide on desktop */
+  corridorTrack.addEventListener("wheel", (e) => {
+    if (window.innerWidth <= 860) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      const maxScroll = corridorTrack.scrollWidth - corridorTrack.clientWidth;
+      const atStart = corridorTrack.scrollLeft <= 2 && e.deltaY < 0;
+      const atEnd = corridorTrack.scrollLeft >= maxScroll - 2 && e.deltaY > 0;
+      if (!atStart && !atEnd) {
+        e.preventDefault();
+        corridorTrack.scrollLeft += e.deltaY * 1.15;
+      }
+    }
+  }, { passive: false });
+
+  corridorTrack.addEventListener("scroll", () => {
+    const max = corridorTrack.scrollWidth - corridorTrack.clientWidth;
+    const pct = max > 0 ? Math.min(100, Math.max(8, (corridorTrack.scrollLeft / max) * 100)) : 100;
+    inkProgressFill.style.width = `${pct}%`;
+  });
+
+  document.getElementById("glidePrev").addEventListener("click", () => corridorTrack.scrollBy({ left: -560, behavior: "smooth" }));
+  document.getElementById("glideNext").addEventListener("click", () => corridorTrack.scrollBy({ left: 560, behavior: "smooth" }));
+
+  /* Projekte: Vier Räume */
+  const maRoomTabs = document.getElementById("maRoomTabs");
+  const maRoomStack = document.getElementById("maRoomStack");
+
+  function renderRoom(id) {
+    const r = ROOMS.find((x) => x.id === id) || ROOMS[0];
+    maRoomTabs.querySelectorAll(".mr-tab").forEach((t) => t.classList.toggle("is-active", t.dataset.rid === r.id));
+    maRoomStack.innerHTML = "";
+    r.photos.forEach((ph, i) => {
+      const st = document.createElement("figure");
+      st.className = "ma-station";
+      st.innerHTML = `
+        <div class="ma-plate" tabindex="0" role="button" aria-label="${ph.title} öffnen">
+          <img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy">
+        </div>
+        <figcaption class="ma-vertical-cap">
+          <span class="num">0${i + 1}</span>
+          <span>${ph.title} · ${ph.location}</span>
+        </figcaption>
+      `;
+      const pl = st.querySelector(".ma-plate");
+      pl.addEventListener("click", () => openLightbox(r.photos, i));
+      pl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(r.photos, i); } });
+      maRoomStack.appendChild(st);
+    });
+  }
+
+  ROOMS.forEach((r) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mr-tab";
+    b.dataset.rid = r.id;
+    b.textContent = `${r.roman}. ${r.title}`;
+    b.addEventListener("click", () => renderRoom(r.id));
+    maRoomTabs.appendChild(b);
+  });
+  renderRoom(ROOMS[0].id);
+
+  /* Archiv 100: Kakemono */
+  document.getElementById("kakemonoImg").src = ASSETS[WEEKLY[0].file];
+  const kakemonoTrigger = document.getElementById("kakemonoTrigger");
+  kakemonoTrigger.addEventListener("click", () => openLightbox(WEEKLY, 0));
+  kakemonoTrigger.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WEEKLY, 0); } });
+
+  const sealGrid100 = document.getElementById("sealGrid100");
+  for (let i = 1; i <= 100; i++) {
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "seal-slot is-live";
+      b.textContent = "壱";
+      b.setAttribute("aria-label", "Woche 001 — Murtensee öffnen");
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      sealGrid100.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "seal-slot";
+      d.textContent = String(i).padStart(2, "0");
+      sealGrid100.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Lupe";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>

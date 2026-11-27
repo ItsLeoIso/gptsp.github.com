@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Sinatra OS 2.6 — Schreibtisch (Konzept 11)</title>
+  <style>
+    :root {
+      --desk: #CFCBC0;
+      --desk-dot: rgba(20, 20, 20, 0.18);
+      --win-bg: #F6F4EE;
+      --win-bar: #EAE6DC;
+      --ink: #121212;
+      --muted: #5C5A54;
+      --cobalt: #1B4DFF;
+      --shadow: 4px 4px 0 #121212;
+      --border: 2px solid #121212;
+      --thin: 1px solid rgba(18, 18, 18, 0.25);
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --font-sans: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    [data-theme="darkos"] {
+      --desk: #14171F;
+      --desk-dot: rgba(255, 255, 255, 0.12);
+      --win-bg: #1E222D;
+      --win-bar: #282D3B;
+      --ink: #F0EFEA;
+      --muted: #9BA0AE;
+      --cobalt: #4C78FF;
+      --shadow: 4px 4px 0 #07080B;
+      --border: 2px solid #F0EFEA;
+      --thin: 1px solid rgba(240, 239, 234, 0.22);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--desk); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-mono);
+      background-color: var(--desk);
+      background-image: radial-gradient(var(--desk-dot) 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: var(--ink);
+      line-height: 1.45;
+      overflow-x: hidden;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+    :focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+
+    /* ---------- CLASSIC OS MENU BAR ---------- */
+    .os-menubar {
+      position: sticky;
+      top: 0;
+      z-index: 800;
+      background: var(--win-bg);
+      border-bottom: var(--border);
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .os-menus {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .apple-mark {
+      padding: 3px 8px;
+      background: var(--ink);
+      color: var(--win-bg);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .menu-item {
+      padding: 4px 10px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .menu-item:hover { border-color: var(--ink); }
+    .menu-item.is-active {
+      background: var(--cobalt);
+      color: #FFF;
+    }
+
+    .os-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .os-btn-sm {
+      padding: 3px 8px;
+      border: 1.5px solid var(--ink);
+      background: var(--win-bar);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .os-btn-sm:hover { background: var(--cobalt); color: #FFF; border-color: var(--cobalt); }
+
+    .view-panel { display: none; flex: 1; }
+    .view-panel.is-active { display: block; }
+
+    /* ---------- DESKTOP WORKSPACE ---------- */
+    .desktop-area {
+      position: relative;
+      min-height: calc(100svh - 86px);
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Desktop Folder Icons Column */
+    .desktop-icons {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 5;
+      width: 112px;
+    }
+
+    .d-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .d-icon:hover .icon-label,
+    .d-icon.is-selected .icon-label {
+      background: var(--cobalt);
+      color: #FFF;
+    }
+
+    .folder-glyph {
+      width: 44px;
+      height: 34px;
+      background: var(--win-bg);
+      border: var(--border);
+      box-shadow: 2px 2px 0 var(--ink);
+      position: relative;
+    }
+
+    .folder-glyph::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: -2px;
+      width: 18px;
+      height: 6px;
+      background: var(--cobalt);
+      border: var(--border);
+      border-bottom: 0;
+    }
+
+    .icon-label {
+      padding: 1px 5px;
+      background: var(--win-bg);
+      border: 1px solid var(--ink);
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Draggable Classic Windows */
+    .os-window {
+      position: absolute;
+      background: var(--win-bg);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .os-window.is-hidden { display: none; }
+
+    .win-titlebar {
+      background: var(--win-bar);
+      border-bottom: var(--border);
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      cursor: grab;
+      user-select: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(128, 128, 128, 0.22) 3px,
+        rgba(128, 128, 128, 0.22) 4px
+      );
+    }
+
+    .win-titlebar:active { cursor: grabbing; }
+
+    .win-title-pill {
+      background: var(--win-bar);
+      padding: 0 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .win-close-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--ink);
+      background: var(--win-bg);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    .win-close-box:hover { background: var(--cobalt); color: #FFF; }
+
+    .win-infobar {
+      padding: 5px 12px;
+      border-bottom: var(--thin);
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .win-body {
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    /* Window 1: Finder Contact Grid */
+    #winFinder {
+      left: 152px;
+      top: 20px;
+      width: min(680px, calc(100vw - 520px));
+      max-height: 76vh;
+      z-index: 20;
+    }
+
+    .finder-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .file-item {
+      border: var(--thin);
+      padding: 8px;
+      background: rgba(128, 128, 128, 0.05);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .file-item:hover, .file-item.is-selected {
+      border-color: var(--cobalt);
+      background: rgba(27, 77, 255, 0.1);
+    }
+
+    .file-thumb-box {
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-thumb-box img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .file-name {
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Window 2: Live Inspector Preview */
+    #winPreview {
+      right: 24px;
+      top: 32px;
+      width: 430px;
+      z-index: 25;
+    }
+
+    .preview-canvas {
+      background: #0D0E11;
+      padding: 12px;
+      min-height: 270px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-in;
+    }
+
+    .preview-canvas img {
+      max-width: 100%;
+      max-height: 300px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* Window 3: Readme / Bio */
+    #winReadme {
+      right: 44px;
+      bottom: 24px;
+      width: 390px;
+      z-index: 22;
+    }
+
+    .readme-grid {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 12px;
+      align-items: start;
+      font-size: 12px;
+    }
+
+    .readme-grid img {
+      width: 76px;
+      height: 76px;
+      border: 1.5px solid var(--ink);
+    }
+
+    /* ---------- PROJEKTE FINDER VIEW ---------- */
+    .finder-full-wrap {
+      max-width: 1320px;
+      margin: 24px auto 48px;
+      padding-inline: 18px;
+    }
+
+    .static-window {
+      background: var(--win-bg);
+      border: var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .finder-split {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      min-height: 540px;
+    }
+
+    .finder-sidebar {
+      border-right: var(--border);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .f-folder-btn {
+      padding: 9px 10px;
+      text-align: left;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .f-folder-btn:hover { border-color: var(--ink); }
+    .f-folder-btn.is-active { background: var(--cobalt); color: #FFF; }
+
+    .finder-content {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+      align-content: start;
+    }
+
+    /* ---------- ARCHIV 100 DISK SECTOR MAP ---------- */
+    .disk-split {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .sector-map {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .sector-cell {
+      aspect-ratio: 1 / 1;
+      border: var(--thin);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .sector-cell.is-live {
+      background: var(--cobalt);
+      border-color: var(--cobalt);
+      color: #FFF;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ---------- BOTTOM TASKBAR / FOOTER ---------- */
+    .os-footer {
+      margin-top: auto;
+      background: var(--win-bg);
+      border-top: var(--border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+    }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #090A0D;
+      color: #F0EFEA;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+    .lb-btn { padding: 5px 11px; border: 1.5px solid #F0EFEA; color: #F0EFEA; font-size: 11px; }
+    .lb-btn:hover, .lb-btn.is-active { background: var(--cobalt); border-color: var(--cobalt); color: #FFF; }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 220ms ease; }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 1.5px solid #F0EFEA; color: #F0EFEA; }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 6px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.45; border: 1.5px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--cobalt); }
+    body.lb-open { overflow: hidden; }
+
+    /* Mobile-smart clean window stack */
+    @media (max-width: 1060px) {
+      .desktop-area { display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+      .desktop-icons { position: static; flex-direction: row; flex-wrap: wrap; width: 100%; gap: 10px; }
+      .os-window { position: static !important; width: 100% !important; max-height: none !important; }
+      #winPreview { order: -1; }
+      .finder-split { grid-template-columns: 1fr; }
+      .finder-sidebar { border-right: 0; border-bottom: var(--border); flex-direction: row; flex-wrap: wrap; }
+      .disk-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .finder-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .os-clock-txt { display: none; }
+      .lb-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="os-menubar">
+  <div class="os-menus">
+    <a href="#start" class="apple-mark" data-view-link="start">LS/OS</a>
+    <button type="button" class="menu-item is-active" data-view-btn="start" aria-current="page">Schreibtisch</button>
+    <button type="button" class="menu-item" data-view-btn="projekte">Ordner: Projekte</button>
+    <button type="button" class="menu-item" data-view-btn="archiv">Archiv_100.app</button>
+  </div>
+  <div class="os-status">
+    <span class="os-clock-txt" id="osClock">LYSS · 12:00</span>
+    <button type="button" class="os-btn-sm" id="themeToggle">Dark OS</button>
+  </div>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE: MULTI-WINDOW DESKTOP ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <div class="desktop-area" id="desktopArea">
+      <div class="desktop-icons" aria-label="Schreibtisch-Symbole">
+        <button type="button" class="d-icon is-selected" data-open-win="winFinder">
+          <span class="folder-glyph"></span>
+          <span class="icon-label">Auswahl_25-26</span>
+        </button>
+        <button type="button" class="d-icon" data-open-win="winPreview">
+          <span class="folder-glyph"></span>
+          <span class="icon-label">Vorschau.app</span>
+        </button>
+        <button type="button" class="d-icon" data-open-win="winReadme">
+          <span class="folder-glyph"></span>
+          <span class="icon-label">Ueber_Mich.txt</span>
+        </button>
+        <button type="button" class="d-icon" data-jump-view="projekte">
+          <span class="folder-glyph"></span>
+          <span class="icon-label">4_Serien</span>
+        </button>
+        <button type="button" class="d-icon" data-jump-view="archiv">
+          <span class="folder-glyph"></span>
+          <span class="icon-label">Archiv_100</span>
+        </button>
+      </div>
+
+      <!-- Window 1: Finder Contact Browser -->
+      <section class="os-window" id="winFinder" aria-label="Fenster Auswahl 2025–2026">
+        <div class="win-titlebar" data-drag-handle>
+          <button type="button" class="win-close-box" data-close-win="winFinder" aria-label="Fenster schliessen">×</button>
+          <span class="win-title-pill">Auswahl_2025-2026 (10 Objekte)</span>
+          <span style="width:16px;"></span>
+        </div>
+        <div class="win-infobar">
+          <span>Unbeschnittene Originale</span>
+          <span>Klick = Vorschau · Doppelklick = Vollbild</span>
+        </div>
+        <div class="win-body">
+          <div class="finder-grid" id="finderGrid"></div>
+        </div>
+      </section>
+
+      <!-- Window 2: Live Preview App -->
+      <section class="os-window" id="winPreview" aria-label="Fenster Vorschau">
+        <div class="win-titlebar" data-drag-handle>
+          <button type="button" class="win-close-box" data-close-win="winPreview" aria-label="Fenster schliessen">×</button>
+          <span class="win-title-pill" id="prevWinTitle">01_tempel.webp</span>
+          <span style="width:16px;"></span>
+        </div>
+        <div class="win-body">
+          <div class="preview-canvas" id="previewTrigger" tabindex="0" role="button" aria-label="Vorschau im Vollbild öffnen">
+            <img id="previewImg" alt="">
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;">
+            <span id="previewMeta">Tempel der Eintracht · Sizilien</span>
+            <button type="button" class="os-btn-sm" id="btnPreviewFull">Vollbild ↗</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Window 3: Bio / Readme -->
+      <section class="os-window" id="winReadme" aria-label="Fenster Über Leandro Sinatra">
+        <div class="win-titlebar" data-drag-handle>
+          <button type="button" class="win-close-box" data-close-win="winReadme" aria-label="Fenster schliessen">×</button>
+          <span class="win-title-pill">Ueber_Leandro.txt</span>
+          <span style="width:16px;"></span>
+        </div>
+        <div class="win-body">
+          <div class="readme-grid">
+            <img id="aboutPortrait" alt="Leandro Sinatra" width="1000" height="1000">
+            <div>
+              <strong>Leandro Sinatra · Lyss, CH</strong>
+              <p style="margin-top:6px;color:var(--muted);font-size:11.5px;">Architektur, Landschaft &amp; Wildlife. Klarheit statt Dekoration, Struktur statt Zufall.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ==================== PROJEKTE FINDER ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <div class="finder-full-wrap">
+      <div class="static-window">
+        <div class="win-titlebar" style="cursor:default;">
+          <span style="width:16px;"></span>
+          <span class="win-title-pill">Macintosh HD : Fotografie : Projekte</span>
+          <span style="width:16px;"></span>
+        </div>
+        <div class="finder-split">
+          <aside class="finder-sidebar" id="projSidebar"></aside>
+          <div class="finder-content" id="projContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ARCHIV 100 DISK MAP ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <div class="finder-full-wrap">
+      <div class="static-window">
+        <div class="win-titlebar" style="cursor:default;">
+          <span style="width:16px;"></span>
+          <span class="win-title-pill">Archiv_100.app — Sektor 001 / 100 belegt</span>
+          <span style="width:16px;"></span>
+        </div>
+        <div class="disk-split">
+          <div>
+            <div class="preview-canvas" id="archTrigger" tabindex="0" role="button" aria-label="Woche 001 öffnen">
+              <img id="archImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11px;">
+              <span><strong>001_murtensee.webp</strong> · 13.09.2026</span>
+              <span>Murtensee, Schweiz ↗</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">100-Wochen-Sektorspeicher (jedes Wochenende +1 Block):</div>
+            <div class="sector-map" id="sectorMap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="os-footer">
+  <div>
+    <a href="mailto:itsleo.iso.contact@gmail.com" style="color:var(--cobalt);font-weight:700;">itsleo.iso.contact@gmail.com</a>
+    <button type="button" class="os-btn-sm" style="margin-left:8px;" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+    <span id="copyStatus" style="margin-left:8px;color:var(--cobalt);font-weight:700;"></span>
+  </div>
+  <div>
+    <a href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer" style="margin-right:14px;">Instagram ↗</a>
+    <span style="color:var(--muted);">Sinatra OS 2.6 · Konzept 11</span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vollbild-Vorschau" aria-hidden="true">
+  <div class="lb-top">
+    <div><span id="lbCounter" style="color:var(--cobalt);margin-right:12px;">01 / 10</span><span id="lbCaption">Tempel der Eintracht</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const FILES = [
+    { fname: "01_concordia.webp", file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Sizilien" },
+    { fname: "02_etna.webp", file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+    { fname: "03_jura_kante.webp", file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+    { fname: "04_graureiher.webp", file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+    { fname: "05_icaro.webp", file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Sizilien" },
+    { fname: "06_jura_sw.webp", file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Schwarzweiss" },
+    { fname: "07_blaumeise.webp", file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge" },
+    { fname: "08_katze_fels.webp", file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" },
+    { fname: "09_weisse_kuh.webp", file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+    { fname: "10_vallorbe.webp", file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "p1", name: "01_Valle_dei_Templi",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    {
+      id: "p2", name: "02_Vallorbe",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }]
+    },
+    {
+      id: "p3", name: "03_Creux_du_Van",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "Creux du Van" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "Creux du Van" }
+      ]
+    },
+    {
+      id: "p4", name: "04_La_Sauge",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "La Sauge" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "La Sauge" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "La Sauge" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "La Sauge" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "La Sauge" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee, Schweiz" }];
+
+  /* Swiss Clock */
+  const clockEl = document.getElementById("osClock");
+  function updateClock() {
+    try {
+      const t = new Intl.DateTimeFormat("de-CH", { timeZone: "Europe/Zurich", hour: "2-digit", minute: "2-digit" }).format(new Date());
+      clockEl.textContent = `LYSS · ${t}`;
+    } catch {
+      clockEl.textContent = "LYSS · CET";
+    }
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  /* Theme */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const c = root.getAttribute("data-theme") === "classic";
+    root.setAttribute("data-theme", c ? "darkos" : "classic");
+    themeBtn.textContent = c ? "Classic OS" : "Dark OS";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+  document.querySelectorAll("[data-jump-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.jumpView)));
+
+  /* Window Manager: Focus, Close, Reopen, Drag */
+  let topZ = 30;
+  function focusWin(win) {
+    topZ += 1;
+    win.style.zIndex = String(topZ);
+    win.classList.remove("is-hidden");
+  }
+
+  document.querySelectorAll(".os-window").forEach((win) => {
+    win.addEventListener("pointerdown", () => focusWin(win));
+  });
+
+  document.querySelectorAll("[data-close-win]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById(btn.dataset.closeWin).classList.add("is-hidden");
+    });
+  });
+
+  document.querySelectorAll("[data-open-win]").forEach((icon) => {
+    icon.addEventListener("click", () => {
+      document.querySelectorAll(".d-icon").forEach((i) => i.classList.remove("is-selected"));
+      icon.classList.add("is-selected");
+      focusWin(document.getElementById(icon.dataset.openWin));
+    });
+  });
+
+  const desktopArea = document.getElementById("desktopArea");
+  document.querySelectorAll("[data-drag-handle]").forEach((bar) => {
+    const win = bar.closest(".os-window");
+    let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    bar.addEventListener("pointerdown", (e) => {
+      if (window.innerWidth <= 1060 || e.target.closest("button")) return;
+      dragging = true;
+      focusWin(win);
+      const areaRect = desktopArea.getBoundingClientRect();
+      const wRect = win.getBoundingClientRect();
+      ox = wRect.left - areaRect.left;
+      oy = wRect.top - areaRect.top;
+      win.style.right = "auto";
+      win.style.bottom = "auto";
+      win.style.left = `${ox}px`;
+      win.style.top = `${oy}px`;
+      sx = e.clientX;
+      sy = e.clientY;
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const areaRect = desktopArea.getBoundingClientRect();
+      const nx = Math.max(0, Math.min(areaRect.width - win.offsetWidth, ox + (e.clientX - sx)));
+      const ny = Math.max(0, Math.min(areaRect.height - 60, oy + (e.clientY - sy)));
+      win.style.left = `${nx}px`;
+      win.style.top = `${ny}px`;
+    });
+    const stop = () => { dragging = false; };
+    bar.addEventListener("pointerup", stop);
+    bar.addEventListener("pointercancel", stop);
+  });
+
+  /* Finder Files + Preview App */
+  const finderGrid = document.getElementById("finderGrid");
+  const prevWinTitle = document.getElementById("prevWinTitle");
+  const previewImg = document.getElementById("previewImg");
+  const previewMeta = document.getElementById("previewMeta");
+  let activeFileIdx = 0;
+
+  function selectFile(idx) {
+    activeFileIdx = idx;
+    const f = FILES[idx];
+    prevWinTitle.textContent = f.fname;
+    previewImg.src = ASSETS[f.file];
+    previewImg.alt = f.title;
+    previewMeta.textContent = `${f.title} · ${f.location}`;
+    finderGrid.querySelectorAll(".file-item").forEach((el, i) => el.classList.toggle("is-selected", i === idx));
+  }
+
+  FILES.forEach((f, i) => {
+    const item = document.createElement("article");
+    item.className = "file-item";
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-label", `${f.title} auswählen`);
+    item.innerHTML = `
+      <div class="file-thumb-box"><img src="${ASSETS[f.file]}" alt="${f.title}" loading="lazy"></div>
+      <div class="file-name">${f.fname}</div>
+    `;
+    item.addEventListener("click", () => {
+      selectFile(i);
+      focusWin(document.getElementById("winPreview"));
+    });
+    item.addEventListener("dblclick", () => openLightbox(FILES, i));
+    item.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(FILES, i); } });
+    finderGrid.appendChild(item);
+  });
+  selectFile(0);
+
+  document.getElementById("previewTrigger").addEventListener("click", () => openLightbox(FILES, activeFileIdx));
+  document.getElementById("btnPreviewFull").addEventListener("click", () => openLightbox(FILES, activeFileIdx));
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Projekte Finder */
+  const projSidebar = document.getElementById("projSidebar");
+  const projContent = document.getElementById("projContent");
+
+  function renderProjFolder(id) {
+    const p = PROJECTS.find((x) => x.id === id) || PROJECTS[0];
+    projSidebar.querySelectorAll(".f-folder-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.pid === p.id));
+    projContent.innerHTML = "";
+    p.photos.forEach((ph, i) => {
+      const card = document.createElement("article");
+      card.className = "file-item";
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `${ph.title} öffnen`);
+      card.innerHTML = `
+        <div class="file-thumb-box"><img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy"></div>
+        <div class="file-name">0${i + 1}_${ph.title}.webp</div>
+      `;
+      card.addEventListener("click", () => openLightbox(p.photos, i));
+      card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(p.photos, i); } });
+      projContent.appendChild(card);
+    });
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "f-folder-btn";
+    b.dataset.pid = p.id;
+    b.innerHTML = `<span>📁 ${p.name}</span><span>${p.photos.length}</span>`;
+    b.addEventListener("click", () => renderProjFolder(p.id));
+    projSidebar.appendChild(b);
+  });
+  renderProjFolder(PROJECTS[0].id);
+
+  /* Archiv 100 */
+  document.getElementById("archImg").src = ASSETS[WEEKLY[0].file];
+  const archTrigger = document.getElementById("archTrigger");
+  archTrigger.addEventListener("click", () => openLightbox(WEEKLY, 0));
+  archTrigger.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WEEKLY, 0); } });
+
+  const sectorMap = document.getElementById("sectorMap");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sector-cell is-live";
+      b.textContent = code;
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      sectorMap.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "sector-cell";
+      d.textContent = code;
+      sectorMap.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>

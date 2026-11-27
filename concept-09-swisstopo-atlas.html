@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="map">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!--__EXTERNAL_FONTS_START__-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <!--__EXTERNAL_FONTS_END__-->
+  <title>Leandro Sinatra — Atlas (Konzept 09)</title>
+  <style>
+    :root {
+      --bg: #F2EFE4;
+      --paper: #FAF8F1;
+      --panel: #EAE5D7;
+      --ink: #182322;
+      --muted: #5C6765;
+      --crimson: #C82D26;
+      --cyan: #24607D;
+      --contour: rgba(36, 96, 125, 0.11);
+      --grid-line: rgba(24, 35, 34, 0.14);
+      --grid-strong: rgba(24, 35, 34, 0.3);
+      --font-sans: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --pad-x: clamp(16px, 3.5vw, 48px);
+    }
+
+    [data-theme="night"] {
+      --bg: #101717;
+      --paper: #162020;
+      --panel: #1B2727;
+      --ink: #ECEAE2;
+      --muted: #8B9997;
+      --crimson: #E64840;
+      --cyan: #59A5C7;
+      --contour: rgba(89, 165, 199, 0.12);
+      --grid-line: rgba(236, 234, 226, 0.14);
+      --grid-strong: rgba(236, 234, 226, 0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(to right, var(--contour) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--contour) 1px, transparent 1px);
+      background-size: 64px 64px;
+      color: var(--ink);
+      line-height: 1.45;
+      overflow-x: hidden;
+      transition: background-color 240ms ease, color 240ms ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; height: auto; }
+    :focus-visible { outline: 2px solid var(--crimson); outline-offset: 3px; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wrap {
+      max-width: 1540px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+    }
+
+    /* ---------- CARTOGRAPHIC HEADER ---------- */
+    .atlas-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: var(--bg);
+      border-bottom: 1.5px solid var(--grid-strong);
+    }
+
+    .header-inner {
+      min-height: 58px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .atlas-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .swiss-cross {
+      width: 20px;
+      height: 20px;
+      background: var(--crimson);
+      color: #FFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .atlas-brand strong {
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .atlas-nav { display: flex; gap: 6px; }
+    .a-tab {
+      padding: 6px 13px;
+      border: 1px solid var(--grid-line);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--paper);
+      transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+      white-space: nowrap;
+    }
+
+    .a-tab:hover { color: var(--ink); border-color: var(--grid-strong); }
+    .a-tab.is-active {
+      background: var(--crimson);
+      border-color: var(--crimson);
+      color: #FFF;
+      font-weight: 600;
+    }
+
+    .map-toggle {
+      padding: 6px 11px;
+      border: 1px solid var(--grid-strong);
+      background: var(--paper);
+      white-space: nowrap;
+    }
+
+    .map-toggle:hover { border-color: var(--crimson); color: var(--crimson); }
+
+    .view-panel { display: none; }
+    .view-panel.is-active { display: block; animation: mapIn 260ms var(--ease); }
+    @keyframes mapIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ---------- INTERACTIVE TOPOGRAPHIC ATLAS HERO ---------- */
+    .atlas-hero {
+      padding-block: clamp(20px, 3vw, 36px);
+      border-bottom: 1.5px solid var(--grid-strong);
+    }
+
+    .atlas-split {
+      display: grid;
+      grid-template-columns: 1.08fr 1fr;
+      gap: clamp(20px, 3vw, 40px);
+      align-items: stretch;
+    }
+
+    .map-sheet {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-strong);
+      padding: clamp(16px, 2.2vw, 26px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .map-sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .map-sheet-head h1 {
+      font-size: clamp(24px, 2.8vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+
+    .scale-badge {
+      padding: 4px 8px;
+      border: 1px solid var(--grid-strong);
+      background: var(--panel);
+      white-space: nowrap;
+    }
+
+    .topo-svg-wrap {
+      position: relative;
+      margin-block: 14px;
+      border: 1px solid var(--grid-line);
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .topo-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .wp-node {
+      cursor: pointer;
+    }
+
+    .wp-node circle.pin {
+      fill: var(--paper);
+      stroke: var(--cyan);
+      stroke-width: 2.2;
+      transition: r 180ms ease, fill 180ms ease, stroke 180ms ease;
+    }
+
+    .wp-node circle.halo {
+      fill: none;
+      stroke: var(--crimson);
+      stroke-width: 1.5;
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .wp-node text {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      fill: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .wp-node:hover circle.pin,
+    .wp-node.is-active circle.pin {
+      fill: var(--crimson);
+      stroke: var(--crimson);
+    }
+
+    .wp-node.is-active circle.halo {
+      opacity: 1;
+    }
+
+    .waypoint-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 12px;
+      border-top: 1px solid var(--grid-line);
+    }
+
+    .wp-btn {
+      padding: 5px 9px;
+      border: 1px solid var(--grid-line);
+      background: var(--bg);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .wp-btn:hover { color: var(--ink); border-color: var(--grid-strong); }
+    .wp-btn.is-active {
+      background: var(--crimson);
+      border-color: var(--crimson);
+      color: #FFF;
+      font-weight: 600;
+    }
+
+    /* Field Plate Viewer on Right */
+    .field-viewer {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-strong);
+      padding: clamp(16px, 2.2vw, 26px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .fv-telemetry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .elev-pill {
+      padding: 3px 8px;
+      background: var(--cyan);
+      color: #FFF;
+      font-weight: 600;
+    }
+
+    .fv-stage {
+      flex: 1;
+      min-height: 320px;
+      background: var(--bg);
+      border: 1px solid var(--grid-line);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-in;
+    }
+
+    .fv-stage img {
+      max-width: 100%;
+      max-height: 44vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .fv-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--grid-line);
+    }
+
+    .fv-thumbs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .fv-th {
+      height: 38px;
+      padding: 2px;
+      border: 1px solid var(--grid-line);
+      opacity: 0.5;
+    }
+
+    .fv-th img { height: 100%; width: auto; }
+    .fv-th.is-active, .fv-th:hover { opacity: 1; border-color: var(--crimson); }
+
+    /* ---------- HÖHENPROFIL (ELEVATION PROFILE GALLERY) ---------- */
+    .elevation-section {
+      padding-block: clamp(36px, 5vw, 68px);
+      border-bottom: 1.5px solid var(--grid-strong);
+    }
+
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .sec-head h2 {
+      font-size: clamp(22px, 2.6vw, 34px);
+      letter-spacing: -0.03em;
+    }
+
+    .elev-bars {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+      height: 120px;
+      padding: 16px;
+      background: var(--paper);
+      border: 1px solid var(--grid-strong);
+      margin-bottom: 28px;
+    }
+
+    .elev-bar-btn {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .elev-bar-fill {
+      width: 100%;
+      background: var(--cyan);
+      opacity: 0.55;
+      transition: opacity 160ms ease, background-color 160ms ease;
+    }
+
+    .elev-bar-btn:hover .elev-bar-fill,
+    .elev-bar-btn.is-active .elev-bar-fill {
+      opacity: 1;
+      background: var(--crimson);
+    }
+
+    .atlas-plates {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+      align-items: start;
+    }
+
+    .atlas-card {
+      background: var(--paper);
+      border: 1px solid var(--grid-strong);
+      padding: 14px;
+      cursor: zoom-in;
+      transition: border-color 180ms ease, transform 200ms var(--ease);
+    }
+
+    .atlas-card:hover, .atlas-card.is-highlighted {
+      border-color: var(--crimson);
+      transform: translateY(-2px);
+    }
+
+    .ac-top {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .ac-img-box {
+      aspect-ratio: 4 / 3;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .ac-img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .ac-foot {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ---------- FIELD BIO ---------- */
+    .atlas-bio {
+      padding-block: clamp(36px, 5vw, 68px);
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: clamp(24px, 4vw, 52px);
+      align-items: center;
+    }
+
+    .bio-coord-frame {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-strong);
+      padding: 10px;
+    }
+
+    .bio-coord-frame img { width: 100%; aspect-ratio: 1 / 1; }
+
+    /* ---------- PROJEKTE EXPEDITION DOSSIERS ---------- */
+    .exp-view {
+      padding-block: clamp(28px, 4vw, 52px) clamp(64px, 8vw, 108px);
+    }
+
+    .exp-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .exp-tab {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-line);
+      padding: 14px;
+      text-align: left;
+      transition: border-color 160ms ease;
+    }
+
+    .exp-tab:hover { border-color: var(--grid-strong); }
+    .exp-tab.is-active { border-color: var(--crimson); background: var(--panel); }
+
+    .exp-banner {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-strong);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .exp-banner h1 { font-size: clamp(26px, 3.2vw, 42px); }
+
+    /* ---------- ARCHIV 100 SURVEY LOG ---------- */
+    .survey-view {
+      padding-block: clamp(28px, 4vw, 52px) clamp(64px, 8vw, 108px);
+    }
+
+    .survey-split {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: clamp(24px, 4vw, 48px);
+      align-items: start;
+    }
+
+    .survey-plate {
+      background: var(--paper);
+      border: 1.5px solid var(--grid-strong);
+      padding: 18px;
+      cursor: zoom-in;
+    }
+
+    .survey-plate img { width: 100%; aspect-ratio: 2200 / 1467; }
+
+    .survey-grid-100 {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      border-top: 1px solid var(--grid-strong);
+      border-left: 1px solid var(--grid-strong);
+      background: var(--paper);
+    }
+
+    .sg-cell {
+      aspect-ratio: 1 / 1;
+      border-right: 1px solid var(--grid-line);
+      border-bottom: 1px solid var(--grid-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .sg-cell.is-live {
+      background: var(--crimson);
+      color: #FFF;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .atlas-footer {
+      border-top: 1.5px solid var(--grid-strong);
+      background: var(--paper);
+      padding-block: 28px;
+    }
+
+    .footer-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* ---------- LIGHTBOX ---------- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: #0D1212;
+      color: #F2EFE4;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+    .lb-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .lb-btn { padding: 6px 12px; border: 1px solid rgba(242, 239, 228, 0.35); color: #F2EFE4; }
+    .lb-btn:hover, .lb-btn.is-active { background: var(--crimson); border-color: var(--crimson); color: #FFF; }
+    .lb-stage { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 0; padding-block: 12px; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 170px); width: auto; height: auto; object-fit: contain; cursor: zoom-in; transition: transform 240ms var(--ease); }
+    .lightbox.is-zoomed .lb-stage img { cursor: zoom-out; transform: scale(1.85); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: 1px solid rgba(242, 239, 228, 0.35); color: #F2EFE4; }
+    .lb-prev { left: 6px; }
+    .lb-next { right: 6px; }
+    .lb-strip { display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-top: 8px; }
+    .lb-thumb { flex: 0 0 auto; height: 42px; opacity: 0.42; border: 1px solid transparent; }
+    .lb-thumb img { height: 100%; width: auto; }
+    .lb-thumb.is-active, .lb-thumb:hover { opacity: 1; border-color: var(--crimson); }
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 980px) {
+      .atlas-split { grid-template-columns: 1fr; }
+      .atlas-plates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .exp-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .survey-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner { flex-wrap: wrap; padding-block: 10px; row-gap: 8px; }
+      .atlas-nav { order: 3; width: 100%; }
+      .a-tab { flex: 1; text-align: center; padding: 6px 8px; }
+      .atlas-plates { grid-template-columns: 1fr; }
+      .elev-bars { display: none; }
+      .atlas-bio { grid-template-columns: 1fr; }
+      .bio-coord-frame { max-width: 170px; }
+      .exp-tabs { grid-template-columns: 1fr; }
+      .lb-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="atlas-header">
+  <div class="wrap header-inner">
+    <a href="#start" class="atlas-brand" data-view-link="start">
+      <span class="swiss-cross">+</span>
+      <strong>Sinatra · Topo-Atlas</strong>
+    </a>
+    <nav class="atlas-nav" aria-label="Hauptnavigation">
+      <button type="button" class="a-tab is-active" data-view-btn="start" aria-current="page">Karte</button>
+      <button type="button" class="a-tab" data-view-btn="projekte">Expeditionen</button>
+      <button type="button" class="a-tab" data-view-btn="archiv">Logbuch · 100</button>
+    </nav>
+    <button type="button" class="map-toggle mono" id="themeToggle">Nachtkarte</button>
+  </div>
+</header>
+
+<main>
+  <!-- ==================== STARTSEITE: INTERACTIVE ATLAS ==================== -->
+  <div class="view-panel is-active" id="view-start">
+    <section class="atlas-hero">
+      <div class="wrap atlas-split">
+        <div class="map-sheet">
+          <div class="map-sheet-head">
+            <div>
+              <span class="mono" style="color:var(--crimson);">Blatt CH / IT · 2025–2026</span>
+              <h1>Leandro Sinatra</h1>
+            </div>
+            <span class="scale-badge mono">47.07° N · Lyss</span>
+          </div>
+
+          <div class="topo-svg-wrap">
+            <svg class="topo-svg" viewBox="0 0 620 340" aria-label="Topografische Karte der Fotostandorte">
+              <!-- Topographic contour rings -->
+              <g fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="1">
+                <ellipse cx="185" cy="128" rx="150" ry="88"/>
+                <ellipse cx="185" cy="128" rx="110" ry="62"/>
+                <ellipse cx="150" cy="118" rx="64" ry="36"/>
+                <ellipse cx="475" cy="242" rx="115" ry="68"/>
+                <ellipse cx="490" cy="236" rx="68" ry="40"/>
+                <ellipse cx="512" cy="225" rx="30" ry="18"/>
+                <line x1="0" y1="170" x2="620" y2="170" stroke-dasharray="3 4"/>
+                <line x1="310" y1="0" x2="310" y2="340" stroke-dasharray="3 4"/>
+              </g>
+              <!-- Expedition route vector -->
+              <path d="M 225 96 L 196 122 L 180 128 L 138 112 L 96 146 L 456 258 L 512 225"
+                    fill="none" stroke="#C82D26" stroke-width="1.6" stroke-dasharray="5 4"/>
+
+              <!-- Region labels -->
+              <text x="18" y="26" font-family="monospace" font-size="10" fill="currentColor" opacity="0.55">SEKTOR A · SCHWEIZER JURA &amp; DREI-SEEN-LAND</text>
+              <text x="342" y="324" font-family="monospace" font-size="10" fill="currentColor" opacity="0.55">SEKTOR B · SIZILIEN (MITTELMEER)</text>
+
+              <!-- Interactive Waypoints -->
+              <g class="wp-node is-active" data-wp="etna" tabindex="0" role="button" aria-label="Standort Etna auswählen">
+                <circle class="halo" cx="512" cy="225" r="13"/>
+                <circle class="pin" cx="512" cy="225" r="6"/>
+                <text x="524" y="229">Etna · 3357m</text>
+              </g>
+              <g class="wp-node" data-wp="agrigento" tabindex="0" role="button" aria-label="Standort Valle dei Templi auswählen">
+                <circle class="halo" cx="456" cy="258" r="13"/>
+                <circle class="pin" cx="456" cy="258" r="6"/>
+                <text x="348" y="276">Agrigento · 230m</text>
+              </g>
+              <g class="wp-node" data-wp="creux" tabindex="0" role="button" aria-label="Standort Creux du Van auswählen">
+                <circle class="halo" cx="138" cy="112" r="13"/>
+                <circle class="pin" cx="138" cy="112" r="6"/>
+                <text x="42" y="96">Creux du Van · 1465m</text>
+              </g>
+              <g class="wp-node" data-wp="vallorbe" tabindex="0" role="button" aria-label="Standort Vallorbe auswählen">
+                <circle class="halo" cx="96" cy="146" r="13"/>
+                <circle class="pin" cx="96" cy="146" r="6"/>
+                <text x="22" y="166">Vallorbe · 780m</text>
+              </g>
+              <g class="wp-node" data-wp="lasauge" tabindex="0" role="button" aria-label="Standort La Sauge auswählen">
+                <circle class="halo" cx="180" cy="128" r="13"/>
+                <circle class="pin" cx="180" cy="128" r="6"/>
+                <text x="192" y="146">La Sauge · 430m</text>
+              </g>
+              <g class="wp-node" data-wp="murtensee" tabindex="0" role="button" aria-label="Standort Murtensee auswählen">
+                <circle class="halo" cx="225" cy="96" r="13"/>
+                <circle class="pin" cx="225" cy="96" r="6"/>
+                <text x="238" y="99">Murtensee · 429m</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="waypoint-pills" id="wpPills"></div>
+        </div>
+
+        <div class="field-viewer">
+          <div class="fv-telemetry mono">
+            <span id="fvCoords">37.7510° N, 14.9934° E</span>
+            <span class="elev-pill" id="fvElev">3357 M Ü. M.</span>
+          </div>
+          <div class="fv-stage" id="fvStage" tabindex="0" role="button" aria-label="Aktuelle Standort-Fotografie im Vollbild öffnen">
+            <img id="fvImg" alt="">
+          </div>
+          <div class="fv-foot">
+            <div>
+              <div style="font-weight:700;font-size:16px;" id="fvTitle">Etna</div>
+              <div class="mono" style="color:var(--muted);" id="fvLoc">Sizilien · Vollbild ↗</div>
+            </div>
+            <div class="fv-thumbs" id="fvThumbs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="elevation-section">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="mono" style="color:var(--crimson);">Höhenprofil · 230 m bis 3357 m</span>
+            <h2>Auswahl nach Meereshöhe</h2>
+          </div>
+          <span class="mono" style="color:var(--muted);">09 Vermessungspunkte · Unbeschnitten</span>
+        </div>
+
+        <div class="elev-bars" id="elevBars" aria-label="Höhenprofil-Diagramm"></div>
+        <div class="atlas-plates" id="atlasPlates"></div>
+      </div>
+    </section>
+
+    <section class="wrap atlas-bio">
+      <div class="bio-coord-frame">
+        <img id="aboutPortrait" alt="Porträt von Leandro Sinatra" width="1000" height="1000">
+      </div>
+      <div>
+        <span class="mono" style="color:var(--crimson);">Basisstation · 47.0744° N, 7.3067° E · Lyss</span>
+        <h2 style="font-size:clamp(26px,3vw,40px);margin-block:6px 12px;">Leandro Sinatra</h2>
+        <p style="max-width:56ch;color:var(--muted);">Fotograf aus Lyss, Kanton Bern. Mich fasziniert der stille Moment, bevor ein Motiv wieder verschwindet — das Zusammenspiel von Licht, Geometrie und Geduld zwischen Schweizer Jura, Drei-Seen-Land und Sizilien.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== PROJEKTE: EXPEDITIONEN ==================== -->
+  <div class="view-panel" id="view-projekte">
+    <section class="exp-view wrap">
+      <div class="exp-tabs" id="expTabs"></div>
+      <div class="exp-banner">
+        <div>
+          <span class="mono" style="color:var(--crimson);" id="expCoords">37.29° N, 13.59° E</span>
+          <h1 id="expTitle">01 Valle dei Templi</h1>
+        </div>
+        <span class="elev-pill mono" id="expElev">230 – 3357 M</span>
+      </div>
+      <div class="atlas-plates" id="expPlates"></div>
+    </section>
+  </div>
+
+  <!-- ==================== ARCHIV 100: LOGBUCH ==================== -->
+  <div class="view-panel" id="view-archiv">
+    <section class="survey-view wrap">
+      <div class="sec-head">
+        <div>
+          <span class="mono" style="color:var(--crimson);">Wöchentliches Feldlogbuch</span>
+          <h2>Archiv · 100</h2>
+        </div>
+        <span class="mono">Messpunkt 001 / 100</span>
+      </div>
+      <div class="survey-split">
+        <div class="survey-plate" id="surveyTrigger" tabindex="0" role="button" aria-label="Messpunkt 001 öffnen">
+          <img id="surveyImg" alt="13.09.2026 — Murtensee, Schweiz" width="2200" height="1467">
+          <div style="display:flex;justify-content:space-between;margin-top:12px;" class="mono">
+            <span><strong>001</strong> · 13.09.2026</span>
+            <span>46.93° N, 7.08° E · Murtensee (429 m)</span>
+          </div>
+        </div>
+        <div class="survey-grid-100" id="surveyGrid100"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="atlas-footer mono">
+  <div class="wrap footer-flex">
+    <div>
+      <a href="mailto:itsleo.iso.contact@gmail.com" style="color:var(--crimson);font-weight:600;">itsleo.iso.contact@gmail.com</a>
+      <button type="button" class="map-toggle mono" style="margin-left:10px;" data-copy-email="itsleo.iso.contact@gmail.com">Kopieren</button>
+      <span id="copyStatus" style="margin-left:8px;color:var(--crimson);"></span>
+    </div>
+    <div>
+      <a href="https://www.instagram.com/itsleo.iso/" target="_blank" rel="noopener noreferrer" style="margin-right:16px;">Instagram ↗</a>
+      <span style="color:var(--muted);">© 2026 Leandro Sinatra · Konzept 09 (Swisstopo Atlas)</span>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografie im Vollbild" aria-hidden="true">
+  <div class="lb-top mono">
+    <div><span id="lbCounter" style="color:var(--crimson);margin-right:12px;">01 / 09</span><span id="lbCaption">Etna</span></div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="lb-btn mono" id="lbZoom">Zoom</button>
+      <button type="button" class="lb-btn mono" id="lbClose">Schliessen ✕</button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Vorheriges Foto">←</button>
+    <img id="lbImg" src="" alt="">
+    <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Nächstes Foto">→</button>
+  </div>
+  <div class="lb-strip" id="lbStrip"></div>
+</div>
+
+<script>
+(() => {
+  const ASSETS = /*__PHOTO_DATA_URI_MAP__*/ {
+    "mount-etna-sicily.webp": "Arbeiten/mount-etna-sicily.webp",
+    "temple-of-concordia-sicily.webp": "Arbeiten/temple-of-concordia-sicily.webp",
+    "icaro-caduto-sicily.webp": "Arbeiten/icaro-caduto-sicily.webp",
+    "creux-du-van-landscape.webp": "Arbeiten/creux-du-van-landscape.webp",
+    "grey-heron-la-sauge.webp": "Arbeiten/grey-heron-la-sauge.webp",
+    "monochrome-moss-study.webp": "Arbeiten/monochrome-moss-study.webp",
+    "blue-tit-la-sauge.webp": "Arbeiten/blue-tit-la-sauge.webp",
+    "cat-sicily.webp": "Arbeiten/cat-sicily.webp",
+    "white-cow-creux-du-van.webp": "Arbeiten/white-cow-creux-du-van.webp",
+    "vallorbe-caves.webp": "Arbeiten/vallorbe-caves.webp",
+    "cattle-creux-du-van.webp": "Arbeiten/cattle-creux-du-van.webp",
+    "monochrome-natural-texture.webp": "Arbeiten/monochrome-natural-texture.webp",
+    "songbird-la-sauge.webp": "Arbeiten/songbird-la-sauge.webp",
+    "bird-in-flight-la-sauge.webp": "Arbeiten/bird-in-flight-la-sauge.webp",
+    "frog-close-up-la-sauge.webp": "Arbeiten/frog-close-up-la-sauge.webp",
+    "frog-in-water-la-sauge.webp": "Arbeiten/frog-in-water-la-sauge.webp",
+    "songbird-on-branch-la-sauge.webp": "Arbeiten/songbird-on-branch-la-sauge.webp",
+    "murtensee-weekly-photo.webp": "Arbeiten/murtensee-weekly-photo.webp",
+    "leandro-sinatra-portrait.webp": "Arbeiten/leandro-sinatra-portrait.webp"
+  };
+
+  const WAYPOINTS = {
+    etna: {
+      label: "Etna (3357m)", coords: "37.7510° N, 14.9934° E", elev: "3357 M Ü. M.",
+      photos: [{ file: "mount-etna-sicily.webp", title: "Etna", location: "Sizilien" }]
+    },
+    agrigento: {
+      label: "Agrigento (230m)", coords: "37.2897° N, 13.5852° E", elev: "230 M Ü. M.",
+      photos: [
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Valle dei Templi" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Valle dei Templi" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien" }
+      ]
+    },
+    creux: {
+      label: "Creux du Van (1465m)", coords: "46.9381° N, 6.7267° E", elev: "1465 M Ü. M.",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Creux du Van" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "Creux du Van" },
+        { file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Creux du Van" }
+      ]
+    },
+    vallorbe: {
+      label: "Vallorbe (780m)", coords: "46.7003° N, 6.3578° E", elev: "780 M Ü. M.",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe" }]
+    },
+    lasauge: {
+      label: "La Sauge (430m)", coords: "46.9739° N, 7.0539° E", elev: "430 M Ü. M.",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge" },
+        { file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "La Sauge" }
+      ]
+    },
+    murtensee: {
+      label: "Murtensee (429m)", coords: "46.9287° N, 7.0811° E", elev: "429 M Ü. M.",
+      photos: [{ file: "murtensee-weekly-photo.webp", title: "Archiv 001 · Murtensee", location: "13.09.2026" }]
+    }
+  };
+
+  /* Ordered from lowest to highest altitude */
+  const ELEVATION_WORKS = [
+    { idx: "01", elev: 230, pct: 22, file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "Agrigento · 230m" },
+    { idx: "02", elev: 235, pct: 24, file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "Agrigento · 235m" },
+    { idx: "03", elev: 260, pct: 26, file: "cat-sicily.webp", title: "Wächterin am Fels", location: "Sizilien · 260m" },
+    { idx: "04", elev: 430, pct: 38, file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "La Sauge · 430m" },
+    { idx: "05", elev: 432, pct: 40, file: "blue-tit-la-sauge.webp", title: "Blaumeise", location: "La Sauge · 432m" },
+    { idx: "06", elev: 780, pct: 58, file: "vallorbe-caves.webp", title: "Licht im Fels", location: "Vallorbe · 780m" },
+    { idx: "07", elev: 1410, pct: 76, file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "Jura · 1410m" },
+    { idx: "08", elev: 1440, pct: 80, file: "monochrome-moss-study.webp", title: "Studie im Jura", location: "Jura · 1440m" },
+    { idx: "09", elev: 1465, pct: 86, file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "Creux du Van · 1465m" }
+  ];
+
+  const PROJECTS = [
+    {
+      id: "p1", num: "01", title: "Valle dei Templi", coords: "37.29° N, 13.59° E · Sizilien", elev: "230 – 3357 M",
+      photos: [
+        { file: "mount-etna-sicily.webp", title: "Etna", location: "3357 m" },
+        { file: "temple-of-concordia-sicily.webp", title: "Tempel der Eintracht", location: "230 m" },
+        { file: "icaro-caduto-sicily.webp", title: "Icaro Caduto", location: "235 m" },
+        { file: "cat-sicily.webp", title: "Wächterin am Fels", location: "260 m" }
+      ]
+    },
+    {
+      id: "p2", num: "02", title: "Höhlen von Vallorbe", coords: "46.70° N, 6.36° E · Waadt", elev: "780 M Ü. M.",
+      photos: [{ file: "vallorbe-caves.webp", title: "Licht im Fels", location: "780 m" }]
+    },
+    {
+      id: "p3", num: "03", title: "Creux du Van", coords: "46.94° N, 6.73° E · Schweizer Jura", elev: "1410 – 1465 M",
+      photos: [
+        { file: "creux-du-van-landscape.webp", title: "Kante des Jura", location: "1465 m" },
+        { file: "cattle-creux-du-van.webp", title: "Weide im Jura", location: "1420 m" },
+        { file: "white-cow-creux-du-van.webp", title: "Weisse Kuh", location: "1410 m" },
+        { file: "monochrome-moss-study.webp", title: "Schwarzweiss I", location: "1440 m" },
+        { file: "monochrome-natural-texture.webp", title: "Schwarzweiss II", location: "1450 m" }
+      ]
+    },
+    {
+      id: "p4", num: "04", title: "La Sauge", coords: "46.97° N, 7.05° E · Drei-Seen-Land", elev: "430 M Ü. M.",
+      photos: [
+        { file: "grey-heron-la-sauge.webp", title: "Graureiher", location: "430 m" },
+        { file: "songbird-la-sauge.webp", title: "Singvogel", location: "430 m" },
+        { file: "blue-tit-la-sauge.webp", title: "Auf dem Pfosten", location: "432 m" },
+        { file: "bird-in-flight-la-sauge.webp", title: "Im Flug", location: "435 m" },
+        { file: "songbird-on-branch-la-sauge.webp", title: "Am Ast", location: "431 m" },
+        { file: "frog-close-up-la-sauge.webp", title: "Frosch I", location: "429 m" },
+        { file: "frog-in-water-la-sauge.webp", title: "Frosch II", location: "429 m" }
+      ]
+    }
+  ];
+
+  const WEEKLY = [{ file: "murtensee-weekly-photo.webp", title: "13.09.2026", location: "Murtensee · 429m" }];
+
+  /* Theme */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const isMap = root.getAttribute("data-theme") === "map";
+    root.setAttribute("data-theme", isMap ? "night" : "map");
+    themeBtn.textContent = isMap ? "Tagkarte" : "Nachtkarte";
+  });
+
+  /* Views */
+  const navBtns = [...document.querySelectorAll("[data-view-btn]")];
+  const panels = {
+    start: document.getElementById("view-start"),
+    projekte: document.getElementById("view-projekte"),
+    archiv: document.getElementById("view-archiv")
+  };
+  function setView(v) {
+    Object.entries(panels).forEach(([k, el]) => el.classList.toggle("is-active", k === v));
+    navBtns.forEach((b) => {
+      const a = b.dataset.viewBtn === v;
+      b.classList.toggle("is-active", a);
+      if (a) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  navBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+  document.querySelector("[data-view-link='start']").addEventListener("click", (e) => { e.preventDefault(); setView("start"); });
+
+  /* Interactive Map Waypoints */
+  const wpNodes = [...document.querySelectorAll(".wp-node")];
+  const wpPills = document.getElementById("wpPills");
+  const fvCoords = document.getElementById("fvCoords");
+  const fvElev = document.getElementById("fvElev");
+  const fvImg = document.getElementById("fvImg");
+  const fvTitle = document.getElementById("fvTitle");
+  const fvLoc = document.getElementById("fvLoc");
+  const fvThumbs = document.getElementById("fvThumbs");
+  const fvStage = document.getElementById("fvStage");
+  let activeWpKey = "etna";
+  let activeWpPhotoIdx = 0;
+
+  function renderFieldPhoto() {
+    const wp = WAYPOINTS[activeWpKey];
+    const ph = wp.photos[activeWpPhotoIdx];
+    fvCoords.textContent = wp.coords;
+    fvElev.textContent = wp.elev;
+    fvImg.src = ASSETS[ph.file];
+    fvImg.alt = ph.title;
+    fvTitle.textContent = ph.title;
+    fvLoc.textContent = `${ph.location} · Vollbild ↗`;
+    fvThumbs.querySelectorAll(".fv-th").forEach((t, i) => t.classList.toggle("is-active", i === activeWpPhotoIdx));
+  }
+
+  function selectWaypoint(key) {
+    activeWpKey = key;
+    activeWpPhotoIdx = 0;
+    wpNodes.forEach((n) => n.classList.toggle("is-active", n.dataset.wp === key));
+    wpPills.querySelectorAll(".wp-btn").forEach((b) => b.classList.toggle("is-active", b.dataset.wp === key));
+
+    const wp = WAYPOINTS[key];
+    fvThumbs.innerHTML = "";
+    if (wp.photos.length > 1) {
+      wp.photos.forEach((ph, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "fv-th";
+        b.innerHTML = `<img src="${ASSETS[ph.file]}" alt="">`;
+        b.addEventListener("click", () => { activeWpPhotoIdx = i; renderFieldPhoto(); });
+        fvThumbs.appendChild(b);
+      });
+    }
+    renderFieldPhoto();
+  }
+
+  Object.entries(WAYPOINTS).forEach(([key, wp]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "wp-btn";
+    b.dataset.wp = key;
+    b.textContent = wp.label;
+    b.addEventListener("click", () => selectWaypoint(key));
+    wpPills.appendChild(b);
+  });
+
+  wpNodes.forEach((n) => {
+    n.addEventListener("click", () => selectWaypoint(n.dataset.wp));
+    n.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectWaypoint(n.dataset.wp); } });
+  });
+  selectWaypoint("etna");
+
+  fvStage.addEventListener("click", () => openLightbox(WAYPOINTS[activeWpKey].photos, activeWpPhotoIdx));
+  fvStage.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WAYPOINTS[activeWpKey].photos, activeWpPhotoIdx); } });
+
+  /* Elevation Profile & Plates */
+  const elevBars = document.getElementById("elevBars");
+  const atlasPlates = document.getElementById("atlasPlates");
+
+  ELEVATION_WORKS.forEach((w, i) => {
+    const bar = document.createElement("button");
+    bar.type = "button";
+    bar.className = "elev-bar-btn mono";
+    bar.innerHTML = `<span style="font-size:9px;color:var(--muted);">${w.elev}m</span><div class="elev-bar-fill" style="height:${w.pct}%"></div>`;
+    bar.addEventListener("click", () => openLightbox(ELEVATION_WORKS, i));
+    bar.addEventListener("mouseenter", () => {
+      atlasPlates.querySelectorAll(".atlas-card").forEach((c, idx) => c.classList.toggle("is-highlighted", idx === i));
+    });
+    bar.addEventListener("mouseleave", () => {
+      atlasPlates.querySelectorAll(".atlas-card").forEach((c) => c.classList.remove("is-highlighted"));
+    });
+    elevBars.appendChild(bar);
+
+    const card = document.createElement("article");
+    card.className = "atlas-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${w.title} öffnen`);
+    card.innerHTML = `
+      <div class="ac-top mono"><span>PKT ${w.idx}</span><span>▲ ${w.elev} M</span></div>
+      <div class="ac-img-box"><img src="${ASSETS[w.file]}" alt="${w.title}" loading="lazy"></div>
+      <div class="ac-foot"><span>${w.title}</span><span class="mono" style="color:var(--muted);font-weight:400;">${w.location}</span></div>
+    `;
+    card.addEventListener("click", () => openLightbox(ELEVATION_WORKS, i));
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(ELEVATION_WORKS, i); } });
+    atlasPlates.appendChild(card);
+  });
+
+  document.getElementById("aboutPortrait").src = ASSETS["leandro-sinatra-portrait.webp"];
+
+  /* Expeditionen (Projekte) */
+  const expTabs = document.getElementById("expTabs");
+  const expCoords = document.getElementById("expCoords");
+  const expTitle = document.getElementById("expTitle");
+  const expElev = document.getElementById("expElev");
+  const expPlates = document.getElementById("expPlates");
+
+  function renderExp(id) {
+    const p = PROJECTS.find((x) => x.id === id) || PROJECTS[0];
+    expCoords.textContent = p.coords;
+    expTitle.textContent = `${p.num} ${p.title}`;
+    expElev.textContent = p.elev;
+    expTabs.querySelectorAll(".exp-tab").forEach((t) => t.classList.toggle("is-active", t.dataset.pid === p.id));
+
+    expPlates.innerHTML = "";
+    p.photos.forEach((ph, i) => {
+      const card = document.createElement("article");
+      card.className = "atlas-card";
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `${ph.title} öffnen`);
+      card.innerHTML = `
+        <div class="ac-top mono"><span>TAFEL 0${i + 1}</span><span>▲ ${ph.location}</span></div>
+        <div class="ac-img-box"><img src="${ASSETS[ph.file]}" alt="${ph.title}" loading="lazy"></div>
+        <div class="ac-foot"><span>${ph.title}</span><span class="mono" style="color:var(--crimson);">↗</span></div>
+      `;
+      card.addEventListener("click", () => openLightbox(p.photos, i));
+      card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(p.photos, i); } });
+      expPlates.appendChild(card);
+    });
+  }
+
+  PROJECTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "exp-tab";
+    b.dataset.pid = p.id;
+    b.innerHTML = `<div class="mono" style="color:var(--crimson);">SEKTOR ${p.num}</div><div style="font-weight:700;margin-top:4px;">${p.title}</div>`;
+    b.addEventListener("click", () => renderExp(p.id));
+    expTabs.appendChild(b);
+  });
+  renderExp(PROJECTS[0].id);
+
+  /* Archiv 100 */
+  document.getElementById("surveyImg").src = ASSETS[WEEKLY[0].file];
+  const surveyTrigger = document.getElementById("surveyTrigger");
+  surveyTrigger.addEventListener("click", () => openLightbox(WEEKLY, 0));
+  surveyTrigger.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(WEEKLY, 0); } });
+
+  const surveyGrid100 = document.getElementById("surveyGrid100");
+  for (let i = 1; i <= 100; i++) {
+    const code = String(i).padStart(3, "0");
+    if (i === 1) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sg-cell is-live";
+      b.textContent = code;
+      b.addEventListener("click", () => openLightbox(WEEKLY, 0));
+      surveyGrid100.appendChild(b);
+    } else {
+      const d = document.createElement("div");
+      d.className = "sg-cell";
+      d.textContent = code;
+      surveyGrid100.appendChild(d);
+    }
+  }
+
+  /* Copy Email */
+  document.querySelectorAll("[data-copy-email]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copyEmail); } catch {}
+      const s = document.getElementById("copyStatus");
+      s.textContent = "Kopiert";
+      setTimeout(() => { s.textContent = ""; }, 2200);
+    });
+  });
+
+  /* Lightbox */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCounter = document.getElementById("lbCounter");
+  const lbCaption = document.getElementById("lbCaption");
+  const lbStrip = document.getElementById("lbStrip");
+  const lbZoom = document.getElementById("lbZoom");
+  const lbClose = document.getElementById("lbClose");
+  const lbPrev = document.getElementById("lbPrev");
+  const lbNext = document.getElementById("lbNext");
+  let lbList = [], lbIdx = 0, lastFocus = null;
+
+  function setZoom(z) {
+    lb.classList.toggle("is-zoomed", z);
+    lbZoom.classList.toggle("is-active", z);
+    lbZoom.textContent = z ? "1×" : "Zoom";
+    if (!z) lbImg.style.transformOrigin = "center center";
+  }
+
+  function renderLb() {
+    const it = lbList[lbIdx];
+    if (!it) return;
+    setZoom(false);
+    lbImg.src = ASSETS[it.file];
+    lbImg.alt = it.title;
+    lbCounter.textContent = `${String(lbIdx + 1).padStart(2, "0")} / ${String(lbList.length).padStart(2, "0")}`;
+    lbCaption.textContent = it.location ? `${it.title} · ${it.location}` : it.title;
+    lbPrev.style.display = lbList.length > 1 ? "" : "none";
+    lbNext.style.display = lbList.length > 1 ? "" : "none";
+    lbStrip.querySelectorAll(".lb-thumb").forEach((t, i) => t.classList.toggle("is-active", i === lbIdx));
+  }
+
+  function openLightbox(list, idx) {
+    lbList = list;
+    lbIdx = (idx + list.length) % list.length;
+    lastFocus = document.activeElement;
+    lbStrip.innerHTML = "";
+    if (list.length > 1) {
+      list.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb";
+        b.innerHTML = `<img src="${ASSETS[it.file]}" alt="">`;
+        b.addEventListener("click", () => { lbIdx = i; renderLb(); });
+        lbStrip.appendChild(b);
+      });
+    }
+    renderLb();
+    lb.classList.add("is-open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lb-open");
+    lbClose.focus();
+  }
+
+  function closeLb() {
+    setZoom(false);
+    lb.classList.remove("is-open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lb-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  lbClose.addEventListener("click", closeLb);
+  lbZoom.addEventListener("click", () => setZoom(!lb.classList.contains("is-zoomed")));
+  lbImg.addEventListener("click", (e) => {
+    const r = lbImg.getBoundingClientRect();
+    lbImg.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    setZoom(!lb.classList.contains("is-zoomed"));
+  });
+  lbPrev.addEventListener("click", () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); });
+  lbNext.addEventListener("click", () => { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); });
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.id === "lbStage") closeLb(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("is-open")) return;
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowRight" && lbList.length > 1) { lbIdx = (lbIdx + 1) % lbList.length; renderLb(); }
+    if (e.key === "ArrowLeft" && lbList.length > 1) { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; renderLb(); }
+    if (e.key.toLowerCase() === "z") setZoom(!lb.classList.contains("is-zoomed"));
+  });
+})();
+</script>
+</body>
+</html>
